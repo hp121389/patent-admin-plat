@@ -13,6 +13,16 @@ type ObjectById struct {
 	Ids []int `json:"ids"`
 }
 
+type ObjectByPatentId struct {
+	PAId  int   `uri:"patent_id"`
+	PAIds []int `json:"patent_ids"`
+}
+
+//type ObjectByPatentName struct {
+//	TI  int   `uri:"ti"`
+//	TIS []int `json:"tis"`
+//}
+
 func (s *ObjectById) Bind(ctx *gin.Context) error {
 	var err error
 	log := api.GetRequestLogger(ctx)

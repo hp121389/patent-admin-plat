@@ -87,6 +87,63 @@ definitions:
       requestId:
         type: string
     type: object
+  dto.SysListDeleteReq:
+    properties:
+      patent_ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysListInsertReq:
+    properties:
+      AD:
+        type: string
+      AR:
+        type: string
+      CL:
+        type: string
+      INN:
+        type: string
+      PA:
+        type: string
+      PD:
+        type: string
+      PNM:
+        type: string
+      PatentId:
+        type: integer
+      TI:
+        type: string
+      createBy:
+        type: integer
+      updateBy:
+        type: integer
+    type: object
+  dto.SysListUpdateReq:
+    properties:
+      AD:
+        type: string
+      AR:
+        type: string
+      CL:
+        type: string
+      INN:
+        type: string
+      PA:
+        type: string
+      PD:
+        type: string
+      PNM:
+        type: string
+      PatentId:
+        type: integer
+      TI:
+        type: string
+      createBy:
+        type: integer
+      updateBy:
+        type: integer
+    type: object
   dto.SysLoginLogDeleteReq:
     properties:
       ids:
@@ -129,38 +186,6 @@ definitions:
         type: integer
       status:
         description: 状态
-        type: string
-      updateBy:
-        type: integer
-    type: object
-  dto.SysTagInsertReq:
-    properties:
-      createBy:
-        type: integer
-      desc:
-        description: 标签描述
-        type: string
-      tagId:
-        description: 标签ID
-        type: integer
-      tagName:
-        description: 标签名称
-        type: string
-      updateBy:
-        type: integer
-    type: object
-  dto.SysTagUpdateReq:
-    properties:
-      createBy:
-        type: integer
-      desc:
-        description: 标签描述
-        type: string
-      tagId:
-        description: 标签ID
-        type: integer
-      tagName:
-        description: 标签名称
         type: string
       updateBy:
         type: integer
@@ -477,26 +502,6 @@ paths:
       summary: 获取Role数据
       tags:
       - 角色/Role
-  /api/v1/search/simple:
-    post:
-      description: 根据查询字符串进行模糊搜索
-      parameters:
-      - description: 用户数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SimpleSearchReq'
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.SwagSimpleSearchResp'
-      security:
-      - Bearer: []
-      summary: 简单查询
-      tags:
-      - 专利检索
   /api/v1/server-monitor:
     get:
       description: 获取JSON
@@ -652,66 +657,6 @@ paths:
       summary: 获取用户
       tags:
       - 用户
-  /api/v1/tag:
-    delete:
-      description: 获取JSON
-      parameters:
-      - description: 标签数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.ObjectById'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 删除标签
-      tags:
-      - 标签/Tag
-    post:
-      description: 获取JSON
-      parameters:
-      - description: 标签数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SysTagInsertReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 增加标签
-      tags:
-      - 标签/Tag
-    put:
-      description: 获取JSON
-      parameters:
-      - description: 标签数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SysTagUpdateReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 更新标签
-      tags:
-      - 标签/Tag
-  /api/v1/tag/{id}:
-    get:
-      description: 获取JSON
-      parameters:
-      - description: tagId
-        in: path
-        name: tagId
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 获取Tag数据
-      tags:
-      - 标签/Tag
   /api/v1/updateinfo:
     put:
       consumes:

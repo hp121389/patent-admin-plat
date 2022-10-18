@@ -312,39 +312,6 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/api/v1/search/simple": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "根据查询字符串进行模糊搜索",
-                "tags": [
-                    "专利检索"
-                ],
-                "summary": "简单查询",
-                "parameters": [
-                    {
-                        "description": "用户数据",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SimpleSearchReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.SwagSimpleSearchResp"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/server-monitor": {
             "get": {
                 "security": [
@@ -587,103 +554,6 @@ const docTemplate = `{
                         "name": "userId",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/api/v1/tag": {
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取JSON",
-                "tags": [
-                    "标签/Tag"
-                ],
-                "summary": "更新标签",
-                "parameters": [
-                    {
-                        "description": "标签数据",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysTagUpdateReq"
-                        }
-                    }
-                ],
-                "responses": {}
-            },
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取JSON",
-                "tags": [
-                    "标签/Tag"
-                ],
-                "summary": "增加标签",
-                "parameters": [
-                    {
-                        "description": "标签数据",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SysTagInsertReq"
-                        }
-                    }
-                ],
-                "responses": {}
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取JSON",
-                "tags": [
-                    "标签/Tag"
-                ],
-                "summary": "删除标签",
-                "parameters": [
-                    {
-                        "description": "标签数据",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.ObjectById"
-                        }
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/api/v1/tag/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "获取JSON",
-                "tags": [
-                    "标签/Tag"
-                ],
-                "summary": "获取Tag数据",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "tagId",
-                        "name": "tagId",
-                        "in": "path"
                     }
                 ],
                 "responses": {}
@@ -984,6 +854,93 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.SysListDeleteReq": {
+            "type": "object",
+            "properties": {
+                "patent_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.SysListInsertReq": {
+            "type": "object",
+            "properties": {
+                "AD": {
+                    "type": "string"
+                },
+                "AR": {
+                    "type": "string"
+                },
+                "CL": {
+                    "type": "string"
+                },
+                "INN": {
+                    "type": "string"
+                },
+                "PA": {
+                    "type": "string"
+                },
+                "PD": {
+                    "type": "string"
+                },
+                "PNM": {
+                    "type": "string"
+                },
+                "PatentId": {
+                    "type": "integer"
+                },
+                "TI": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.SysListUpdateReq": {
+            "type": "object",
+            "properties": {
+                "AD": {
+                    "type": "string"
+                },
+                "AR": {
+                    "type": "string"
+                },
+                "CL": {
+                    "type": "string"
+                },
+                "INN": {
+                    "type": "string"
+                },
+                "PA": {
+                    "type": "string"
+                },
+                "PD": {
+                    "type": "string"
+                },
+                "PNM": {
+                    "type": "string"
+                },
+                "PatentId": {
+                    "type": "integer"
+                },
+                "TI": {
+                    "type": "string"
+                },
+                "createBy": {
+                    "type": "integer"
+                },
+                "updateBy": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.SysLoginLogDeleteReq": {
             "type": "object",
             "properties": {
@@ -1044,52 +1001,6 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "状态",
-                    "type": "string"
-                },
-                "updateBy": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.SysTagInsertReq": {
-            "type": "object",
-            "properties": {
-                "createBy": {
-                    "type": "integer"
-                },
-                "desc": {
-                    "description": "标签描述",
-                    "type": "string"
-                },
-                "tagId": {
-                    "description": "标签ID",
-                    "type": "integer"
-                },
-                "tagName": {
-                    "description": "标签名称",
-                    "type": "string"
-                },
-                "updateBy": {
-                    "type": "integer"
-                }
-            }
-        },
-        "dto.SysTagUpdateReq": {
-            "type": "object",
-            "properties": {
-                "createBy": {
-                    "type": "integer"
-                },
-                "desc": {
-                    "description": "标签描述",
-                    "type": "string"
-                },
-                "tagId": {
-                    "description": "标签ID",
-                    "type": "integer"
-                },
-                "tagName": {
-                    "description": "标签名称",
                     "type": "string"
                 },
                 "updateBy": {

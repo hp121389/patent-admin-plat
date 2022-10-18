@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	routerCheckRole = append(routerCheckRole, registerSysLoginLogRouter)
+	RouterCheckRole = append(RouterCheckRole, registerSysLoginLogRouter)
 }
 
 // 需认证的路由代码

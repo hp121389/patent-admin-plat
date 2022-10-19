@@ -17,6 +17,9 @@ const (
 	authUrl   = "http://www.innojoy.com/accountAuth.aspx"
 	searchUrl = "http://www.innojoy.com/service/patentSearch.aspx"
 
+	searchListFields = "TI,AN,AD,PNM,PD,PA,PINN,CL,CD"
+	searchSortBy     = "-公开（公告）日,公开（公告）号"
+
 	defaultCacheExpire     = time.Hour * 24
 	defaultCleanupInterval = time.Minute
 	defaultCacheCapacity   = 100000
@@ -81,28 +84,27 @@ func (ic *InnojoyClient) autoLogin() error {
 	return nil
 }
 
-func (ic *InnojoyClient) SimpleSearch(req *dto.SimpleSearchReq) (result []*dto.PatentDetail, err error) {
-	sr := ic.parseSimpleSearchQuery(req.Query, req.DB, req.PageIndex, req.PageSize)
+func (ic *InnojoyClient) Search(req *dto.SimpleSearchReq) (result []*dto.PatentDetail, err error) {
+	sr := ic.parseSearchQuery(req.Query, req.DB, req.PageIndex, req.PageSize)
 	return ic.search(sr, ic.autoLogin)
 }
 
-func (ic *InnojoyClient) parseSimpleSearchQuery(query string, db string, pageIndex int, pageSize int) *SearchReq {
-	queryFormat := fmt.Sprintf("TI='%s'", query)
+func (ic *InnojoyClient) parseSearchQuery(query string, db string, pageIndex int, pageSize int) *SearchReq {
 	var guid string
 	if pageIndex > 0 {
-		guid = ic.pc.Get(queryFormat)
+		guid = ic.pc.Get(query)
 	}
 	return &SearchReq{
 		Token: ic.token,
 		PatentSearchConfig: &PatentSearchConfig{
 			GUID:      guid,
 			Action:    "Search",
-			Query:     queryFormat,
+			Query:     query,
 			Database:  db,
 			Page:      strconv.Itoa(pageIndex),
 			PageSize:  strconv.Itoa(pageSize),
-			Sortby:    "-公开（公告）日,公开（公告）号",
-			FieldList: "TI,AN,AD,PNM,PD,PA,PINN,CL",
+			Sortby:    searchSortBy,
+			FieldList: searchListFields,
 		},
 	}
 }

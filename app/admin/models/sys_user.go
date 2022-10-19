@@ -22,9 +22,10 @@ type SysUser struct {
 	Interest  string `json:"bio" gorm:"size:1024;comment:研究兴趣"`
 	Departure string `json:"departure" gorm:"size:128;comment:单位"`
 	Status    string `json:"status" gorm:"size:4;comment:状态"`
-	RoleIds   []int  `json:"roleIds" gorm:"-"`
+	RoleIds   []int  `json:"roleIds" gorm:"-"` //忽略该字段，- 表示无读写
 	models.ControlBy
 	models.ModelTime
+	//嵌入结构体：先写好models然后嵌入，等效于嵌入的models也在初始化数据表时生效
 }
 
 func (e *SysUser) TableName() string {
@@ -40,7 +41,19 @@ func (e *SysUser) GetId() interface{} {
 	return e.UserId
 }
 
+/*
+GORM 允许用户定义的钩子有
+创建记录时将调用这些钩子方法 BeforeSave,BeforeCreate,/更新db/,AfterSave, AfterCreate 提交或回滚事务
+更新记录时将调用这些钩子方法 BeforeSave,BeforeUpdate,/更新db/,AfterUpdate,AfterSave 提交或回滚事务
+删除记录时将调用这些钩子方法 BeforeDelete,/更新db/,AfterDelete 提交或回滚事务
+查询记录时将调用这些钩子方法 /从 db 中加载数据/,Preloading (eager loading),AfterFind
+
+如果您已经为模型定义了指定的方法，它会在创建、更新、查询、删除时自动被调用。如果任何回调返回错误，GORM 将停止后续的操作并回滚事务。
+*/
+//钩子方法的函数签名应该是 func(*gorm.DB) error
+
 //加密
+
 func (e *SysUser) Encrypt() (err error) {
 	if e.Password == "" {
 		return

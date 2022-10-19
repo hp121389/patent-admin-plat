@@ -179,6 +179,7 @@ func (s *SysUserUpdateReq) GetId() interface{} {
 //}
 
 type SysUserById struct {
+	//嵌入结构体
 	dto.ObjectById
 	common.ControlBy
 }

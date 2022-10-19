@@ -8,3 +8,10 @@ type SimpleSearchReq struct {
 	Query string `json:"Query"`
 	DB    string `json:"DB"`
 }
+
+type TableSearchReq struct {
+	dto.Pagination
+
+	Query string `json:"Query"`
+	DB    string `json:"DB"`
+}

@@ -1,6 +1,6 @@
 package dto
 
-type SwagSimpleSearchResp struct {
+type SwagSearchListResp struct {
 	RequestId string `json:"requestId"`
 	Code      int    `json:"code"`
 	Msg       string `json:"msg"`

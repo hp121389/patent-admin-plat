@@ -14,8 +14,7 @@ type ObjectById struct {
 }
 
 type ObjectByPatentId struct {
-	PAId  int   `uri:"patent_id"`
-	PAIds []int `json:"patent_ids"`
+	PatentId int `uri:"patent_id"`
 }
 
 //type ObjectByPatentName struct {

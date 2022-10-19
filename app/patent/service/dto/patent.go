@@ -9,21 +9,21 @@ import (
 
 //查询必须写form字段
 
-type SysListGetPageReq struct {
+type PatentGetPageReq struct {
 	dto.Pagination `search:"-"`
-	PatentId       int    `form:"PatentId" search:"type:exact;column:PatentId;table:sys_list" comment:"专利ID"`
-	TI             string `form:"TI" search:"type:exact;column:TI;table:sys_list" comment:"专利名"`
-	PNM            string `form:"PNM" search:"type:exact;column:PNN;table:sys_list" comment:"申请号"`
-	AD             string `form:"AD" search:"type:exact;column:AD;table:sys_list" comment:"申请日"`
-	PD             string `form:"PD" search:"type:exact;column:PD;table:sys_list" comment:"公开日"`
-	CL             string `form:"CL" search:"type:exact;column:CL;table:sys_list" comment:"简介"`
-	PA             string `form:"PA" search:"type:exact;column:PA;table:sys_list" comment:"申请单位"`
-	AR             string `form:"AR" search:"type:exact;column:AR;table:sys_list" comment:"地址"`
-	INN            string `form:"INN" search:"type:exact;column:INN;table:sys_list" comment:"申请人"`
-	SysListOrder
+	PatentId       int    `form:"PatentId" search:"type:exact;column:PatentId;table:patent" comment:"专利ID"`
+	TI             string `form:"TI" search:"type:exact;column:TI;table:patent" comment:"专利名"`
+	PNM            string `form:"PNM" search:"type:exact;column:PNN;table:patent" comment:"申请号"`
+	AD             string `form:"AD" search:"type:exact;column:AD;table:patent" comment:"申请日"`
+	PD             string `form:"PD" search:"type:exact;column:PD;table:patent" comment:"公开日"`
+	CL             string `form:"CL" search:"type:exact;column:CL;table:patent" comment:"简介"`
+	PA             string `form:"PA" search:"type:exact;column:PA;table:patent" comment:"申请单位"`
+	AR             string `form:"AR" search:"type:exact;column:AR;table:patent" comment:"地址"`
+	INN            string `form:"INN" search:"type:exact;column:INN;table:patent" comment:"申请人"`
+	PatentOrder
 }
 
-type SysListUpdateReq struct {
+type PatentUpdateReq struct {
 	PatentId int    `json:"PatentId" gorm:"size:128;comment:专利ID"`
 	TI       string `json:"TI" gorm:"size:128;comment:专利名"`
 	PNM      string `json:"PNM" gorm:"size:128;comment:申请号"`
@@ -36,19 +36,19 @@ type SysListUpdateReq struct {
 	common.ControlBy
 }
 
-func (s SysListUpdateReq) GetPatentId() interface{} {
+func (s PatentUpdateReq) GetPatentId() interface{} {
 	return s.PatentId
 }
 
-type SysListOrder struct {
-	CreatedAtOrder string `search:"type:order;column:created_at;table:sys_list" form:"createdAtOrder"`
+type PatentOrder struct {
+	CreatedAtOrder string `search:"type:order;column:created_at;table:patent" form:"createdAtOrder"`
 }
 
-func (m *SysListGetPageReq) GetNeedSearch() interface{} {
+func (m *PatentGetPageReq) GetNeedSearch() interface{} {
 	return *m
 }
 
-func (s *SysListUpdateReq) GenerateList(model *models.SysList) {
+func (s *PatentUpdateReq) GenerateList(model *models.Patent) {
 	if s.PatentId != 0 {
 		model.PatentId = s.PatentId
 	}
@@ -62,7 +62,7 @@ func (s *SysListUpdateReq) GenerateList(model *models.SysList) {
 	model.PA = s.PA
 }
 
-type SysListControl struct {
+type PatentControl struct {
 	PatentId      int       `uri:"Id" comment:"主键"` // 主键
 	Username      string    `json:"username" comment:"用户名"`
 	Status        string    `json:"status" comment:"状态"`
@@ -76,25 +76,25 @@ type SysListControl struct {
 	Msg           string    `json:"msg" comment:"信息"`
 }
 
-type SysListGetReq struct {
+type PatentGetReq struct {
 	PatentId int `uri:"patent_id"`
 }
 
-func (s *SysListGetReq) GetPatentId() interface{} {
+func (s *PatentGetReq) GetPatentId() interface{} {
 	return s.PatentId
 }
 
-// SysLoginLogDeleteReq 功能删除请求参数
+// PatentDeleteReq 功能删除请求参数
 
-type SysListDeleteReq struct {
-	PatentIds []int `json:"patent_ids"`
+type PatentDeleteReq struct {
+	PatentId int `json:"patent_ids"`
 }
 
-func (s *SysListDeleteReq) GetPatentId() interface{} {
-	return s.PatentIds
+func (s *PatentDeleteReq) GetPatentId() interface{} {
+	return s.PatentId
 }
 
-type SysListInsertReq struct {
+type PatentInsertReq struct {
 	PatentId int    `json:"PatentId" gorm:"size:128;comment:专利ID"`
 	TI       string `json:"TI" gorm:"size:128;comment:专利名"`
 	PNM      string `json:"PNM" gorm:"size:128;comment:申请号"`
@@ -107,7 +107,7 @@ type SysListInsertReq struct {
 	common.ControlBy
 }
 
-func (s *SysListInsertReq) GenerateList(model *models.SysList) {
+func (s *PatentInsertReq) GenerateList(model *models.Patent) {
 	if s.PatentId != 0 {
 		model.PatentId = s.PatentId
 	}
@@ -122,32 +122,19 @@ func (s *SysListInsertReq) GenerateList(model *models.SysList) {
 	model.CreateBy = s.CreateBy
 }
 
-func (s *SysListInsertReq) GetPatentId() interface{} {
+func (s *PatentInsertReq) GetPatentId() interface{} {
 	return s.PatentId
 }
 
-type SysListById struct {
+type PatentById struct {
 	dto.ObjectByPatentId
 	common.ControlBy
 }
 
-func (s *SysListById) GetPatentId() interface{} {
-	return s.PAId
+func (s *PatentById) GetPatentId() interface{} {
+	return s.PatentId
 }
 
-func (s *SysListById) GenerateM() (common.ActiveRecord, error) {
-	return &models.SysList{}, nil
+func (s *PatentById) GenerateM() (common.ActiveRecord, error) {
+	return &models.Patent{}, nil
 }
-
-//type SysListByName struct {
-//	dto.ObjectByPatentName
-//	common.ControlBy
-//}
-//
-//func (s *SysListByName) GetPatentTI() interface{} {
-//	return s.TI
-//}
-//
-//func (s *SysListByName) GenerateM() (common.ActiveRecord, error) {
-//	return &models.SysList{}, nil
-//}

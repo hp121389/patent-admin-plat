@@ -9,7 +9,7 @@ import (
 
 var (
 	routerNoCheckRole = make([]func(*gin.RouterGroup), 0)
-	routerCheckRole   = make([]func(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware), 0)
+	RouterCheckRole   = make([]func(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware), 0)
 )
 
 // 路由示例
@@ -36,7 +36,7 @@ func examplesNoCheckRoleRouter(r *gin.Engine) {
 func examplesCheckRoleRouter(r *gin.Engine, authMiddleware *jwtauth.GinJWTMiddleware) {
 	// 可根据业务需求来设置接口版本
 	v1 := r.Group("/api/v1")
-	for _, f := range routerCheckRole {
+	for _, f := range RouterCheckRole {
 		f(v1, authMiddleware)
 	}
 }

@@ -101,6 +101,63 @@ definitions:
       requestId:
         type: string
     type: object
+  dto.SysListDeleteReq:
+    properties:
+      patent_ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysListInsertReq:
+    properties:
+      AD:
+        type: string
+      AR:
+        type: string
+      CL:
+        type: string
+      INN:
+        type: string
+      PA:
+        type: string
+      PD:
+        type: string
+      PNM:
+        type: string
+      PatentId:
+        type: integer
+      TI:
+        type: string
+      createBy:
+        type: integer
+      updateBy:
+        type: integer
+    type: object
+  dto.SysListUpdateReq:
+    properties:
+      AD:
+        type: string
+      AR:
+        type: string
+      CL:
+        type: string
+      INN:
+        type: string
+      PA:
+        type: string
+      PD:
+        type: string
+      PNM:
+        type: string
+      PatentId:
+        type: integer
+      TI:
+        type: string
+      createBy:
+        type: integer
+      updateBy:
+        type: integer
+    type: object
   dto.SysLoginLogDeleteReq:
     properties:
       ids:
@@ -522,26 +579,6 @@ paths:
       summary: 获取Role数据
       tags:
       - 角色/Role
-  /api/v1/search/simple:
-    post:
-      description: 根据查询字符串进行模糊搜索
-      parameters:
-      - description: 用户数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SimpleSearchReq'
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.SwagSimpleSearchResp'
-      security:
-      - Bearer: []
-      summary: 简单查询
-      tags:
-      - 专利检索
   /api/v1/server-monitor:
     get:
       description: 获取JSON
@@ -618,9 +655,9 @@ paths:
     delete:
       description: 删除数据
       parameters:
-      - description: packageId
+      - description: userId
         in: path
-        name: packageId
+        name: userId
         required: true
         type: integer
       - description: body
@@ -632,9 +669,9 @@ paths:
       responses: {}
       security:
       - Bearer: []
-      summary: 删除专利包数据
+      summary: 删除用户数据
       tags:
-      - 专利包
+      - 用户
     get:
       description: 获取JSON
       parameters:

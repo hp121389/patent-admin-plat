@@ -1,0 +1,763 @@
+definitions:
+  dto.ObjectById:
+    properties:
+      id:
+        type: integer
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.PassWord:
+    properties:
+      newPassword:
+        type: string
+      oldPassword:
+        type: string
+    type: object
+  dto.ResetSysUserPwdReq:
+    properties:
+      createBy:
+        type: integer
+      password:
+        type: string
+      updateBy:
+        type: integer
+      userId:
+        description: 用户ID
+        type: integer
+    type: object
+  dto.SimpleSearchReq:
+    properties:
+      DB:
+        type: string
+      Query:
+        type: string
+      pageIndex:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  dto.SwagSimpleSearchResp:
+    properties:
+      code:
+        type: integer
+      data:
+        properties:
+          count:
+            type: integer
+          list:
+            items:
+              properties:
+                AD:
+                  type: string
+                AN:
+                  type: string
+                DB:
+                  type: string
+                ExamAN:
+                  type: string
+                ISNEWDATA:
+                  type: boolean
+                "NO":
+                  type: integer
+                PA:
+                  type: string
+                PD:
+                  type: string
+                PINN:
+                  type: string
+                PNM:
+                  type: string
+                PNM2:
+                  type: string
+                RNO:
+                  type: integer
+                TI:
+                  type: string
+              type: object
+            type: array
+          pageIndex:
+            type: integer
+          pageSize:
+            type: integer
+        type: object
+      msg:
+        type: string
+      requestId:
+        type: string
+    type: object
+  dto.SysListDeleteReq:
+    properties:
+      patent_ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysListInsertReq:
+    properties:
+      AD:
+        type: string
+      AR:
+        type: string
+      CL:
+        type: string
+      INN:
+        type: string
+      PA:
+        type: string
+      PD:
+        type: string
+      PNM:
+        type: string
+      PatentId:
+        type: integer
+      TI:
+        type: string
+      createBy:
+        type: integer
+      updateBy:
+        type: integer
+    type: object
+  dto.SysListUpdateReq:
+    properties:
+      AD:
+        type: string
+      AR:
+        type: string
+      CL:
+        type: string
+      INN:
+        type: string
+      PA:
+        type: string
+      PD:
+        type: string
+      PNM:
+        type: string
+      PatentId:
+        type: integer
+      TI:
+        type: string
+      createBy:
+        type: integer
+      updateBy:
+        type: integer
+    type: object
+  dto.SysLoginLogDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysRoleDeleteReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysRoleInsertReq:
+    properties:
+      admin:
+        type: boolean
+      createBy:
+        type: integer
+      dataScope:
+        type: string
+      flag:
+        description: 标记
+        type: string
+      remark:
+        description: 备注
+        type: string
+      roleId:
+        description: 角色编码
+        type: integer
+      roleKey:
+        description: 角色代码
+        type: string
+      roleName:
+        description: 角色名称
+        type: string
+      roleSort:
+        description: 角色排序
+        type: integer
+      status:
+        description: 状态
+        type: string
+      updateBy:
+        type: integer
+    type: object
+  dto.SysUserInsertReq:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      createBy:
+        type: integer
+      departure:
+        type: string
+      email:
+        type: string
+      interest:
+        type: string
+      nickName:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      remark:
+        type: string
+      roleId:
+        type: integer
+      sex:
+        type: string
+      status:
+        default: "1"
+        type: string
+      updateBy:
+        type: integer
+      userId:
+        description: 用户ID
+        type: integer
+      username:
+        type: string
+    type: object
+  dto.SysUserUpdateReq:
+    properties:
+      avatar:
+        type: string
+      bio:
+        type: string
+      createBy:
+        type: integer
+      departure:
+        type: string
+      email:
+        type: string
+      interest:
+        type: string
+      nickName:
+        type: string
+      phone:
+        type: string
+      remark:
+        type: string
+      roleId:
+        type: integer
+      sex:
+        type: string
+      status:
+        default: "1"
+        type: string
+      updateBy:
+        type: integer
+      userId:
+        description: 用户ID
+        type: integer
+    type: object
+  dto.UpdateStatusReq:
+    properties:
+      createBy:
+        type: integer
+      roleId:
+        description: 角色编码
+        type: integer
+      status:
+        description: 状态
+        type: string
+      updateBy:
+        type: integer
+    type: object
+  dto.UpdateSysUserStatusReq:
+    properties:
+      createBy:
+        type: integer
+      status:
+        type: string
+      updateBy:
+        type: integer
+      userId:
+        description: 用户ID
+        type: integer
+    type: object
+  handler.Login:
+    properties:
+      code:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+      uuid:
+        type: string
+    required:
+    - code
+    - password
+    - username
+    - uuid
+    type: object
+info:
+  contact: {}
+  description: 专利检测平台v0.1
+  title: PatentAdminPlat API
+  version: 0.1.0
+paths:
+  /api/v1/captcha:
+    get:
+      description: 获取验证码
+      responses: {}
+      summary: 获取验证码
+      tags:
+      - 登陆
+  /api/v1/getinfo:
+    get:
+      description: 获取JSON
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 获取个人信息
+      tags:
+      - 个人中心
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        获取token
+        LoginHandler can be used by clients to get a jwt token.
+        Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
+        Reply will be of the form {"token": "TOKEN"}.
+        dev mode：It should be noted that all fields cannot be empty, and a value of 0 can be passed in addition to the account password
+        注意：开发模式：需要注意全部字段不能为空，账号密码外可以传入0值
+      parameters:
+      - description: account
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/handler.Login'
+      responses:
+        "200":
+          description: '{"code": 200, "expire": "2019-08-07T12:45:48+08:00", "token":
+            ".eyJleHAiOjE1NjUxNTMxNDgsImlkIjoiYWRtaW4iLCJvcmlnX2lhdCI6MTU2NTE0OTU0OH0.-zvzHvbg0A"
+            }'
+          schema:
+            type: string
+      summary: 登陆
+      tags:
+      - 登陆
+  /api/v1/logout:
+    post:
+      consumes:
+      - application/json
+      description: 获取token
+      responses:
+        "200":
+          description: '{"code": 200, "msg": "成功退出系统" }'
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: 退出登录
+      tags:
+      - 登陆
+  /api/v1/public/uploadFile:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 获取JSON
+      parameters:
+      - description: type
+        in: query
+        name: type
+        required: true
+        type: string
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses:
+        "200":
+          description: '{"code": -1, "message": "添加失败"}'
+          schema:
+            type: string
+      security:
+      - Bearer: []
+      summary: 上传图片
+      tags:
+      - 公共接口
+  /api/v1/register:
+    post:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: 用户数据
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysUserInsertReq'
+      responses: {}
+      summary: 注册用户
+      tags:
+      - 登陆
+  /api/v1/role:
+    delete:
+      description: 删除数据
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysRoleDeleteReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 删除用户角色
+      tags:
+      - 角色/Role
+    get:
+      description: Get JSON
+      parameters:
+      - description: roleName
+        in: query
+        name: roleName
+        type: string
+      - description: status
+        in: query
+        name: status
+        type: string
+      - description: roleKey
+        in: query
+        name: roleKey
+        type: string
+      - description: 页条数
+        in: query
+        name: pageSize
+        type: integer
+      - description: 页码
+        in: query
+        name: pageIndex
+        type: integer
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 角色列表数据
+      tags:
+      - 角色/Role
+    post:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysRoleInsertReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 创建角色
+      tags:
+      - 角色/Role
+  /api/v1/role-status/{id}:
+    put:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateStatusReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 修改用户角色
+      tags:
+      - 角色/Role
+  /api/v1/role/{id}:
+    get:
+      description: 获取JSON
+      parameters:
+      - description: roleId
+        in: path
+        name: roleId
+        type: string
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 获取Role数据
+      tags:
+      - 角色/Role
+  /api/v1/server-monitor:
+    get:
+      description: 获取JSON
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 系统信息
+      tags:
+      - 系统信息
+  /api/v1/sys-login-log:
+    delete:
+      description: 登录日志删除
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysLoginLogDeleteReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 登录日志删除
+      tags:
+      - 登录日志
+    get:
+      description: 获取JSON
+      parameters:
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: ip地址
+        in: query
+        name: ipaddr
+        type: string
+      - description: 归属地
+        in: query
+        name: loginLocation
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: 开始时间
+        in: query
+        name: beginTime
+        type: string
+      - description: 结束时间
+        in: query
+        name: endTime
+        type: string
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 登录日志列表
+      tags:
+      - 登录日志
+  /api/v1/sys-login-log/{id}:
+    get:
+      description: 获取JSON
+      parameters:
+      - description: id
+        in: path
+        name: id
+        type: string
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 登录日志通过id获取
+      tags:
+      - 登录日志
+  /api/v1/sys-user:
+    delete:
+      description: 删除数据
+      parameters:
+      - description: userId
+        in: path
+        name: userId
+        required: true
+        type: integer
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ObjectById'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 删除用户数据
+      tags:
+      - 用户
+    get:
+      description: 获取JSON
+      parameters:
+      - description: username
+        in: query
+        name: username
+        type: string
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 列表用户信息数据
+      tags:
+      - 用户
+    post:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: 用户数据
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysUserInsertReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 创建用户
+      tags:
+      - 用户
+    put:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysUserUpdateReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 修改用户数据
+      tags:
+      - 用户
+  /api/v1/sys-user/{userId}:
+    get:
+      description: 获取JSON
+      parameters:
+      - description: 用户编码
+        in: path
+        name: userId
+        required: true
+        type: integer
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 获取用户
+      tags:
+      - 用户
+  /api/v1/updateinfo:
+    put:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SysUserUpdateReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 修改个人信息
+      tags:
+      - 个人中心
+  /api/v1/user/avatar:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 获取JSON
+      parameters:
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 修改头像
+      tags:
+      - 个人中心
+  /api/v1/user/profile:
+    get:
+      description: 获取JSON
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 获取个人中心用户
+      tags:
+      - 个人中心
+  /api/v1/user/pwd/reset:
+    put:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetSysUserPwdReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 重置用户密码
+      tags:
+      - 用户
+  /api/v1/user/pwd/set:
+    put:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PassWord'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 修改密码
+      tags:
+      - 用户
+  /api/v1/user/status:
+    put:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSysUserStatusReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 修改用户状态
+      tags:
+      - 用户
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

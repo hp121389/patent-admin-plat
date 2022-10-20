@@ -11,7 +11,7 @@ type Tag struct {
 }
 
 func (Tag) TableName() string {
-	return "tag"
+	return "tag_table"
 
 }
 func (e *Tag) Generate() models.ActiveRecord {

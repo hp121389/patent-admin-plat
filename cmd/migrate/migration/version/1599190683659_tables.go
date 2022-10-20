@@ -25,6 +25,11 @@ func _1599190683659Tables(db *gorm.DB, version string) error {
 			new(models.SysLoginLog),
 			new(models.SysUser),
 			new(models.SysRole),
+			new(models.Patent),
+			new(models.Package),
+			new(models.PatentTag),
+			new(models.Tag),
+			new(models.UserPatent),
 		)
 		if err != nil {
 			return err

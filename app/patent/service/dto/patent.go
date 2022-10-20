@@ -4,7 +4,6 @@ import (
 	"go-admin/app/patent/models"
 	"go-admin/common/dto"
 	common "go-admin/common/models"
-	"time"
 )
 
 //查询必须写form字段
@@ -24,15 +23,16 @@ type PatentGetPageReq struct {
 }
 
 type PatentUpdateReq struct {
-	PatentId int    `json:"PatentId" gorm:"size:128;comment:专利ID"`
-	TI       string `json:"TI" gorm:"size:128;comment:专利名"`
-	PNM      string `json:"PNM" gorm:"size:128;comment:申请号"`
-	AD       string `json:"AD" gorm:"size:128;comment:申请日"`
-	PD       string `json:"PD" gorm:"size:128;comment:公开日"`
-	CL       string `json:"CL" gorm:"size:128;comment:简介"`
-	PA       string `json:"PA" gorm:"size:128;comment:申请单位"`
-	AR       string `json:"AR" gorm:"size:128;comment:地址"`
-	INN      string `json:"INN" gorm:"size:128;comment:申请人"`
+	PatentId int `json:"PatentId" gorm:"size:128;comment:专利ID"`
+
+	TI  string `json:"TI" gorm:"size:128;comment:专利名"`
+	PNM string `json:"PNM" gorm:"size:128;comment:申请号"`
+	AD  string `json:"AD" gorm:"size:128;comment:申请日"`
+	PD  string `json:"PD" gorm:"size:128;comment:公开日"`
+	CL  string `json:"CL" gorm:"size:128;comment:简介"`
+	PA  string `json:"PA" gorm:"size:128;comment:申请单位"`
+	AR  string `json:"AR" gorm:"size:128;comment:地址"`
+	INN string `json:"INN" gorm:"size:128;comment:申请人"`
 	common.ControlBy
 }
 
@@ -46,6 +46,10 @@ type PatentOrder struct {
 
 func (m *PatentGetPageReq) GetNeedSearch() interface{} {
 	return *m
+}
+func (s *PatentGetPageReq) GetPatentId() interface{} {
+
+	return s.PatentId
 }
 
 func (s *PatentUpdateReq) GenerateList(model *models.Patent) {
@@ -62,20 +66,6 @@ func (s *PatentUpdateReq) GenerateList(model *models.Patent) {
 	model.PA = s.PA
 }
 
-type PatentControl struct {
-	PatentId      int       `uri:"Id" comment:"主键"` // 主键
-	Username      string    `json:"username" comment:"用户名"`
-	Status        string    `json:"status" comment:"状态"`
-	Ipaddr        string    `json:"ipaddr" comment:"ip地址"`
-	LoginLocation string    `json:"loginLocation" comment:"归属地"`
-	Browser       string    `json:"browser" comment:"浏览器"`
-	Os            string    `json:"os" comment:"系统"`
-	Platform      string    `json:"platform" comment:"固件"`
-	LoginTime     time.Time `json:"loginTime" comment:"登录时间"`
-	Remark        string    `json:"remark" comment:"备注"`
-	Msg           string    `json:"msg" comment:"信息"`
-}
-
 type PatentGetReq struct {
 	PatentId int `uri:"patent_id"`
 }
@@ -87,7 +77,7 @@ func (s *PatentGetReq) GetPatentId() interface{} {
 // PatentDeleteReq 功能删除请求参数
 
 type PatentDeleteReq struct {
-	PatentId int `json:"patent_ids"`
+	PatentId int `json:"PatentIds"`
 }
 
 func (s *PatentDeleteReq) GetPatentId() interface{} {
@@ -137,4 +127,34 @@ func (s *PatentById) GetPatentId() interface{} {
 
 func (s *PatentById) GenerateM() (common.ActiveRecord, error) {
 	return &models.Patent{}, nil
+}
+
+type PatentsByIdsForRelationshipUsers struct {
+	dto.ObjectOfPatentId
+}
+
+func (s *PatentsByIdsForRelationshipUsers) GetPatentId() []int {
+
+	s.PatentIds = append(s.PatentIds, s.PatentId)
+	return s.PatentIds
+
+}
+
+func (s *PatentsByIdsForRelationshipUsers) GetNeedSearch() interface{} {
+	return *s
+}
+
+type PatentsByIdsForRelationshipTags struct {
+	dto.ObjectOfPatentId
+}
+
+func (s *PatentsByIdsForRelationshipTags) GetNeedSearch() interface{} {
+	return *s
+}
+
+func (s *PatentsByIdsForRelationshipTags) GetPatentId() []int {
+
+	s.PatentIds = append(s.PatentIds, s.PatentId)
+	return s.PatentIds
+
 }

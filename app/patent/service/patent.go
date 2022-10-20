@@ -53,13 +53,13 @@ func (e *Patent) Get(d *dto.PatentById, model *models.Patent) error {
 	return nil
 }
 
-// Remove 根据专利id删除Patent（可以自定义根据专利id删除数据的个数，因为post的内容是一个json里面是PatentID的数组）
+// Remove 根据专利id删除Patent
 func (e *Patent) Remove(c *dto.PatentById) error {
 	var err error
 	var data models.Patent
 
 	db := e.Orm.Delete(&data, c.GetPatentId())
-	//.Where("patent_id = ?", c.GetPatentId())
+
 	if db.Error != nil {
 		err = db.Error
 		e.Log.Errorf("Delete error: %s", err)
@@ -101,8 +101,8 @@ func (e *Patent) UpdateLists(c *dto.PatentUpdateReq) error {
 	return nil
 }
 
-// InsertListsByPatentId 根据PatentId 创建Patent对象
-func (e *Patent) InsertListsByPatentId(c *dto.PatentInsertReq) error {
+// Insert 根据PatentId 创建Patent对象
+func (e *Patent) Insert(c *dto.PatentInsertReq) error {
 	var err error
 	var data models.Patent
 	var i int64
@@ -123,4 +123,31 @@ func (e *Patent) InsertListsByPatentId(c *dto.PatentInsertReq) error {
 		return err
 	}
 	return nil
+}
+
+// InsertIfAbsent 根据PatentId 创建Patent对象
+func (e *Patent) InsertIfAbsent(c *dto.PatentInsertReq) (int, error) {
+	var err error
+	var data models.Patent
+	var i int64
+	err = e.Orm.Model(&data).Where("PNM = ?", c.PNM).Count(&i).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return 0, err
+	}
+	if i > 0 {
+		err = e.Orm.Model(&data).Where("PNM = ?", c.PNM).First(&data).Error
+		if err != nil {
+			e.Log.Errorf("db error: %s", err)
+			return 0, err
+		}
+		return data.PatentId, nil
+	}
+	c.GenerateList(&data)
+	err = e.Orm.Create(&data).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return 0, err
+	}
+	return data.PatentId, nil
 }

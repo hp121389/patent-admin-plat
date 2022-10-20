@@ -56,3 +56,16 @@ type TagGetReq struct {
 func (s *TagGetReq) GetId() interface{} {
 	return s.Id
 }
+
+type TagsByIdsForRelationshipPatents struct {
+	dto.ObjectOfTagId
+}
+
+func (s *TagsByIdsForRelationshipPatents) GetTagId() []int {
+	s.TagIds = append(s.TagIds, s.TagId)
+	return s.TagIds
+}
+
+func (s *TagsByIdsForRelationshipPatents) GetNeedSearch() interface{} {
+	return *s
+}

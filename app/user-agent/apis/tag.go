@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin/binding"
 	"go-admin/app/user-agent/models"
@@ -70,14 +71,40 @@ func (e Tag) Insert(c *gin.Context) {
 	}
 	// 设置创建人
 	req.SetCreateBy(user.GetUserId(c))
-	err = s.Insert(&req)
+	tid, err := s.Insert(&req) //finish tag insert
+
+	//req1 := dto.NewUserTagInsert(user.GetUserId(c),req.GetId())  //
+	// s1 :=service.UserTag{}
+	// err = s1.
 	if err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())
 		return
 	}
+	err = e.UserTagInsert(c, tid)
 
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
 	e.OK(req.GetId(), "创建成功")
+}
+
+func (e Tag) UserTagInsert(c *gin.Context, tid int) error {
+	req := dto.NewUserTagInsert(user.GetUserId(c), tid)
+	s := service.Tag{}
+
+	if err := s.NewUserTagInsert(req); err != nil {
+		e.Logger.Error(err)
+		if errors.Is(err, service.ErrConflictBindPatent) {
+			e.Error(409, err, err.Error())
+		} else {
+			e.Error(500, err, err.Error())
+		}
+
+	}
+	return nil
 }
 
 // Delete

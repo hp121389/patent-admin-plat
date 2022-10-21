@@ -35,8 +35,8 @@ func registerPatentRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlew
 		r.PUT("", api.UpdatePatent) //修改专利
 
 		r.DELETE("/:patent_id", api.DeletePatentByPatentId) //删除该专利√
-		r.DELETE("/claim/:patent_id", api.DeleteClaim)      //取消关注√
-		r.DELETE("/focus/:patent_id", api.DeleteFocus)      //取消认领√
+		r.DELETE("/claim/:patent_id", api.DeleteClaim)      //取消关注no
+		r.DELETE("/focus/:patent_id", api.DeleteFocus)      //取消认领no
 		r.DELETE("/tags/:patent_id/:tag_id", api.DeleteTag) //取消添加该标签√
 		//取消加入该专利包
 

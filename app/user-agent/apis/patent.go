@@ -2,7 +2,6 @@ package apis
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
@@ -221,7 +220,7 @@ func (e Patent) ClaimPatent(c *gin.Context) {
 		return
 	}
 
-	req := dto.NewUserPatentClaim(user.GetUserId(c), pid, user.GetUserId(c))
+	req := dto.NewUserPatentClaim(user.GetUserId(c), pid, user.GetUserId(c), user.GetUserId(c))
 
 	if err = s.Inserts(req); err != nil {
 		e.Logger.Error(err)
@@ -266,7 +265,7 @@ func (e Patent) FocusPatent(c *gin.Context) {
 		return
 	}
 
-	req := dto.NewUserPatentFocus(user.GetUserId(c), pid, user.GetUserId(c))
+	req := dto.NewUserPatentFocus(user.GetUserId(c), pid, user.GetUserId(c), user.GetUserId(c))
 
 	if err = s.Inserts(req); err != nil {
 		e.Logger.Error(err)
@@ -420,15 +419,13 @@ func (e Patent) GetClaimPages(c *gin.Context) {
 // @Router /api/v1/user-agent/patent/focus/{patent_id}  [delete]
 // @Security Bearer
 func (e Patent) DeleteFocus(c *gin.Context) {
-	s := service.Patent{}
-	req := dto.UserPatentObject{}
-	req.UserId = user.GetUserId(c)
 
-	req.SetUpdateBy(user.GetUserId(c))
+	s := service.Patent{}
+	req := dto.NewUserPatentFocus(user.GetUserId(c), 0, user.GetUserId(c), user.GetUserId(c))
 
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req). //在这一步传入request数据
+		Bind(req).
 		MakeService(&s.Service).
 		Errors
 
@@ -440,8 +437,8 @@ func (e Patent) DeleteFocus(c *gin.Context) {
 
 	// 数据权限检查
 	//p := actions.GetPermissionFromContext(c)
-
-	err = s.RemoveFocus(&req)
+	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
+	err = s.RemoveFocus(req)
 	if err != nil {
 		e.Logger.Error(err)
 		return
@@ -457,17 +454,17 @@ func (e Patent) DeleteFocus(c *gin.Context) {
 // @Router /api/v1/user-agent/patent/claim/{patent_id} [delete]
 // @Security Bearer
 func (e Patent) DeleteClaim(c *gin.Context) {
-	s := service.Patent{}
-	req := dto.UserPatentObject{}
-	req.UserId = user.GetUserId(c)
 
-	req.SetUpdateBy(user.GetUserId(c))
+	s := service.Patent{}
+	req := dto.NewUserPatentClaim(user.GetUserId(c), 0, user.GetUserId(c), user.GetUserId(c))
 
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req). //在这一步传入request数据
+		Bind(req). //修改&
 		MakeService(&s.Service).
 		Errors
+
+	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
 
 	if err != nil {
 		e.Logger.Error(err)
@@ -478,11 +475,12 @@ func (e Patent) DeleteClaim(c *gin.Context) {
 	// 数据权限检查
 	//p := actions.GetPermissionFromContext(c)
 
-	err = s.RemoveClaim(&req)
+	err = s.RemoveClaim(req)
 	if err != nil {
 		e.Logger.Error(err)
 		return
 	}
+
 	e.OK(req, "取消认领成功")
 }
 
@@ -496,11 +494,11 @@ func (e Patent) DeleteClaim(c *gin.Context) {
 // @Security Bearer
 func (e Patent) DeleteTag(c *gin.Context) {
 	s := service.Patent{}
-	req := dto.PatentTagObject{}
+	req := dto.PatentTagInsertReq{}
 	req.SetUpdateBy(user.GetUserId(c))
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req). //在这一步传入request数据
+		Bind(&req).
 		MakeService(&s.Service).
 		Errors
 
@@ -509,6 +507,8 @@ func (e Patent) DeleteTag(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
+
+	req.TagId, err = strconv.Atoi(c.Param("tag_id"))
 
 	// 数据权限检查
 	//p := actions.GetPermissionFromContext(c)
@@ -570,16 +570,12 @@ func (e Patent) InsertTag(c *gin.Context) {
 // @Description 显示该标签下的专利
 // @Tags 专利表
 // @Param TagId query string false "标签ID"
-// @Router /api/v1/user-agent/patent/patents/{tag_id} [get]
+// @Router /api/v1/user-agent/patent/tag-patents/{tag_id} [get]
 // @Security Bearer
 func (e Patent) GetPatent(c *gin.Context) {
 
 	s := service.Patent{}
 	req := dto.TagPageGetReq{}
-	//req的tagid从路由来
-
-	fmt.Println(req.TagId)
-
 	req1 := dto.PatentsByIdsForRelationshipTags{}
 
 	err := e.MakeContext(c).
@@ -602,11 +598,6 @@ func (e Patent) GetPatent(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(req.TagId)
-	fmt.Println(req.TagId)
-	fmt.Println(req.TagId)
-	fmt.Println(req.TagId)
-	
 	//数据权限检查
 	//p := actions.GetPermissionFromContext(c)
 
@@ -632,7 +623,7 @@ func (e Patent) GetPatent(c *gin.Context) {
 	req1.PatentIds = make([]int, len(list))
 
 	for i := 0; i < len(list); i++ {
-		req1.PatentIds[i] = list[i].TagId
+		req1.PatentIds[i] = list[i].PatentId
 	}
 
 	err = s.GetPatentPages(&req1, &list1, &count2)
@@ -671,6 +662,8 @@ func (e Patent) GetTags(c *gin.Context) {
 
 	//数据权限检查
 	//p := actions.GetPermissionFromContext(c)
+
+	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
 
 	list := make([]models.PatentTag, 0)
 	list1 := make([]models.Tag, 0)

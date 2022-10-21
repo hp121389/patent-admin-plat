@@ -425,6 +425,7 @@ func (e *Patent) GetPatentPages(d *dto.PatentsByIdsForRelationshipTags, list *[]
 				Where("Patent_Id = ? ", ids[i]).
 				First(&data1).Limit(-1).Offset(-1).
 				Count(count).Error
+
 			*list = append(*list, data1)
 			if err != nil {
 				e.Log.Errorf("db error:%s", err)
@@ -467,7 +468,7 @@ func (e *Patent) InsertPatentTagRelationship(c *dto.PatentTagInsertReq) error {
 }
 
 // RemoveRelationship 根据专利id、TYPE删除用户专利关系
-func (e *Patent) RemoveRelationship(c *dto.PatentTagObject) error {
+func (e *Patent) RemoveRelationship(c *dto.PatentTagInsertReq) error {
 	var err error
 	var data models.PatentTag
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/spf13/viper"
-	"go-admin/app/patent/my_config"
+	"go-admin/app/user-agent/my_config"
 	"log"
 	"net/http"
 	"os"

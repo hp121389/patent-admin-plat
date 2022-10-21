@@ -10,17 +10,22 @@ import (
 
 type ObjectById struct {
 	Id  int   `uri:"id"`
-	Ids []int `json:"ids"`
+	Ids []int `json:"Ids"`
 }
 
 type ObjectByPatentId struct {
 	PatentId int `uri:"patent_id"`
 }
 
-//type ObjectByPatentName struct {
-//	TI  int   `uri:"ti"`
-//	TIS []int `json:"tis"`
-//}
+type ObjectOfPatentId struct {
+	PatentId  int   `uri:"patent_id"`
+	PatentIds []int `json:"Patent_Ids"`
+}
+
+type ObjectOfTagId struct {
+	TagId  int   `uri:"tag_id"`
+	TagIds []int `json:"Tag_Ids"`
+}
 
 func (s *ObjectById) Bind(ctx *gin.Context) error {
 	var err error

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/spf13/viper"
-	"go-admin/app/patent/my_config"
+	"go-admin/app/user-agent/my_config"
 	"log"
 	"net/http"
 	"os"
@@ -157,7 +157,7 @@ func run() error {
 var Router runtime.Router
 
 func tip() {
-	usageStr := `欢迎使用 ` + pkg.Green(`patent-admin-plat `+global.Version) + ` 可以使用 ` + pkg.Red(`-h`) + ` 查看命令`
+	usageStr := `欢迎使用 ` + pkg.Green(`user-agent-admin-plat `+global.Version) + ` 可以使用 ` + pkg.Red(`-h`) + ` 查看命令`
 	fmt.Printf("%s \n\n", usageStr)
 }
 

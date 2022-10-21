@@ -22,7 +22,7 @@ type Package struct {
 // @Description 获取JSON
 // @Tags 专利包
 // @Param packageName query string false "packageName"
-// @Router /api/v1/package [get]
+// @Router /api/v1/user-agent/package [get]
 // @Security Bearer
 func (e Package) GetPage(c *gin.Context) {
 	s := service.Package{}
@@ -58,7 +58,7 @@ func (e Package) GetPage(c *gin.Context) {
 // @Description 获取JSON
 // @Tags 专利包
 // @Param packageId path int true "专利包编码"
-// @Router /api/v1/package/{packageId} [get]
+// @Router /api/v1/user-agent/package/{packageId} [get]
 // @Security Bearer
 func (e Package) Get(c *gin.Context) {
 	s := service.Package{}
@@ -91,7 +91,7 @@ func (e Package) Get(c *gin.Context) {
 // @Accept  application/json
 // @Product application/json
 // @Param data body dto.PackageInsertReq true "专利包数据"
-// @Router /api/v1/package [post]
+// @Router /api/v1/user-agent/package [post]
 // @Security Bearer
 func (e Package) Insert(c *gin.Context) {
 	s := service.Package{}
@@ -125,7 +125,7 @@ func (e Package) Insert(c *gin.Context) {
 // @Accept  application/json
 // @Product application/json
 // @Param data body dto.PackageInsertReq true "body"
-// @Router /api/v1/package [put]
+// @Router /api/v1/user-agent/package [put]
 // @Security Bearer
 func (e Package) Update(c *gin.Context) {
 	s := service.Package{}
@@ -159,7 +159,7 @@ func (e Package) Update(c *gin.Context) {
 // @Description 删除数据
 // @Tags 专利包
 // @Param packageId path int true "packageId"
-// @Router /api/v1/sys-user [delete]
+// @Router /api/v1/user-agent/package [delete]
 // @Param data body dto.ObjectById true "body"
 // @Security Bearer
 func (e Package) Delete(c *gin.Context) {

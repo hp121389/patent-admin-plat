@@ -3,9 +3,9 @@ package models
 import "go-admin/common/models"
 
 type Package struct {
-	PackageId   int    `gorm:"primaryKey;autoIncrement;comment:编码"  json:"packageId"`
-	PackageName string `json:"packageName" gorm:"size:128;comment:专利包"`
-	Desc        string `json:"desc" gorm:"size:128;comment:描述"`
+	PackageId   int    `gorm:"primaryKey;autoIncrement;comment:编码"  json:"PackageId"`
+	PackageName string `json:"PackageName" gorm:"size:128;comment:专利包"`
+	Desc        string `json:"Desc" gorm:"size:128;comment:描述"`
 	models.ControlBy
 	models.ModelTime
 }

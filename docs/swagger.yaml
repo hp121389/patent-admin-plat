@@ -8,6 +8,20 @@ definitions:
           type: integer
         type: array
     type: object
+  dto.PackageInsertReq:
+    properties:
+      createBy:
+        type: integer
+      desc:
+        type: string
+      packageId:
+        description: 专利包ID
+        type: integer
+      packageName:
+        type: string
+      updateBy:
+        type: integer
+    type: object
   dto.PassWord:
     properties:
       newPassword:
@@ -366,6 +380,69 @@ paths:
       summary: 退出登录
       tags:
       - 登陆
+  /api/v1/package:
+    get:
+      description: 获取JSON
+      parameters:
+      - description: packageName
+        in: query
+        name: packageName
+        type: string
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 列表专利包信息数据
+      tags:
+      - 专利包
+    post:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: 专利包数据
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PackageInsertReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 创建专利包
+      tags:
+      - 专利包
+    put:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PackageInsertReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 修改专利包数据
+      tags:
+      - 专利包
+  /api/v1/package/{packageId}:
+    get:
+      description: 获取JSON
+      parameters:
+      - description: 专利包编码
+        in: path
+        name: packageId
+        required: true
+        type: integer
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 获取专利包
+      tags:
+      - 专利包
   /api/v1/public/uploadFile:
     post:
       consumes:

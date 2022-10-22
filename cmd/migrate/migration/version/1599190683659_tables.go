@@ -30,6 +30,7 @@ func _1599190683659Tables(db *gorm.DB, version string) error {
 			new(models.PatentTag),
 			new(models.Tag),
 			new(models.UserPatent),
+			new(models.PatentPackage),
 		)
 		if err != nil {
 			return err

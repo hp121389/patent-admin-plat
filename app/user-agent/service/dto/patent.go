@@ -23,21 +23,16 @@ type PatentGetPageReq struct {
 }
 
 type PatentUpdateReq struct {
-	PatentId int `json:"PatentId" gorm:"size:128;comment:专利ID"`
-
-	TI  string `json:"TI" gorm:"size:128;comment:专利名"`
-	PNM string `json:"PNM" gorm:"size:128;comment:申请号" vd:"len($)>0"`
-	AD  string `json:"AD" gorm:"size:128;comment:申请日"`
-	PD  string `json:"PD" gorm:"size:128;comment:公开日"`
-	CL  string `json:"CL" gorm:"size:128;comment:简介"`
-	PA  string `json:"PA" gorm:"size:128;comment:申请单位"`
-	AR  string `json:"AR" gorm:"size:128;comment:地址"`
-	INN string `json:"INN" gorm:"size:128;comment:申请人"`
+	PatentId int    `json:"PatentId" gorm:"size:128;comment:专利ID"`
+	TI       string `json:"TI" gorm:"size:128;comment:专利名"`
+	PNM      string `json:"PNM" gorm:"size:128;comment:申请号" vd:"len($)>0"`
+	AD       string `json:"AD" gorm:"size:128;comment:申请日"`
+	PD       string `json:"PD" gorm:"size:128;comment:公开日"`
+	CL       string `json:"CL" gorm:"size:128;comment:简介"`
+	PA       string `json:"PA" gorm:"size:128;comment:申请单位"`
+	AR       string `json:"AR" gorm:"size:128;comment:地址"`
+	INN      string `json:"INN" gorm:"size:128;comment:申请人"`
 	common.ControlBy
-}
-
-func (s PatentUpdateReq) GetPatentId() interface{} {
-	return s.PatentId
 }
 
 type PatentOrder struct {
@@ -47,9 +42,8 @@ type PatentOrder struct {
 func (m *PatentGetPageReq) GetNeedSearch() interface{} {
 	return *m
 }
-func (s *PatentGetPageReq) GetPatentId() interface{} {
-
-	return s.PatentId
+func (m *PatentGetPageReq) GetPatentId() interface{} {
+	return m.PatentId
 }
 
 func (s *PatentUpdateReq) GenerateList(model *models.Patent) {
@@ -64,24 +58,6 @@ func (s *PatentUpdateReq) GenerateList(model *models.Patent) {
 	model.PD = s.PD
 	model.INN = s.INN
 	model.PA = s.PA
-}
-
-type PatentGetReq struct {
-	PatentId int `uri:"patent_id"`
-}
-
-func (s *PatentGetReq) GetPatentId() interface{} {
-	return s.PatentId
-}
-
-// PatentDeleteReq 功能删除请求参数
-
-type PatentDeleteReq struct {
-	PatentId int `json:"PatentIds"`
-}
-
-func (s *PatentDeleteReq) GetPatentId() interface{} {
-	return s.PatentId
 }
 
 type PatentInsertReq struct {
@@ -117,7 +93,7 @@ func (s *PatentInsertReq) GetPatentId() interface{} {
 }
 
 type PatentById struct {
-	dto.ObjectByPatentId
+	PatentId int `json:"PatentId" gorm:"size:128;comment:专利ID"`
 	common.ControlBy
 }
 
@@ -129,36 +105,8 @@ func (s *PatentById) GenerateM() (common.ActiveRecord, error) {
 	return &models.Patent{}, nil
 }
 
-type PatentsByIdsForRelationshipUsers struct {
-	dto.ObjectOfPatentId
-}
-
-func (s *PatentsByIdsForRelationshipUsers) GetPatentId() []int {
-
-	s.PatentIds = append(s.PatentIds, s.PatentId)
-	return s.PatentIds
-
-}
-
-func (s *PatentsByIdsForRelationshipUsers) GetNeedSearch() interface{} {
-	return *s
-}
-
-type PatentsByIdsForRelationshipTags struct {
-	dto.ObjectOfPatentId
-}
-
-func (s *PatentsByIdsForRelationshipTags) GetNeedSearch() interface{} {
-	return *s
-}
-
-func (s *PatentsByIdsForRelationshipTags) GetPatentId() []int {
-
-	s.PatentIds = append(s.PatentIds, s.PatentId)
-	return s.PatentIds
-}
-
 //user-patent
+
 const (
 	ClaimType = "认领"
 	FocusType = "关注"
@@ -295,11 +243,47 @@ func (d *PatentTagInsertReq) GetTagId() interface{} {
 type TagUpdateReqByPatent struct {
 	TagId    int `json:"TagId" gorm:"size:128;comment:标签ID"`
 	PatentId int `uri:"patent_id"`
+	//待修改
 	common.ControlBy
 }
 
 type PatentUpdateReqByTag struct {
 	TagId    int `uri:"tag_id"`
 	PatentId int `json:"PatentId" gorm:"size:128;comment:专利ID"`
+	//待修改
 	common.ControlBy
+}
+
+type PatentsIds struct {
+	PatentId  int   `json:"Patent_Id"`
+	PatentIds []int `json:"Patent_Ids"`
+}
+
+func (s *PatentsIds) GetNeedSearch() interface{} {
+	return *s
+}
+
+func (s *PatentsIds) GetPatentId() []int {
+	s.PatentIds = append(s.PatentIds, s.PatentId)
+	return s.PatentIds
+}
+
+//patent-package
+
+type PackageBack struct {
+	PatentId  int `form:"PatentId" search:"type:exact;column:TagId;table:patent_package" comment:"专利ID"`
+	PackageId int `form:"PackageId" search:"type:exact;column:TagId;table:patent_package" comment:"专利包ID"`
+}
+
+type PackagePageGetReq struct {
+	dto.Pagination `search:"-"`
+	PackageBack
+	PatentTagOrder
+	common.ControlBy
+}
+
+func (d *PackagePageGetReq) GeneratePackagePatent(g *models.PatentPackage) {
+	g.PatentId = d.PatentId
+	g.PackageId = d.PackageId
+
 }

@@ -31,3 +31,43 @@ func (e *Patent) Generate() models.ActiveRecord {
 func (e *Patent) GetId() interface{} {
 	return e.PatentId
 }
+
+//user-patent
+
+type UserPatent struct {
+	models.Model
+	PatentId int    `gorm:"foreignKey:PatentId;comment:PatentId" json:"PatentId" `
+	UserId   int    `gorm:"comment:用户ID"  json:"UserId"`
+	Type     string `json:"Type" gorm:"size:64;comment:关系类型（关注/认领）"`
+	models.ControlBy
+}
+
+func (e *UserPatent) TableName() string {
+	return "user_patent"
+}
+
+//patent-tag
+
+type PatentTag struct {
+	models.Model
+	PatentId int `gorm:"foreignKey:PatentId;comment:专利Id" json:"PatentId" `
+	TagId    int `gorm:"comment:标签ID"  json:"TagId"`
+	models.ControlBy
+}
+
+func (e *PatentTag) TableName() string {
+	return "patent_tag"
+}
+
+//patent-package
+
+type PatentPackage struct {
+	models.Model
+	PatentId  int `gorm:"foreignKey:PatentId;comment:专利Id" json:"PatentId" `
+	PackageId int `gorm:"comment:专利包ID"  json:"PackageId"`
+	models.ControlBy
+}
+
+func (e *PatentPackage) TableName() string {
+	return "patent_package"
+}

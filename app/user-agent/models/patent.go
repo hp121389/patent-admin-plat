@@ -46,14 +46,6 @@ func (e *UserPatent) TableName() string {
 	return "user_patent"
 }
 
-func (e *UserPatent) GetUserId() interface{} {
-	return e.UserId
-}
-
-func (e *UserPatent) GetPatentId() interface{} {
-	return e.PatentId
-}
-
 //patent-tag
 
 type PatentTag struct {
@@ -67,10 +59,15 @@ func (e *PatentTag) TableName() string {
 	return "patent_tag"
 }
 
-func (e *PatentTag) GetTagId() interface{} {
-	return e.TagId
+//patent-package
+
+type PatentPackage struct {
+	models.Model
+	PatentId  int `gorm:"foreignKey:PatentId;comment:专利Id" json:"PatentId" `
+	PackageId int `gorm:"comment:专利包ID"  json:"PackageId"`
+	models.ControlBy
 }
 
-func (e *PatentTag) GetPatentId() interface{} {
-	return e.PatentId
+func (e *PatentPackage) TableName() string {
+	return "patent_package"
 }

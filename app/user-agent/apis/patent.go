@@ -28,6 +28,7 @@ type Patent struct {
 func (e Patent) GetPatentById(c *gin.Context) {
 	s := service.Patent{}
 	req := dto.PatentById{}
+
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, nil).
@@ -142,6 +143,7 @@ func (e Patent) UpdatePatent(c *gin.Context) {
 	}
 
 	req.SetUpdateBy(user.GetUserId(c))
+
 	//数据权限检查
 	//p := actions.GetPermissionFromContext(c)
 
@@ -150,17 +152,17 @@ func (e Patent) UpdatePatent(c *gin.Context) {
 		e.Logger.Error(err)
 		return
 	}
-	e.OK(req.GetPatentId(), "更新成功")
+	e.OK(req, "更新成功")
 }
 
-// DeletePatentByPatentId
+// DeletePatent
 // @Summary 删除专利
 // @Description  输入专利id删除专利表
 // @Tags 专利表
 // @Param PatentId query string false "专利ID"
 // @Router /api/v1/user-agent/patent/{patent_id} [delete]
 // @Security Bearer
-func (e Patent) DeletePatentByPatentId(c *gin.Context) {
+func (e Patent) DeletePatent(c *gin.Context) {
 	s := service.Patent{}
 	req := dto.PatentById{}
 
@@ -175,8 +177,8 @@ func (e Patent) DeletePatentByPatentId(c *gin.Context) {
 		return
 	}
 
-	// 设置编辑人
-	req.SetUpdateBy(user.GetUserId(c))
+	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
+	req.UpdateBy = user.GetUserId(c)
 
 	// 数据权限检查
 	//p := actions.GetPermissionFromContext(c)
@@ -306,7 +308,7 @@ func (e Patent) GetFocusPages(c *gin.Context) {
 	s := service.Patent{}             //service中查询或者返回的结果赋值给s变量
 	req := dto.UserPatentGetPageReq{} //被绑定的数据
 	req.UserId = user.GetUserId(c)
-	req1 := dto.PatentsByIdsForRelationshipUsers{}
+	req1 := dto.PatentsIds{}
 
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -358,7 +360,7 @@ func (e Patent) GetFocusPages(c *gin.Context) {
 func (e Patent) GetClaimPages(c *gin.Context) {
 	s := service.Patent{}             //service中查询或者返回的结果赋值给s变量
 	req := dto.UserPatentGetPageReq{} //被绑定的数据
-	req1 := dto.PatentsByIdsForRelationshipUsers{}
+	req1 := dto.PatentsIds{}
 
 	req.UserId = user.GetUserId(c)
 
@@ -456,6 +458,7 @@ func (e Patent) DeleteFocus(c *gin.Context) {
 func (e Patent) DeleteClaim(c *gin.Context) {
 
 	s := service.Patent{}
+
 	req := dto.NewUserPatentClaim(user.GetUserId(c), 0, user.GetUserId(c), user.GetUserId(c))
 
 	err := e.MakeContext(c).
@@ -485,12 +488,12 @@ func (e Patent) DeleteClaim(c *gin.Context) {
 }
 
 // DeleteTag
-// @Summary 取消标签
+// @Summary 取消给该专利添加的该标签
 // @Description  取消给该专利添加的该标签
 // @Tags 专利表
 // @Param PatentId query string false "专利ID"
 // @Param TagId query string false "标签ID"
-// @Router /api/v1/user-agent/patent/tags/{patent_id}/{tag_id} [delete]
+// @Router /api/v1/user-agent/patent/tags/{tag_id}/patent/{patent_id} [delete]
 // @Security Bearer
 func (e Patent) DeleteTag(c *gin.Context) {
 	s := service.Patent{}
@@ -523,7 +526,7 @@ func (e Patent) DeleteTag(c *gin.Context) {
 }
 
 // InsertTag
-// @Summary 添加标签
+// @Summary 为该专利添加该标签
 // @Description  为该专利添加该标签
 // @Tags 专利表
 // @Accept  application/json
@@ -576,7 +579,7 @@ func (e Patent) GetPatent(c *gin.Context) {
 
 	s := service.Patent{}
 	req := dto.TagPageGetReq{}
-	req1 := dto.PatentsByIdsForRelationshipTags{}
+	req1 := dto.PatentsIds{}
 
 	err := e.MakeContext(c).
 		MakeOrm().
@@ -699,6 +702,155 @@ func (e Patent) GetTags(c *gin.Context) {
 
 	e.OK(list1, "查询成功")
 
+}
+
+// GetPackagePatents
+// @Summary 显示专利包内专利
+// @Description 显示专利包内专利
+// @Tags 专利表
+// @Param TagId query string false "标签ID"
+// @Router /api/v1/user-agent/patent/package/{package_id} [get]
+// @Security Bearer
+func (e Patent) GetPackagePatents(c *gin.Context) {
+
+	s := service.Patent{}
+	req := dto.PackagePageGetReq{}
+	req1 := dto.PatentsIds{}
+
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+
+	req.PackageId, err = strconv.Atoi(c.Param("package_id"))
+
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+
+	//数据权限检查
+	//p := actions.GetPermissionFromContext(c)
+
+	list := make([]models.PatentPackage, 0)
+	list1 := make([]models.Patent, 0)
+	var count int64
+
+	err = s.GetPatentIdByPackageId(&req, &list, &count)
+
+	if err != nil {
+		e.Error(500, err, "查询失败")
+		return
+	}
+
+	var count2 int64
+
+	err = e.MakeContext(c).
+		MakeOrm().
+		Bind(&req1).
+		MakeService(&s.Service).
+		Errors
+
+	req1.PatentIds = make([]int, len(list))
+
+	for i := 0; i < len(list); i++ {
+		req1.PatentIds[i] = list[i].PatentId
+	}
+
+	err = s.GetPatentPages(&req1, &list1, &count2)
+	if err != nil {
+		e.Error(500, err, "查询失败")
+		return
+	}
+	e.OK(list1, "查询成功")
+
+}
+
+// InsertPackagePatent
+// @Summary 将专利加入专利包
+// @Description  将专利加入专利包
+// @Tags 专利表
+// @Accept  application/json
+// @Product application/json
+// @Param data body dto.PackagePageGetReq true "PackageId和PatentId为必要输入"
+// @Router /api/v1/user-agent/patent/package [post]
+// @Security Bearer
+func (e Patent) InsertPackagePatent(c *gin.Context) {
+	s := service.Patent{}
+	req := dto.PackagePageGetReq{}
+
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req, binding.JSON).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	// 设置创建人
+	req.SetCreateBy(user.GetUserId(c))
+
+	if req.PatentId == 0 || req.PackageId == 0 {
+		e.Logger.Error(err)
+		e.Error(404, err, "您输入的专利id不存在！")
+		return
+	}
+	err = s.InsertPatentPackage(&req)
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	e.OK(req.PackageBack, "创建成功")
+}
+
+// DeletePackagePatent
+// @Summary 取消加入该专利包
+// @Description  取消加入该专利包
+// @Tags 专利表
+// @Param PatentId query string false "专利ID"
+// @Param PackageId query string false "专利包ID"
+// @Router /api/v1/user-agent/patent/package/{package_id}/patent/{patent_id} [delete]
+// @Security Bearer
+func (e Patent) DeletePackagePatent(c *gin.Context) {
+	s := service.Patent{}
+	req := dto.PackagePageGetReq{}
+	req.SetUpdateBy(user.GetUserId(c))
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+
+	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
+	req.PackageId, err = strconv.Atoi(c.Param("package_id"))
+
+	// 数据权限检查
+	//p := actions.GetPermissionFromContext(c)
+
+	err = s.RemovePackagePatent(&req)
+
+	if err != nil {
+		e.Logger.Error(err)
+		return
+	}
+	e.OK(req.PackageBack, "删除成功")
 }
 
 //// UpdateUserPatentRelationship

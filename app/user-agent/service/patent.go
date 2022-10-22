@@ -77,7 +77,7 @@ func (e *Patent) Remove(c *dto.PatentById) error {
 func (e *Patent) UpdateLists(c *dto.PatentUpdateReq) error {
 	var err error
 	var model models.Patent
-	db := e.Orm.First(&model, c.GetPatentId())
+	db := e.Orm.First(&model, c.PatentId)
 	if err = db.Error; err != nil {
 		e.Log.Errorf("Service Update Patent error: %s", err)
 		return err
@@ -86,9 +86,7 @@ func (e *Patent) UpdateLists(c *dto.PatentUpdateReq) error {
 		return errors.New("无权更新该数据")
 
 	}
-
 	c.GenerateList(&model)
-
 	update := e.Orm.Model(&model).Where("patent_id = ?", &model.PatentId).Updates(&model)
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)
@@ -107,7 +105,7 @@ func (e *Patent) Insert(c *dto.PatentInsertReq) error {
 	var err error
 	var data models.Patent
 	var i int64
-	err = e.Orm.Model(&data).Where("patent_id = ?", c.PatentId).Count(&i).Error
+	err = e.Orm.Model(&data).Where("PNM = ?", c.PNM).Count(&i).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err
@@ -126,7 +124,7 @@ func (e *Patent) Insert(c *dto.PatentInsertReq) error {
 	return nil
 }
 
-// InsertIfAbsent 根据PatentId 创建Patent对象
+// InsertIfAbsent 根据PatentId 创建Patent对象 且返回创建对象的PatentId
 func (e *Patent) InsertIfAbsent(c *dto.PatentInsertReq) (int, error) {
 	var err error
 	var data models.Patent
@@ -296,7 +294,7 @@ func (e *Patent) GetFocusLists(c *dto.UserPatentGetPageReq, list *[]models.UserP
 }
 
 // GetPatentPagesByIds 获取patent列表
-func (e *Patent) GetPatentPagesByIds(d *dto.PatentsByIdsForRelationshipUsers, list *[]models.Patent, count *int64) error {
+func (e *Patent) GetPatentPagesByIds(d *dto.PatentsIds, list *[]models.Patent, count *int64) error {
 	var err error
 	var ids []int = d.GetPatentId()
 	for i := 0; i < len(ids); i++ {
@@ -402,7 +400,6 @@ func (e *Patent) GetPatentIdByTagId(c *dto.TagPageGetReq, list *[]models.PatentT
 
 	err = e.Orm.Model(&data).
 		Where("Tag_Id = ?", c.GetTagId()).
-		//tag=0是因为req没收到数据,需要收到uri的TagId的所有PatentIds
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
 
@@ -414,7 +411,7 @@ func (e *Patent) GetPatentIdByTagId(c *dto.TagPageGetReq, list *[]models.PatentT
 }
 
 // GetPatentPages 通过PatentId获取Patent列表（TI等）
-func (e *Patent) GetPatentPages(d *dto.PatentsByIdsForRelationshipTags, list *[]models.Patent, count *int64) error {
+func (e *Patent) GetPatentPages(d *dto.PatentsIds, list *[]models.Patent, count *int64) error {
 
 	var err error
 	var ids []int = d.GetPatentId()
@@ -473,6 +470,70 @@ func (e *Patent) RemoveRelationship(c *dto.PatentTagInsertReq) error {
 	var data models.PatentTag
 
 	db := e.Orm.Where("Patent_Id = ? AND Tag_Id = ? ", c.PatentId, c.TagId).
+		Delete(&data)
+
+	if db.Error != nil {
+		err = db.Error
+		e.Log.Errorf("Delete error: %s", err)
+		return err
+	}
+	if db.RowsAffected == 0 {
+		err = errors.New("无权删除该数据")
+		return err
+	}
+	return nil
+}
+
+//GetPatentIdByPackageId 通过PackageId获得PatentId
+func (e *Patent) GetPatentIdByPackageId(c *dto.PackagePageGetReq, list *[]models.PatentPackage, count *int64) error {
+	var err error
+	var data models.PatentPackage
+
+	err = e.Orm.Model(&data).
+		Where("Package_Id = ?", c.PackageId).
+		Find(list).Limit(-1).Offset(-1).
+		Count(count).Error
+
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// InsertPatentPackage 创建专利标签关系
+func (e *Patent) InsertPatentPackage(c *dto.PackagePageGetReq) error {
+	var err error
+	var data models.PatentPackage
+	var i int64
+	err = e.Orm.Model(&data).Where("Patent_Id = ? AND Package_Id = ? ", c.PatentId, c.PackageId).
+		Count(&i).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if i > 0 {
+		err := errors.New("关系已存在！")
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+
+	c.GeneratePackagePatent(&data)
+
+	err = e.Orm.Create(&data).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	return nil
+}
+
+// RemovePackagePatent 根据专利id、TYPE删除用户专利关系
+func (e *Patent) RemovePackagePatent(c *dto.PackagePageGetReq) error {
+	var err error
+	var data models.PatentPackage
+
+	db := e.Orm.Where("Patent_Id = ? AND Package_Id = ? ", c.PatentId, c.PackageId).
 		Delete(&data)
 
 	if db.Error != nil {

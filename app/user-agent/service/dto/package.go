@@ -14,10 +14,6 @@ type PackageGetPageReq struct {
 	Desc           string `form:"Desc" search:"type:contains;column:desc;table:package" comment:"描述"`
 }
 
-type PackageOrder struct {
-	CreatedAtOrder string `search:"type:order;column:created_at;table:package" form:"createdAtOrder"`
-}
-
 func (m *PackageGetPageReq) GetNeedSearch() interface{} {
 	return *m
 }
@@ -29,7 +25,7 @@ type PackageInsertReq struct {
 	common.ControlBy
 }
 
-func (s *PackageInsertReq) Generate(model *models.Package) {
+func (s *PackageInsertReq) GenerateList(model *models.Package) {
 	if s.PackageId != 0 {
 		model.PackageId = s.PackageId
 	}
@@ -71,4 +67,67 @@ func (s *PackageById) GetId() interface{} {
 		return s.Ids
 	}
 	return s.Id
+}
+
+type PackagesByIdsForRelationshipUsers struct {
+	dto.ObjectOfPackageId
+}
+
+func (s *PackagesByIdsForRelationshipUsers) GetPackageId() []int {
+
+	s.PackageIds = append(s.PackageIds, s.PackageId)
+	return s.PackageIds
+
+}
+
+type UserPackageGetPageReq struct {
+	dto.Pagination `search:"-"`
+	UserId         int `form:"UserId" search:"type:exact;column:user_id;table:user_package" comment:"用户ID"`
+	PackageId      int `form:"PackageId" search:"type:exact;column:package_id;table:user_package" comment:"专利包ID"`
+	UserPackageOrder
+}
+
+type UserPackageOrder struct {
+	PackageIdOrder string `search:"type:order;column:package_id;table:user_package" form:"PackageIdOrder"`
+}
+
+func (m *UserPackageGetPageReq) GetNeedSearch() interface{} {
+	return *m
+}
+
+func (d *UserPackageGetPageReq) GetUserId() interface{} {
+	return d.UserId
+}
+
+func (d *UserPackageGetPageReq) GetPackageId() interface{} {
+	return d.PackageId
+}
+
+type UserPackageInsertReq struct {
+	UserId    int `form:"UserId" search:"type:exact;column:user_id;table:user_package" comment:"用户ID"`
+	PackageId int `form:"PackageId" search:"type:exact;column:package_id;table:user_package" comment:"专利包ID"`
+	common.ControlBy
+}
+
+func (s *UserPackageInsertReq) GenerateUserPackage(g *models.UserPackage) {
+	g.PackageId = s.PackageId
+	g.UserId = s.UserId
+
+}
+
+type UserPackageObject struct {
+	UserId    int `form:"UserId" search:"type:exact;column:user_id;table:user_package" comment:"用户ID"`
+	PackageId int `uri:"package_id"`
+	common.ControlBy
+}
+
+func (d *UserPackageObject) GetPackageId() interface{} {
+	return d.PackageId
+}
+
+func NewUserPackageInsert(userId, pId int) *UserPackageInsertReq {
+	return &UserPackageInsertReq{
+		UserId:    userId,
+		PackageId: pId,
+	}
 }

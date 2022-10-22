@@ -36,6 +36,21 @@ func (e *Patent) GetPage(c *dto.PatentGetPageReq, list *[]models.Patent, count *
 	return nil
 }
 
+// GetUserPatentPage 获取patent列表
+func (e *Patent) GetUserPatentPage(c *dto.UserPatentObject, list *[]models.Patent, count *int64) error {
+	var err error
+	var data models.Patent
+
+	err = e.Orm.Model(&data).Where("user_id = ?", c.UserId).
+		Find(list).Limit(-1).Offset(-1).
+		Count(count).Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
 // Get 获取Patent对象
 func (e *Patent) Get(d *dto.PatentById, model *models.Patent) error {
 	//引用传递、函数名、形参、返回值
@@ -284,6 +299,21 @@ func (e *Patent) GetFocusLists(c *dto.UserPatentGetPageReq, list *[]models.UserP
 	var data models.UserPatent
 	err = e.Orm.Model(&data).
 		Where("Type = ? AND User_Id = ?", dto.FocusType, c.GetUserId()).
+		Find(list).Limit(-1).Offset(-1).
+		Count(count).Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// GetUserPatentIds 通过UserId获得PatentId列表
+func (e *Patent) GetUserPatentIds(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
+	var err error
+	var data models.UserPatent
+	err = e.Orm.Model(&data).
+		Where("User_Id = ?", c.GetUserId()).
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
 	if err != nil {

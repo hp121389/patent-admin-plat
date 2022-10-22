@@ -16,6 +16,7 @@ type Patent struct {
 	AR       string `json:"AR" gorm:"size:128;comment:地址"`
 	INN      string `json:"INN" gorm:"size:128;comment:申请人"`
 	models.ControlBy
+
 	//嵌入结构体：先写好models然后嵌入，等效于models本体
 }
 

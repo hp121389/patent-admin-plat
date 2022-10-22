@@ -2,6 +2,7 @@ package apis
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
@@ -851,6 +852,69 @@ func (e Patent) DeletePackagePatent(c *gin.Context) {
 		return
 	}
 	e.OK(req.PackageBack, "删除成功")
+}
+
+// GetUserPatentsPages
+// @Summary 获取用户的专利列表
+// @Description 获取用户的专利列表
+// @Tags 专利表
+// @Accept  application/json
+// @Product application/json
+// @Router /api/v1/user-agent/patent/user [get]
+// @Security Bearer
+func (e Patent) GetUserPatentsPages(c *gin.Context) {
+
+	s := service.Patent{}             //service中查询或者返回的结果赋值给s变量
+	req := dto.UserPatentGetPageReq{} //被绑定的数据
+	req1 := dto.PatentsIds{}
+
+	req.UserId = user.GetUserId(c)
+
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	//数据权限检查
+	//p := actions.GetPermissionFromContext(c)
+	list := make([]models.UserPatent, 0)
+	list1 := make([]models.Patent, 0)
+
+	var count int64
+	err = s.GetUserPatentIds(&req, &list, &count)
+
+	if err != nil {
+		e.Error(500, err, "查询失败")
+		return
+	}
+
+	var count2 int64
+	err = e.MakeContext(c).
+		MakeOrm().
+		Bind(&req1).
+		MakeService(&s.Service).
+		Errors
+
+	req1.PatentIds = make([]int, len(list))
+	for i := 0; i < len(list); i++ {
+		req1.PatentIds[i] = list[i].PatentId
+	}
+
+	err = s.GetPatentPagesByIds(&req1, &list1, &count2)
+
+	fmt.Println(list1)
+
+	if err != nil {
+		e.Error(500, err, "查询失败")
+		return
+	}
+	e.OK(list1, "查询成功")
 }
 
 //// UpdateUserPatentRelationship

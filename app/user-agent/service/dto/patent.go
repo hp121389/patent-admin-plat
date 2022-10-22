@@ -10,40 +10,46 @@ import (
 
 type PatentGetPageReq struct {
 	dto.Pagination `search:"-"`
-	PatentId       int    `form:"PatentId" search:"type:exact;column:PatentId;table:user-agent" comment:"专利ID"`
-	TI             string `form:"TI" search:"type:exact;column:TI;table:user-agent" comment:"专利名"`
-	PNM            string `form:"PNM" search:"type:exact;column:PNN;table:user-agent" comment:"申请号"`
-	AD             string `form:"AD" search:"type:exact;column:AD;table:user-agent" comment:"申请日"`
-	PD             string `form:"PD" search:"type:exact;column:PD;table:user-agent" comment:"公开日"`
-	CL             string `form:"CL" search:"type:exact;column:CL;table:user-agent" comment:"简介"`
-	PA             string `form:"PA" search:"type:exact;column:PA;table:user-agent" comment:"申请单位"`
-	AR             string `form:"AR" search:"type:exact;column:AR;table:user-agent" comment:"地址"`
-	INN            string `form:"INN" search:"type:exact;column:INN;table:user-agent" comment:"申请人"`
+	PatentId       int    `form:"PatentId" search:"type:exact;column:PatentId;table:patent" comment:"专利ID"`
+	TI             string `form:"TI" search:"type:exact;column:TI;table:patent" comment:"专利名"`
+	PNM            string `form:"PNM" search:"type:exact;column:PNN;table:patent" comment:"申请号"`
+	AD             string `form:"AD" search:"type:exact;column:AD;table:patent" comment:"申请日"`
+	PD             string `form:"PD" search:"type:exact;column:PD;table:patent" comment:"公开日"`
+	CL             string `form:"CL" search:"type:exact;column:CL;table:patent" comment:"简介"`
+	PA             string `form:"PA" search:"type:exact;column:PA;table:patent" comment:"申请单位"`
+	AR             string `form:"AR" search:"type:exact;column:AR;table:patent" comment:"地址"`
+	INN            string `form:"INN" search:"type:exact;column:INN;table:patent" comment:"申请人"`
 	PatentOrder
 }
 
 type PatentUpdateReq struct {
-	PatentId int    `json:"PatentId" gorm:"size:128;comment:专利ID"`
-	TI       string `json:"TI" gorm:"size:128;comment:专利名"`
-	PNM      string `json:"PNM" gorm:"size:128;comment:申请号" vd:"len($)>0"`
-	AD       string `json:"AD" gorm:"size:128;comment:申请日"`
-	PD       string `json:"PD" gorm:"size:128;comment:公开日"`
-	CL       string `json:"CL" gorm:"size:128;comment:简介"`
-	PA       string `json:"PA" gorm:"size:128;comment:申请单位"`
-	AR       string `json:"AR" gorm:"size:128;comment:地址"`
-	INN      string `json:"INN" gorm:"size:128;comment:申请人"`
+	PatentId int `json:"PatentId" gorm:"size:128;comment:专利ID"`
+
+	TI  string `json:"TI" gorm:"size:128;comment:专利名"`
+	PNM string `json:"PNM" gorm:"size:128;comment:申请号" vd:"len($)>0"`
+	AD  string `json:"AD" gorm:"size:128;comment:申请日"`
+	PD  string `json:"PD" gorm:"size:128;comment:公开日"`
+	CL  string `json:"CL" gorm:"comment:简介"`
+	PA  string `json:"PA" gorm:"size:128;comment:申请单位"`
+	AR  string `json:"AR" gorm:"size:128;comment:地址"`
+	INN string `json:"INN" gorm:"size:128;comment:申请人"`
 	common.ControlBy
 }
 
+func (s PatentUpdateReq) GetPatentId() interface{} {
+	return s.PatentId
+}
+
 type PatentOrder struct {
-	CreatedAtOrder string `search:"type:order;column:created_at;table:user-agent" form:"createdAtOrder"`
+	CreatedAtOrder string `search:"type:order;column:created_at;table:patent" form:"createdAtOrder"`
 }
 
 func (m *PatentGetPageReq) GetNeedSearch() interface{} {
 	return *m
 }
-func (m *PatentGetPageReq) GetPatentId() interface{} {
-	return m.PatentId
+func (s *PatentGetPageReq) GetPatentId() interface{} {
+
+	return s.PatentId
 }
 
 func (s *PatentUpdateReq) GenerateList(model *models.Patent) {
@@ -60,13 +66,31 @@ func (s *PatentUpdateReq) GenerateList(model *models.Patent) {
 	model.PA = s.PA
 }
 
+type PatentGetReq struct {
+	PatentId int `uri:"patent_id"`
+}
+
+func (s *PatentGetReq) GetPatentId() interface{} {
+	return s.PatentId
+}
+
+// PatentDeleteReq 功能删除请求参数
+
+type PatentDeleteReq struct {
+	PatentId int `json:"PatentIds"`
+}
+
+func (s *PatentDeleteReq) GetPatentId() interface{} {
+	return s.PatentId
+}
+
 type PatentInsertReq struct {
 	PatentId int    `json:"PatentId" gorm:"size:128;comment:专利ID"`
 	TI       string `json:"TI" gorm:"size:128;comment:专利名"`
 	PNM      string `json:"PNM" gorm:"size:128;comment:申请号" vd:"len($)>0"`
 	AD       string `json:"AD" gorm:"size:128;comment:申请日"`
 	PD       string `json:"PD" gorm:"size:128;comment:公开日"`
-	CL       string `json:"CL" gorm:"size:128;comment:简介"`
+	CL       string `json:"CL" gorm:"comment:简介"`
 	PA       string `json:"PA" gorm:"size:128;comment:申请单位"`
 	AR       string `json:"AR" gorm:"size:128;comment:地址"`
 	INN      string `json:"INN" gorm:"size:128;comment:申请人"`
@@ -93,7 +117,7 @@ func (s *PatentInsertReq) GetPatentId() interface{} {
 }
 
 type PatentById struct {
-	PatentId int `json:"PatentId" gorm:"size:128;comment:专利ID"`
+	dto.ObjectByPatentId
 	common.ControlBy
 }
 
@@ -105,8 +129,36 @@ func (s *PatentById) GenerateM() (common.ActiveRecord, error) {
 	return &models.Patent{}, nil
 }
 
-//user-patent
+type PatentsByIdsForRelationshipUsers struct {
+	dto.ObjectOfPatentId
+}
 
+func (s *PatentsByIdsForRelationshipUsers) GetPatentId() []int {
+
+	s.PatentIds = append(s.PatentIds, s.PatentId)
+	return s.PatentIds
+
+}
+
+func (s *PatentsByIdsForRelationshipUsers) GetNeedSearch() interface{} {
+	return *s
+}
+
+type PatentsByIdsForRelationshipTags struct {
+	dto.ObjectOfPatentId
+}
+
+func (s *PatentsByIdsForRelationshipTags) GetNeedSearch() interface{} {
+	return *s
+}
+
+func (s *PatentsByIdsForRelationshipTags) GetPatentId() []int {
+
+	s.PatentIds = append(s.PatentIds, s.PatentId)
+	return s.PatentIds
+}
+
+//user-patent
 const (
 	ClaimType = "认领"
 	FocusType = "关注"
@@ -243,47 +295,11 @@ func (d *PatentTagInsertReq) GetTagId() interface{} {
 type TagUpdateReqByPatent struct {
 	TagId    int `json:"TagId" gorm:"size:128;comment:标签ID"`
 	PatentId int `uri:"patent_id"`
-	//待修改
 	common.ControlBy
 }
 
 type PatentUpdateReqByTag struct {
 	TagId    int `uri:"tag_id"`
 	PatentId int `json:"PatentId" gorm:"size:128;comment:专利ID"`
-	//待修改
 	common.ControlBy
-}
-
-type PatentsIds struct {
-	PatentId  int   `json:"Patent_Id"`
-	PatentIds []int `json:"Patent_Ids"`
-}
-
-func (s *PatentsIds) GetNeedSearch() interface{} {
-	return *s
-}
-
-func (s *PatentsIds) GetPatentId() []int {
-	s.PatentIds = append(s.PatentIds, s.PatentId)
-	return s.PatentIds
-}
-
-//patent-package
-
-type PackageBack struct {
-	PatentId  int `form:"PatentId" search:"type:exact;column:TagId;table:patent_package" comment:"专利ID"`
-	PackageId int `form:"PackageId" search:"type:exact;column:TagId;table:patent_package" comment:"专利包ID"`
-}
-
-type PackagePageGetReq struct {
-	dto.Pagination `search:"-"`
-	PackageBack
-	PatentTagOrder
-	common.ControlBy
-}
-
-func (d *PackagePageGetReq) GeneratePackagePatent(g *models.PatentPackage) {
-	g.PatentId = d.PatentId
-	g.PackageId = d.PackageId
-
 }

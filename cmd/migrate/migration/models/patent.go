@@ -11,7 +11,7 @@ type Patent struct {
 	PNM      string `json:"PNM" gorm:"size:128;comment:申请号"`
 	AD       string `json:"AD" gorm:"size:128;comment:申请日"`
 	PD       string `json:"PD" gorm:"size:128;comment:公开日"`
-	CL       string `json:"CL" gorm:"size:128;comment:简介"`
+	CL       string `json:"CL" gorm:"comment:简介"`
 	PA       string `json:"PA" gorm:"size:128;comment:申请单位"`
 	AR       string `json:"AR" gorm:"size:128;comment:地址"`
 	INN      string `json:"INN" gorm:"size:128;comment:申请人"`

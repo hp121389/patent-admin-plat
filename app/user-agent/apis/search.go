@@ -3,6 +3,7 @@ package apis
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
+	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	"go-admin/app/user-agent/service"
 	"go-admin/app/user-agent/service/dto"
 )
@@ -25,6 +26,7 @@ func (e Search) Search(c *gin.Context) {
 	req := dto.SimpleSearchReq{}
 
 	err := e.MakeContext(c).
+		MakeOrm().
 		Bind(&req).
 		MakeService(&s.Service).
 		Errors
@@ -37,6 +39,10 @@ func (e Search) Search(c *gin.Context) {
 	if len(req.DB) == 0 {
 		// todo: 设置默认数据库配置文件
 		req.DB = "wgzl,syxx,fmzl"
+	}
+
+	if len(c.GetHeader("Authorization")) != 0 {
+		req.UserId = user.GetUserId(c)
 	}
 
 	ps, err := ic.Search(&req)

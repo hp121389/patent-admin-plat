@@ -36,14 +36,24 @@ func (e *Patent) GetPage(c *dto.PatentGetPageReq, list *[]models.Patent, count *
 	return nil
 }
 
-// GetUserPatentPage 获取patent列表
-func (e *Patent) GetUserPatentPage(c *dto.UserPatentObject, list *[]models.Patent, count *int64) error {
+// GetPageByIds 获取patent列表
+func (e *Patent) GetPageByIds(d *dto.PatentsIds, list *[]models.Patent, count *int64) error {
 	var err error
-	var data models.Patent
-
-	err = e.Orm.Model(&data).Where("user_id = ?", c.UserId).
-		Find(list).Limit(-1).Offset(-1).
-		Count(count).Error
+	var ids []int = d.GetPatentId()
+	for i := 0; i < len(ids); i++ {
+		if ids[i] != 0 {
+			var data1 models.Patent
+			err = e.Orm.Model(&data1).
+				Where("Patent_Id = ? ", ids[i]).
+				First(&data1).Limit(-1).Offset(-1).
+				Count(count).Error
+			*list = append(*list, data1)
+			if err != nil {
+				e.Log.Errorf("db error:%s", err)
+				return err
+			}
+		}
+	}
 	if err != nil {
 		e.Log.Errorf("db error:%s", err)
 		return err
@@ -64,52 +74,6 @@ func (e *Patent) Get(d *dto.PatentById, model *models.Patent) error {
 	}
 	if db.Error != nil {
 		e.Log.Errorf("db error:%s", err)
-		return err
-	}
-	return nil
-}
-
-// Remove 根据专利id删除Patent
-func (e *Patent) Remove(c *dto.PatentById) error {
-	var err error
-	var data models.Patent
-
-	db := e.Orm.Delete(&data, c.GetPatentId())
-
-	if db.Error != nil {
-		err = db.Error
-		e.Log.Errorf("Delete error: %s", err)
-		return err
-	}
-	if db.RowsAffected == 0 {
-		err = errors.New("无权删除该数据")
-		return err
-	}
-	return nil
-}
-
-// UpdateLists 根据PatentId修改Patent对象
-func (e *Patent) UpdateLists(c *dto.PatentUpdateReq) error {
-	var err error
-	var model models.Patent
-	db := e.Orm.First(&model, c.PatentId)
-	if err = db.Error; err != nil {
-		e.Log.Errorf("Service Update Patent error: %s", err)
-		return err
-	}
-	if db.RowsAffected == 0 {
-		return errors.New("无权更新该数据")
-
-	}
-	c.GenerateList(&model)
-	update := e.Orm.Model(&model).Where("patent_id = ?", &model.PatentId).Updates(&model)
-	if err = update.Error; err != nil {
-		e.Log.Errorf("db error: %s", err)
-		return err
-	}
-	if update.RowsAffected == 0 {
-		err = errors.New("update patent-info error")
-		log.Warnf("db update error")
 		return err
 	}
 	return nil
@@ -140,30 +104,106 @@ func (e *Patent) Insert(c *dto.PatentInsertReq) error {
 }
 
 // InsertIfAbsent 根据PatentId 创建Patent对象 且返回创建对象的PatentId
-func (e *Patent) InsertIfAbsent(c *dto.PatentInsertReq) (int, error) {
+func (e *Patent) InsertIfAbsent(c *dto.PatentInsertReq) (*models.Patent, error) {
 	var err error
 	var data models.Patent
 	var i int64
 	err = e.Orm.Model(&data).Where("PNM = ?", c.PNM).Count(&i).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
-		return 0, err
+		return nil, err
 	}
 	if i > 0 {
 		err = e.Orm.Model(&data).Where("PNM = ?", c.PNM).First(&data).Error
 		if err != nil {
 			e.Log.Errorf("db error: %s", err)
-			return 0, err
+			return nil, err
 		}
-		return data.PatentId, nil
+		return &data, nil
 	}
 	c.GenerateList(&data)
 	err = e.Orm.Create(&data).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
-		return 0, err
+		return nil, err
 	}
-	return data.PatentId, nil
+	return &data, nil
+}
+
+// UpdateLists 根据PatentId修改Patent对象
+func (e *Patent) UpdateLists(c *dto.PatentUpdateReq) error {
+	var err error
+	var model models.Patent
+	db := e.Orm.First(&model, c.PatentId)
+	if err = db.Error; err != nil {
+		e.Log.Errorf("Service Update Patent error: %s", err)
+		return err
+	}
+	if db.RowsAffected == 0 {
+		return errors.New("无权更新该数据")
+
+	}
+	c.GenerateList(&model)
+	update := e.Orm.Model(&model).Where("patent_id = ?", &model.PatentId).Updates(&model)
+	if err = update.Error; err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if update.RowsAffected == 0 {
+		err = errors.New("update patent-info error")
+		log.Warnf("db update error")
+		return err
+	}
+	return nil
+}
+
+// Remove 根据专利id删除Patent
+func (e *Patent) Remove(c *dto.PatentById) error {
+	var err error
+	var data models.Patent
+
+	db := e.Orm.Delete(&data, c.GetPatentId())
+
+	if db.Error != nil {
+		err = db.Error
+		e.Log.Errorf("Delete error: %s", err)
+		return err
+	}
+	if db.RowsAffected == 0 {
+		err = errors.New("无权删除该数据")
+		return err
+	}
+	return nil
+}
+
+// GetUserPatentIds 通过UserId获得PatentId列表
+func (e *Patent) GetUserPatentIds(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
+	var err error
+	var data models.UserPatent
+	err = e.Orm.Model(&data).
+		Where("User_Id = ?", c.GetUserId()).
+		Find(list).Limit(-1).Offset(-1).
+		Count(count).Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// GetClaimLists 通过UserId获得PatentId列表
+func (e *Patent) GetClaimLists(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
+	var err error
+	var data models.UserPatent
+	err = e.Orm.Model(&data).
+		Where("Type = ? AND User_Id = ?", dto.ClaimType, c.GetUserId()).
+		Find(list).Limit(-1).Offset(-1).
+		Count(count).Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
 }
 
 // RemoveClaim 取消认领
@@ -181,6 +221,21 @@ func (e *Patent) RemoveClaim(c *dto.UserPatentObject) error {
 	}
 	if db.RowsAffected == 0 {
 		err = errors.New("无权删除该数据")
+		return err
+	}
+	return nil
+}
+
+// GetFocusLists 通过UserId获得PatentId列表
+func (e *Patent) GetFocusLists(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
+	var err error
+	var data models.UserPatent
+	err = e.Orm.Model(&data).
+		Where("Type = ? AND User_Id = ?", dto.FocusType, c.GetUserId()).
+		Find(list).Limit(-1).Offset(-1).
+		Count(count).Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
 		return err
 	}
 	return nil
@@ -206,150 +261,21 @@ func (e *Patent) RemoveFocus(c *dto.UserPatentObject) error {
 	return nil
 }
 
-//// InsertCollectionRelationship 创建关注关系
-//func (e *UserPatent) InsertCollectionRelationship(c *dto.UserPatentObject) error {
-//	var err error
-//	var data models.UserPatent
-//	var i int64
-//	err = e.Orm.Model(&data).Where("Patent_Id = ? AND User_Id = ? AND Type = ?", c.PatentId, c.UserId, c.Type).
-//		Count(&i).Error
-//	if err != nil {
-//		e.Log.Errorf("db error: %s", err)
-//		return err
-//	}
-//	if i > 0 {
-//		err := errors.New("关系已存在！")
-//		e.Log.Errorf("db error: %s", err)
-//		return err
-//	}
-//
-//	c.GenerateUserPatent(&data)
-//	c.Type = "关注"
-//
-//	err = e.Orm.Create(&data).Error
-//	if err != nil {
-//		e.Log.Errorf("db error: %s", err)
-//		return err
-//	}
-//	return nil
-//}
-
-//// UpdateUserPatent
-//func (e *UserPatent) UpdateUserPatent(c *dto.UpDateUserPatentObject) error {
-//	var err error
-//	var model models.UserPatent
-//	var i int64
-//
-//	ids := e.Orm.Model(&model).Where("Patent_Id = ? AND User_Id = ? ", c.PatentId, c.UserId).First(&model).Count(&i)
-//
-//	fmt.Println("一共有", i, "个专利id为", c.PatentId, "且用户是", c.UserId, "的关系")
-//
-//	if i == 2 {
-//		//先按照条件找到用户对应的专利，然后修改，且只找一个。
-//		//如果一个用户即关注又认领了一个专利怎么办呢 ,model不是数组，只是一个model
-//		return errors.New("您已同时认领和关注该专利！")
-//	}
-//
-//	err = ids.Error
-//
-//	db := e.Orm.Model(&model).Where("Patent_Id = ? AND User_Id = ? ", c.PatentId, c.UserId).
-//		First(&model)
-//
-//	if err = db.Error; err != nil {
-//		e.Log.Errorf("Service Update User-Patent error: %s", err)
-//		return err
-//	}
-//	if db.RowsAffected == 0 {
-//		return errors.New("无权更新该数据")
-//	}
-//
-//	c.GenerateUserPatent(&model)
-//
-//	update := e.Orm.Model(&model).Updates(&model)
-//	if err = update.Error; err != nil {
-//		e.Log.Errorf("db error: %s", err)
-//		return err
-//	}
-//	if update.RowsAffected == 0 {
-//		err = errors.New("update patent-info error maybe you dont need update or record not exist")
-//		log.Warnf("db update error")
-//		return err
-//	}
-//	return nil
-//}
-
-// GetClaimLists 通过UserId获得PatentId列表
-func (e *Patent) GetClaimLists(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
+func (e *Patent) GetAllRelatedPatentsByUserId(d *dto.UserPatentObject, list *[]models.UserPatent) error {
 	var err error
-	var data models.UserPatent
-	err = e.Orm.Model(&data).
-		Where("Type = ? AND User_Id = ?", dto.ClaimType, c.GetUserId()).
+	err = e.Orm.Debug().
+		Where("user_id = ?", d.UserId).
 		Find(list).Limit(-1).Offset(-1).
-		Count(count).Error
+		Error
 	if err != nil {
-		e.Log.Errorf("db error:%s", err)
+		e.Log.Errorf("db error: %s", err)
 		return err
 	}
 	return nil
 }
 
-// GetFocusLists 通过UserId获得PatentId列表
-func (e *Patent) GetFocusLists(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
-	var err error
-	var data models.UserPatent
-	err = e.Orm.Model(&data).
-		Where("Type = ? AND User_Id = ?", dto.FocusType, c.GetUserId()).
-		Find(list).Limit(-1).Offset(-1).
-		Count(count).Error
-	if err != nil {
-		e.Log.Errorf("db error:%s", err)
-		return err
-	}
-	return nil
-}
-
-// GetUserPatentIds 通过UserId获得PatentId列表
-func (e *Patent) GetUserPatentIds(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
-	var err error
-	var data models.UserPatent
-	err = e.Orm.Model(&data).
-		Where("User_Id = ?", c.GetUserId()).
-		Find(list).Limit(-1).Offset(-1).
-		Count(count).Error
-	if err != nil {
-		e.Log.Errorf("db error:%s", err)
-		return err
-	}
-	return nil
-}
-
-// GetPatentPagesByIds 获取patent列表
-func (e *Patent) GetPatentPagesByIds(d *dto.PatentsIds, list *[]models.Patent, count *int64) error {
-	var err error
-	var ids []int = d.GetPatentId()
-	for i := 0; i < len(ids); i++ {
-		if ids[i] != 0 {
-			var data1 models.Patent
-			err = e.Orm.Model(&data1).
-				Where("Patent_Id = ? ", ids[i]).
-				First(&data1).Limit(-1).Offset(-1).
-				Count(count).Error
-			*list = append(*list, data1)
-			if err != nil {
-				e.Log.Errorf("db error:%s", err)
-				return err
-			}
-		}
-	}
-	if err != nil {
-		e.Log.Errorf("db error:%s", err)
-		return err
-	}
-	return nil
-}
-
-// Inserts relationship between user and patent
-func (e *Patent) Inserts(c *dto.UserPatentObject) error {
+// InsertUserPatent insert relationship between user and patent
+func (e *Patent) InsertUserPatent(c *dto.UserPatentObject) error {
 	var err error
 	var data models.UserPatent
 	var i int64
@@ -433,33 +359,6 @@ func (e *Patent) GetPatentIdByTagId(c *dto.TagPageGetReq, list *[]models.PatentT
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
 
-	if err != nil {
-		e.Log.Errorf("db error:%s", err)
-		return err
-	}
-	return nil
-}
-
-// GetPatentPages 通过PatentId获取Patent列表（TI等）
-func (e *Patent) GetPatentPages(d *dto.PatentsIds, list *[]models.Patent, count *int64) error {
-
-	var err error
-	var ids []int = d.GetPatentId()
-	for i := 0; i < len(ids); i++ {
-		if ids[i] != 0 {
-			var data1 models.Patent
-			err = e.Orm.Model(&data1).
-				Where("Patent_Id = ? ", ids[i]).
-				First(&data1).Limit(-1).Offset(-1).
-				Count(count).Error
-
-			*list = append(*list, data1)
-			if err != nil {
-				e.Log.Errorf("db error:%s", err)
-				return err
-			}
-		}
-	}
 	if err != nil {
 		e.Log.Errorf("db error:%s", err)
 		return err

@@ -212,4 +212,8 @@ type PatentDetail struct {
 	Fic0       string        `json:"fic,omitempty"`
 	Ficn0      string        `json:"ficn,omitempty"`
 	Refbscyn0  string        `json:"refbscyn,omitempty"`
+
+	IsClaimed bool `json:"isClaimed"`
+	IsFocused bool `json:"isFocused"`
+	PatentId  int  `json:"patentId"`
 }

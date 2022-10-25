@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	s_cache "github.com/Gleiphir2769/s-cache"
+	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/my_config"
 	"go-admin/app/user-agent/service/dto"
 	"io/ioutil"
@@ -17,7 +18,7 @@ const (
 	authUrl   = "http://www.innojoy.com/accountAuth.aspx"
 	searchUrl = "http://www.innojoy.com/service/patentSearch.aspx"
 
-	searchListFields = "TI,AN,AD,PNM,PD,PA,PINN,CL,CD"
+	searchListFields = "TI,AN,AD,PNM,PD,PA,PINN,CL,CD,AR,CLS"
 	searchSortBy     = "-公开（公告）日,公开（公告）号"
 
 	defaultCacheExpire     = time.Hour * 24
@@ -85,8 +86,27 @@ func (ic *InnojoyClient) autoLogin() error {
 }
 
 func (ic *InnojoyClient) Search(req *dto.SimpleSearchReq) (result []*dto.PatentDetail, err error) {
+	ps := Patent{}
+	upReq := &dto.UserPatentObject{UserId: req.UserId}
+	var relatedPatents *[]models.UserPatent
+	if req.UserId != 0 {
+		if err := ps.GetAllRelatedPatentsByUserId(upReq, relatedPatents); err != nil {
+			return nil, err
+		}
+	}
+
 	sr := ic.parseSearchQuery(req.Query, req.DB, req.PageIndex, req.PageSize)
-	return ic.search(sr, ic.autoLogin)
+	res, err := ic.search(sr, ic.autoLogin)
+	if err != nil {
+		return nil, err
+	}
+
+	// mark focused or claimed
+	if relatedPatents != nil {
+		markRelation(&res, relatedPatents)
+	}
+
+	return res, nil
 }
 
 func (ic *InnojoyClient) parseSearchQuery(query string, db string, pageIndex int, pageSize int) *SearchReq {
@@ -183,6 +203,10 @@ func refinePatentDetails(pds []*dto.PatentDetail) {
 	for _, pd := range pds {
 		pd.Ti = strings.Split(pd.Ti, "[ZH]")[0]
 		pd.Pa = strings.Split(pd.Pa, ";")[0]
+		if len(strings.Split(pd.Ar, " ")) > 1 {
+			temp := strings.Split(pd.Ar, " ")
+			pd.Ar = temp[1]
+		}
 	}
 }
 
@@ -210,4 +234,23 @@ func (c *pageCache) Get(key string) string {
 	}
 	defer h.Release()
 	return h.Value().(string)
+}
+
+func markRelation(res *[]*dto.PatentDetail, related *[]models.UserPatent) {
+	rm := make(map[string]models.UserPatent, len(*related))
+	for _, rel := range *related {
+		rm[rel.PNM] = rel
+	}
+	for _, r := range *res {
+		if rel, ok := rm[r.Pnm]; ok {
+			switch rel.Type {
+			case dto.ClaimType:
+				r.IsClaimed = true
+				fallthrough
+			case dto.FocusType:
+				r.IsFocused = true
+			}
+			r.PatentId = rel.PatentId
+		}
+	}
 }

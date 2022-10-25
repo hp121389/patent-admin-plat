@@ -6,15 +6,9 @@ import (
 
 type Patent struct {
 	//models.Model        //就是自增id
-	PatentId int    `json:"PatentId" gorm:"size:128;primaryKey;autoIncrement;comment:专利ID(主键)"`
-	TI       string `json:"TI" gorm:"size:128;comment:专利名"`
-	PNM      string `json:"PNM" gorm:"size:128;comment:申请号"`
-	AD       string `json:"AD" gorm:"size:128;comment:申请日"`
-	PD       string `json:"PD" gorm:"size:128;comment:公开日"`
-	CL       string `json:"CL" gorm:"comment:简介"`
-	PA       string `json:"PA" gorm:"size:128;comment:申请单位"`
-	AR       string `json:"AR" gorm:"size:128;comment:地址"`
-	INN      string `json:"INN" gorm:"size:128;comment:申请人"`
+	PatentId         int    `json:"PatentId" gorm:"size:128;primaryKey;autoIncrement;comment:专利ID(主键)"`
+	PNM              string `json:"PNM" gorm:"size:128;comment:申请号"`
+	PatentProperties string `json:"patentProperties" gorm:"comment:专利详情"`
 	models.ControlBy
 	//嵌入结构体：先写好models然后嵌入，等效于models本体
 }
@@ -38,6 +32,7 @@ type UserPatent struct {
 	models.Model
 	PatentId int    `gorm:"foreignKey:PatentId;comment:PatentId" json:"PatentId" `
 	UserId   int    `gorm:"comment:用户ID"  json:"UserId"`
+	PNM      string `json:"PNM" gorm:"size:128;comment:申请号"`
 	Type     string `json:"Type" gorm:"size:64;comment:关系类型（关注/认领）"`
 	models.ControlBy
 }

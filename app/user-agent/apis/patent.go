@@ -3,6 +3,7 @@ package apis
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
@@ -18,6 +19,8 @@ import (
 type Patent struct {
 	api.Api
 }
+
+//----------------------------------------patent----------------------------------------
 
 // GetPatentById
 // @Summary 检索专利
@@ -97,7 +100,7 @@ func (e Patent) GetPatentLists(c *gin.Context) { //gin框架里的上下文
 // @Security Bearer
 func (e Patent) InsertPatent(c *gin.Context) {
 	s := service.Patent{}
-	req := dto.PatentInsertReq{}
+	req := dto.PatentUpdateReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON).
@@ -117,7 +120,7 @@ func (e Patent) InsertPatent(c *gin.Context) {
 		return
 	}
 
-	e.OK(req.GetPatentId(), "创建成功")
+	e.OK(req, "创建成功")
 }
 
 // UpdatePatent
@@ -189,7 +192,73 @@ func (e Patent) DeletePatent(c *gin.Context) {
 		e.Logger.Error(err)
 		return
 	}
-	e.OK(req.GetPatentId(), "删除成功")
+	e.OK(req, "删除成功")
+}
+
+//----------------------------------------user-patent-----------------------------------------------------------------
+
+// GetUserPatentsPages
+// @Summary 获取用户的专利列表
+// @Description 获取用户的专利列表
+// @Tags 专利表
+// @Accept  application/json
+// @Product application/json
+// @Router /api/v1/user-agent/patent/user [get]
+// @Security Bearer
+func (e Patent) GetUserPatentsPages(c *gin.Context) {
+
+	s := service.UserPatent{}
+	s1 := service.Patent{}
+	req := dto.UserPatentGetPageReq{}
+	req1 := dto.PatentsIds{}
+
+	req.UserId = user.GetUserId(c)
+
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	//数据权限检查
+	//p := actions.GetPermissionFromContext(c)
+	list := make([]models.UserPatent, 0)
+	list1 := make([]models.Patent, 0)
+
+	var count int64
+	err = s.GetUserPatentIds(&req, &list, &count)
+
+	if err != nil {
+		e.Error(500, err, "查询失败")
+		return
+	}
+
+	var count2 int64
+	err = e.MakeContext(c).
+		MakeOrm().
+		Bind(&req1).
+		MakeService(&s.Service).
+		Errors
+
+	req1.PatentIds = make([]int, len(list))
+	for i := 0; i < len(list); i++ {
+		req1.PatentIds[i] = list[i].PatentId
+	}
+
+	err = s1.GetPageByIds(&req1, &list1, &count2)
+
+	fmt.Println(list1)
+
+	if err != nil {
+		e.Error(500, err, "查询失败")
+		return
+	}
+	e.OK(list1, "查询成功")
 }
 
 // ClaimPatent
@@ -211,7 +280,7 @@ func (e Patent) ClaimPatent(c *gin.Context) {
 		return
 	}
 
-	s := service.Patent{}
+	s := service.UserPatent{}
 	err = e.MakeContext(c).
 		MakeOrm().
 		//Bind(&req, binding.JSON).
@@ -257,7 +326,7 @@ func (e Patent) FocusPatent(c *gin.Context) {
 		return
 	}
 
-	s := service.Patent{}
+	s := service.UserPatent{}
 	err = e.MakeContext(c).
 		MakeOrm().
 		MakeService(&s.Service).
@@ -285,7 +354,7 @@ func (e Patent) FocusPatent(c *gin.Context) {
 
 func (e Patent) internalInsertIfAbsent(c *gin.Context) (int, string, error) {
 	ps := service.Patent{}
-	req := dto.PatentInsertReq{}
+	req := dto.PatentUpdateReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON).
@@ -310,8 +379,9 @@ func (e Patent) internalInsertIfAbsent(c *gin.Context) (int, string, error) {
 // @Router /api/v1/user-agent/patent/focus [get]
 // @Security Bearer
 func (e Patent) GetFocusPages(c *gin.Context) {
-	s := service.Patent{}             //service中查询或者返回的结果赋值给s变量
-	req := dto.UserPatentGetPageReq{} //被绑定的数据
+	s := service.UserPatent{}
+	s1 := service.Patent{}
+	req := dto.UserPatentGetPageReq{}
 	req.UserId = user.GetUserId(c)
 	req1 := dto.PatentsIds{}
 
@@ -346,7 +416,7 @@ func (e Patent) GetFocusPages(c *gin.Context) {
 	for i := 0; i < len(list); i++ {
 		req1.PatentIds[i] = list[i].PatentId
 	}
-	err = s.GetPageByIds(&req1, &list1, &count2)
+	err = s1.GetPageByIds(&req1, &list1, &count2)
 	if err != nil {
 		e.Error(500, err, "查询失败")
 		return
@@ -363,7 +433,8 @@ func (e Patent) GetFocusPages(c *gin.Context) {
 // @Router /api/v1/user-agent/patent/claim [get]
 // @Security Bearer
 func (e Patent) GetClaimPages(c *gin.Context) {
-	s := service.Patent{}             //service中查询或者返回的结果赋值给s变量
+	s := service.UserPatent{}
+	s1 := service.Patent{}
 	req := dto.UserPatentGetPageReq{} //被绑定的数据
 	req1 := dto.PatentsIds{}
 
@@ -408,7 +479,7 @@ func (e Patent) GetClaimPages(c *gin.Context) {
 		req1.PatentIds[i] = list[i].PatentId
 	}
 
-	err = s.GetPageByIds(&req1, &list1, &count2)
+	err = s1.GetPageByIds(&req1, &list1, &count2)
 
 	if err != nil {
 		e.Error(500, err, "查询失败")
@@ -426,7 +497,7 @@ func (e Patent) GetClaimPages(c *gin.Context) {
 // @Router /api/v1/user-agent/patent/focus/{patent_id}  [delete]
 // @Security Bearer
 func (e Patent) DeleteFocus(c *gin.Context) {
-	s := service.Patent{}
+	s := service.UserPatent{}
 	pid, err := strconv.Atoi(c.Param("patent_id"))
 	if err != nil {
 		e.Logger.Error(err)
@@ -469,7 +540,7 @@ func (e Patent) DeleteFocus(c *gin.Context) {
 // @Security Bearer
 func (e Patent) DeleteClaim(c *gin.Context) {
 
-	s := service.Patent{}
+	s := service.UserPatent{}
 
 	pid, err := strconv.Atoi(c.Param("patent_id"))
 	if err != nil {
@@ -497,6 +568,53 @@ func (e Patent) DeleteClaim(c *gin.Context) {
 
 	e.OK(req, "取消认领成功")
 }
+
+//----------------------------------------user-patent 修改用户专利关系----------------------------------------
+
+//// UpdateUserPatentRelationship
+//// @Summary 修改用户专利关系
+//// @Description 需要输入专利id
+//// @Tags 专利表
+//// @Accept  application/json
+//// @Product application/json
+//// @Param data body dto.UpDateUserPatentObject true "body"
+//// @Router /api/v1/user-agent/patent [put]
+//// @Security Bearer
+//func (e Patent) UpdateUserPatentRelationship(c *gin.Context) {
+//	s := service.UserPatent{}
+//	req := dto.UpDateUserPatentObject{}
+//	req.UserId = user.GetUserId(c)
+//	err := e.MakeContext(c).
+//		MakeOrm().
+//		Bind(&req, binding.JSON).
+//		MakeService(&s.Service).
+//		Errors
+//	if err != nil {
+//		e.Logger.Error(err)
+//		e.Error(500, err, err.Error())
+//		return
+//	}
+//
+//	req.SetUpdateBy(user.GetUserId(c))
+//	//数据权限检查
+//	//p := actions.GetPermissionFromContext(c)
+//
+//	if req.PatentId == 0 {
+//		e.Logger.Error(err)
+//		e.Error(404, err, "请输入专利id")
+//		return
+//	}
+//
+//	err = s.UpdateUserPatent(&req)
+//
+//	if err != nil {
+//		e.Logger.Error(err)
+//		return
+//	}
+//	e.OK(req, "更新成功")
+//}
+
+//----------------------------------------tag-patent----------------------------------------
 
 // DeleteTag
 // @Summary 取消给该专利添加的该标签
@@ -546,7 +664,7 @@ func (e Patent) DeleteTag(c *gin.Context) {
 // @Router /api/v1/user-agent/patent/tag [post]
 // @Security Bearer
 func (e Patent) InsertTag(c *gin.Context) {
-	s := service.Patent{}
+	s := service.PatentTag{}
 	req := dto.PatentTagInsertReq{}
 
 	err := e.MakeContext(c).
@@ -588,8 +706,9 @@ func (e Patent) InsertTag(c *gin.Context) {
 // @Security Bearer
 func (e Patent) GetPatent(c *gin.Context) {
 
-	s := service.Patent{}
-	req := dto.TagPageGetReq{}
+	s := service.PatentTag{}
+	s1 := service.Patent{}
+	req := dto.PatentTagGetPageReq{}
 	req1 := dto.PatentsIds{}
 
 	err := e.MakeContext(c).
@@ -640,7 +759,7 @@ func (e Patent) GetPatent(c *gin.Context) {
 		req1.PatentIds[i] = list[i].PatentId
 	}
 
-	err = s.GetPageByIds(&req1, &list1, &count2)
+	err = s1.GetPageByIds(&req1, &list1, &count2)
 	if err != nil {
 		e.Error(500, err, "查询失败")
 		return
@@ -658,7 +777,7 @@ func (e Patent) GetPatent(c *gin.Context) {
 // @Security Bearer
 func (e Patent) GetTags(c *gin.Context) {
 
-	s := service.Patent{}
+	s := service.PatentTag{}
 	req := dto.PatentTagGetPageReq{}
 	req1 := dto.TagsByIdsForRelationshipPatents{}
 
@@ -715,6 +834,8 @@ func (e Patent) GetTags(c *gin.Context) {
 
 }
 
+//----------------------------------------patent-package---------------------------------------
+
 // GetPackagePatents
 // @Summary 显示专利包内专利
 // @Description 显示专利包内专利
@@ -724,7 +845,8 @@ func (e Patent) GetTags(c *gin.Context) {
 // @Security Bearer
 func (e Patent) GetPackagePatents(c *gin.Context) {
 
-	s := service.Patent{}
+	s := service.PatentPackage{}
+	s1 := service.Patent{}
 	req := dto.PackagePageGetReq{}
 	req1 := dto.PatentsIds{}
 
@@ -776,7 +898,7 @@ func (e Patent) GetPackagePatents(c *gin.Context) {
 		req1.PatentIds[i] = list[i].PatentId
 	}
 
-	err = s.GetPageByIds(&req1, &list1, &count2)
+	err = s1.GetPageByIds(&req1, &list1, &count2)
 	if err != nil {
 		e.Error(500, err, "查询失败")
 		return
@@ -795,7 +917,7 @@ func (e Patent) GetPackagePatents(c *gin.Context) {
 // @Router /api/v1/user-agent/patent/package [post]
 // @Security Bearer
 func (e Patent) InsertPackagePatent(c *gin.Context) {
-	s := service.Patent{}
+	s := service.PatentPackage{}
 	req := dto.PackagePageGetReq{}
 
 	err := e.MakeContext(c).
@@ -834,7 +956,7 @@ func (e Patent) InsertPackagePatent(c *gin.Context) {
 // @Router /api/v1/user-agent/patent/package/{package_id}/patent/{patent_id} [delete]
 // @Security Bearer
 func (e Patent) DeletePackagePatent(c *gin.Context) {
-	s := service.Patent{}
+	s := service.PatentPackage{}
 	req := dto.PackagePageGetReq{}
 	req.SetUpdateBy(user.GetUserId(c))
 	err := e.MakeContext(c).
@@ -863,159 +985,3 @@ func (e Patent) DeletePackagePatent(c *gin.Context) {
 	}
 	e.OK(req.PackageBack, "删除成功")
 }
-
-// GetUserPatentsPages
-// @Summary 获取用户的专利列表
-// @Description 获取用户的专利列表
-// @Tags 专利表
-// @Accept  application/json
-// @Product application/json
-// @Router /api/v1/user-agent/patent/user [get]
-// @Security Bearer
-func (e Patent) GetUserPatentsPages(c *gin.Context) {
-
-	s := service.Patent{}             //service中查询或者返回的结果赋值给s变量
-	req := dto.UserPatentGetPageReq{} //被绑定的数据
-	req1 := dto.PatentsIds{}
-
-	req.UserId = user.GetUserId(c)
-
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req).
-		MakeService(&s.Service).
-		Errors
-
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-	//数据权限检查
-	//p := actions.GetPermissionFromContext(c)
-	list := make([]models.UserPatent, 0)
-	list1 := make([]models.Patent, 0)
-
-	var count int64
-	err = s.GetUserPatentIds(&req, &list, &count)
-
-	if err != nil {
-		e.Error(500, err, "查询失败")
-		return
-	}
-
-	var count2 int64
-	err = e.MakeContext(c).
-		MakeOrm().
-		Bind(&req1).
-		MakeService(&s.Service).
-		Errors
-
-	req1.PatentIds = make([]int, len(list))
-	for i := 0; i < len(list); i++ {
-		req1.PatentIds[i] = list[i].PatentId
-	}
-
-	err = s.GetPageByIds(&req1, &list1, &count2)
-
-	fmt.Println(list1)
-
-	if err != nil {
-		e.Error(500, err, "查询失败")
-		return
-	}
-	e.OK(list1, "查询成功")
-}
-
-//// UpdateUserPatentRelationship
-//// @Summary 修改用户专利关系
-//// @Description 需要输入专利id
-//// @Tags 专利表
-//// @Accept  application/json
-//// @Product application/json
-//// @Param data body dto.UpDateUserPatentObject true "body"
-//// @Router /api/v1/user-agent/patent [put]
-//// @Security Bearer
-//func (e Patent) UpdateUserPatentRelationship(c *gin.Context) {
-//	s := service.UserPatent{}
-//	req := dto.UpDateUserPatentObject{}
-//	req.UserId = user.GetUserId(c)
-//	err := e.MakeContext(c).
-//		MakeOrm().
-//		Bind(&req, binding.JSON).
-//		MakeService(&s.Service).
-//		Errors
-//	if err != nil {
-//		e.Logger.Error(err)
-//		e.Error(500, err, err.Error())
-//		return
-//	}
-//
-//	req.SetUpdateBy(user.GetUserId(c))
-//	//数据权限检查
-//	//p := actions.GetPermissionFromContext(c)
-//
-//	if req.PatentId == 0 {
-//		e.Logger.Error(err)
-//		e.Error(404, err, "请输入专利id")
-//		return
-//	}
-//
-//	err = s.UpdateUserPatent(&req)
-//
-//	if err != nil {
-//		e.Logger.Error(err)
-//		return
-//	}
-//	e.OK(req, "更新成功")
-//}
-//// InsertUserPatentRelationship
-//// @Summary 创建用户专利关系
-//// @Description Type和PatentId为必要输入，Type只能是 认领 或者 关注 关系
-//// @Tags 用户专利关系表
-//// @Accept  application/json
-//// @Product application/json
-//// @Param data body dto.UserPatentInsertReq true "Type和PatentId为必要输入"
-//// @Router /api/v1/user-patent/ [post]
-//// @Security Bearer
-//func (e UserPatent) InsertUserPatentRelationship(c *gin.Context) {
-//	s := service.UserPatent{}
-//	req := dto.UserPatentInsertReq{}
-//	req.UserId = user.GetUserId(c)
-//	err := e.MakeContext(c).
-//		MakeOrm().
-//		Bind(&req, binding.JSON).
-//		MakeService(&s.Service).
-//		Errors
-//	if err != nil {
-//		e.Logger.Error(err)
-//		e.Error(500, err, err.Error())
-//		return
-//	}
-//	// 设置创建人
-//	req.SetCreateBy(user.GetUserId(c))
-//
-//	if req.Type == "认领" {
-//		err = s.Insert(&req)
-//	} else if req.Type == "关注" {
-//		err = s.InsertCollectionRelationship(&req)
-//	} else {
-//		e.Logger.Error(err)
-//		e.Error(404, err, fmt.Sprintf("invalid req.Type: %s, should be 认领/关注", req.Type))
-//		return
-//	}
-//
-//	if req.PatentId == 0 {
-//		e.Logger.Error(err)
-//		e.Error(404, err, "您输入的专利id不存在！")
-//		return
-//	}
-//
-//	if err != nil {
-//		e.Logger.Error(err)
-//		e.Error(500, err, err.Error())
-//		return
-//	}
-//
-//	e.OK(req, "创建成功")
-//}

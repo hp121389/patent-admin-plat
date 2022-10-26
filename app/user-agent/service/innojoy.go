@@ -86,7 +86,7 @@ func (ic *InnojoyClient) autoLogin() error {
 }
 
 func (ic *InnojoyClient) Search(req *dto.SimpleSearchReq) (result []*dto.PatentDetail, err error) {
-	ps := Patent{}
+	ps := UserPatent{}
 	upReq := &dto.UserPatentObject{UserId: req.UserId}
 	var relatedPatents *[]models.UserPatent
 	if req.UserId != 0 {

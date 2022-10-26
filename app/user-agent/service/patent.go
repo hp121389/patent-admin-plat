@@ -139,7 +139,7 @@ func (e *Patent) UpdateLists(c *dto.PatentUpdateReq) error {
 		return err
 	}
 	if db.RowsAffected == 0 {
-		return errors.New("无权更新该数据")
+		return errors.New("专利不存在")
 
 	}
 	c.GenerateList(&model)
@@ -169,7 +169,7 @@ func (e *Patent) Remove(c *dto.PatentById) error {
 		return err
 	}
 	if db.RowsAffected == 0 {
-		err = errors.New("无权删除该数据")
+		err = errors.New("删除数据不存在")
 		return err
 	}
 	return nil

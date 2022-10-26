@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
+	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service"
 	"go-admin/app/user-agent/service/dto"
 )
@@ -12,17 +13,17 @@ type Search struct {
 	api.Api
 }
 
-// Search
+// AuthSearch
 // @Summary 专利搜索
-// @Description 根据查询字符串进行搜索（可传入逻辑表达式或简单字符串）
+// @Description 根据查询字符串进行搜索（已登陆）
 // @Tags 专利检索
 // @Param data body dto.SimpleSearchReq true "用户数据"
 // @Success 200 {object} dto.SwagSearchListResp
-// @Router /api/v1/search [post]
+// @Router /api/v1/user-agent/auth-search [post]
 // @Security Bearer
-func (e Search) Search(c *gin.Context) {
+func (e Search) AuthSearch(c *gin.Context) {
 	ic := service.GetCurrentInnojoy()
-	s := service.Search{}
+	s := service.UserPatent{}
 	req := dto.SimpleSearchReq{}
 
 	err := e.MakeContext(c).
@@ -45,7 +46,43 @@ func (e Search) Search(c *gin.Context) {
 		req.UserId = user.GetUserId(c)
 	}
 
-	ps, err := ic.Search(&req)
+	upReq := &dto.UserPatentObject{UserId: req.UserId}
+	relatedPatents := make([]models.UserPatent, 0)
+	err = s.GetAllRelatedPatentsByUserId(upReq, &relatedPatents)
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+
+	ps, err := ic.Search(&req, relatedPatents)
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+
+	e.PageOK(ps, req.PageSize, req.PageIndex, len(ps), "查询成功")
+}
+
+// Search
+// @Summary 专利搜索
+// @Description 根据查询字符串进行搜索（未登录）
+// @Tags 专利检索
+// @Param data body dto.SimpleSearchReq true "用户数据"
+// @Success 200 {object} dto.SwagSearchListResp
+// @Router /api/v1/user-agent/search [post]
+// @Security Bearer
+func (e Search) Search(c *gin.Context) {
+	ic := service.GetCurrentInnojoy()
+	req := dto.SimpleSearchReq{}
+
+	if len(req.DB) == 0 {
+		// todo: 设置默认数据库配置文件
+		req.DB = "wgzl,syxx,fmzl"
+	}
+
+	ps, err := ic.Search(&req, nil)
 	if err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())

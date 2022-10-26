@@ -85,16 +85,7 @@ func (ic *InnojoyClient) autoLogin() error {
 	return nil
 }
 
-func (ic *InnojoyClient) Search(req *dto.SimpleSearchReq) (result []*dto.PatentDetail, err error) {
-	ps := UserPatent{}
-	upReq := &dto.UserPatentObject{UserId: req.UserId}
-	var relatedPatents *[]models.UserPatent
-	if req.UserId != 0 {
-		if err := ps.GetAllRelatedPatentsByUserId(upReq, relatedPatents); err != nil {
-			return nil, err
-		}
-	}
-
+func (ic *InnojoyClient) Search(req *dto.SimpleSearchReq, relatedPatents []models.UserPatent) (result []*dto.PatentDetail, err error) {
 	sr := ic.parseSearchQuery(req.Query, req.DB, req.PageIndex, req.PageSize)
 	res, err := ic.search(sr, ic.autoLogin)
 	if err != nil {
@@ -103,7 +94,7 @@ func (ic *InnojoyClient) Search(req *dto.SimpleSearchReq) (result []*dto.PatentD
 
 	// mark focused or claimed
 	if relatedPatents != nil {
-		markRelation(&res, relatedPatents)
+		markRelation(res, relatedPatents)
 	}
 
 	return res, nil
@@ -236,12 +227,12 @@ func (c *pageCache) Get(key string) string {
 	return h.Value().(string)
 }
 
-func markRelation(res *[]*dto.PatentDetail, related *[]models.UserPatent) {
-	rm := make(map[string]models.UserPatent, len(*related))
-	for _, rel := range *related {
+func markRelation(res []*dto.PatentDetail, related []models.UserPatent) {
+	rm := make(map[string]models.UserPatent, len(related))
+	for _, rel := range related {
 		rm[rel.PNM] = rel
 	}
-	for _, r := range *res {
+	for _, r := range res {
 		if rel, ok := rm[r.Pnm]; ok {
 			switch rel.Type {
 			case dto.ClaimType:

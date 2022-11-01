@@ -22,9 +22,5 @@ func registerTagRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware
 		r.POST("", api.Insert)   //增加标签并增加用户--标签信息
 		r.DELETE("", api.Delete) //删除标签
 	}
-	//r1 := v1.Group("").Use(authMiddleware.MiddlewareFunc())
-	//{
-	//	//r1.PUT("/role-status", api.Update2Status)
-	//	//r1.PUT("/roledatascope", api.Update2DataScope)
-	//}
+
 }

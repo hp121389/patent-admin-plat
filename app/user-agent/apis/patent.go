@@ -46,6 +46,8 @@ func (e Patent) GetPatentById(c *gin.Context) {
 	var object models.Patent
 	//数据权限检查
 	//p := actions.GetPermissionFromContext(c)
+	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
+
 	err = s.Get(&req, &object)
 	if err != nil {
 		e.Error(http.StatusUnprocessableEntity, err, "查询失败")
@@ -61,8 +63,8 @@ func (e Patent) GetPatentById(c *gin.Context) {
 // @Router /api/v1/user-agent/patent [get]
 // @Security Bearer
 func (e Patent) GetPatentLists(c *gin.Context) { //gin框架里的上下文
-	s := service.Patent{}         //service中查询或者返回的结果赋值给s变量
-	req := dto.PatentGetPageReq{} //被绑定的数据
+	s := service.Patent{}        //service中查询或者返回的结果赋值给s变量
+	req := dto.PatentUpdateReq{} //被绑定的数据
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -86,7 +88,7 @@ func (e Patent) GetPatentLists(c *gin.Context) { //gin框架里的上下文
 		return
 	}
 
-	e.PageOK(list, int(count), req.GetPageIndex(), req.GetPageSize(), "查询成功")
+	e.OK(list, "查询成功")
 }
 
 // InsertPatent

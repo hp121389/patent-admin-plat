@@ -8,8 +8,6 @@ import (
 
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"gorm.io/gorm"
-
-	cDto "go-admin/common/dto"
 )
 
 type Patent struct {
@@ -17,15 +15,11 @@ type Patent struct {
 }
 
 // GetPage 获取Patent列表
-func (e *Patent) GetPage(c *dto.PatentGetPageReq, list *[]models.Patent, count *int64) error {
+func (e *Patent) GetPage(c *dto.PatentUpdateReq, list *[]models.Patent, count *int64) error {
 	var err error
 	var data models.Patent
 
 	err = e.Orm.Model(&data).
-		Scopes(
-			cDto.MakeCondition(c.GetNeedSearch()),
-			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
-		).
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
 	if err != nil {

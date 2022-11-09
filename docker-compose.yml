@@ -8,7 +8,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ./config/:/go-admin-api/config/
+      - ./config/:/go-admin-apis/config/
       - ./static/:/go-admin-api/static/
       - ./temp/:/go-admin-api/temp/
     networks:

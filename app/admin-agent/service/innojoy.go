@@ -85,7 +85,7 @@ func (ic *InnojoyClient) autoLogin() error {
 	return nil
 }
 
-func (ic *InnojoyClient) Search(req *dto.SimpleSearchReq, relatedPatents []models.UserPatent) (result []*dto.PatentDetail, err error) {
+func (ic *InnojoyClient) Search(req *dto.SimpleSearchReq) (result []*dto.PatentDetail, err error) {
 	sr := ic.parseSearchQuery(req.Query, req.DB, req.PageIndex, req.PageSize)
 	res, err := ic.search(sr, ic.autoLogin)
 	if err != nil {

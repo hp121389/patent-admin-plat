@@ -36,7 +36,7 @@ func (m *PatentGetPageReq) GetPatentId() interface{} {
 type PatentUpdateReq struct {
 	PatentId int    `json:"patentId" gorm:"size:128;comment:专利ID"`
 	TI       string `json:"TI" gorm:"size:128;comment:专利名"`
-	PNM      string `json:"PNM" gorm:"size:128;comment:申请号" vd:"len($)>0"`
+	PNM      string `json:"PNM" gorm:"size:128;comment:申请号" ` //vd:"len($)>0"
 	AD       string `json:"AD" gorm:"size:128;comment:申请日"`
 	PD       string `json:"PD" gorm:"size:128;comment:公开日"`
 	CL       string `json:"CL" gorm:"comment:简介"`

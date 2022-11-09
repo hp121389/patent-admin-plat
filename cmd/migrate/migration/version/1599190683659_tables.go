@@ -2,6 +2,7 @@ package version
 
 import (
 	"github.com/go-admin-team/go-admin-core/sdk/config"
+	"go-admin/app/admin-agent/model"
 	"go-admin/cmd/migrate/migration/models"
 	"runtime"
 
@@ -31,6 +32,8 @@ func _1599190683659Tables(db *gorm.DB, version string) error {
 			new(models.Tag),
 			new(models.UserPatent),
 			new(models.PatentPackage),
+			new(model.Report),
+			new(model.PatentReport),
 		)
 		if err != nil {
 			return err

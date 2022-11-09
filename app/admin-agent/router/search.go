@@ -18,7 +18,7 @@ func registerSearchRouter(v1 *gin.RouterGroup) {
 	r := v1.Group("/search")
 	{
 		r.POST("", api.Search)
-		//r.GET("advance", api.Insert)
+		//r.GET("advance", apis.Insert)
 	}
 }
 
@@ -28,6 +28,6 @@ func registerAuthedSearchRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTM
 	r := v1.Group("/auth-search").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
 		r.POST("", api.AuthSearch)
-		//r.GET("advance", api.Insert)
+		//r.GET("advance", apis.Insert)
 	}
 }

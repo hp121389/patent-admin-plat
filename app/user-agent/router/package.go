@@ -16,16 +16,15 @@ func registerPackageRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddle
 	api := apis.Package{}
 	r := v1.Group("/package").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
-		r.GET("", api.GetPage)
+		r.GET("", api.ListByCurrentUser)
 		r.GET("/:id", api.Get)
 		r.POST("", api.Insert)
 		r.PUT("/", api.Update)
-		r.DELETE("/", api.Delete)
-	}
-	//r1 := v1.Group("").Use(authMiddleware.MiddlewareFunc())
-	//{
-	//	r1.PUT("/role-status", api.Update2Status)
-	//	//r1.PUT("/roledatascope", api.Update2DataScope)
-	//}
+		r.DELETE("/:id", api.Delete)
 
+		r.GET("/:id/patent", api.GetPackagePatents)              //显示专利包内专利√
+		r.POST("/:id/patent", api.InsertPackagePatent)           //将专利加入专利包√
+		r.DELETE("/:id/patent/:pid", api.DeletePackagePatent)    //取消加入该专利包
+		r.GET("/:id/patent/:PNM/isExist", api.IsPatentInPackage) //取消加入该专利包
+	}
 }

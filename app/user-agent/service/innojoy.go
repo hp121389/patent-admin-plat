@@ -234,11 +234,9 @@ func markRelation(res []*dto.PatentDetail, related []models.UserPatent) {
 	}
 	for _, r := range res {
 		if rel, ok := rm[r.Pnm]; ok {
-			switch rel.Type {
-			case dto.ClaimType:
+			if rel.Type == dto.ClaimType {
 				r.IsClaimed = true
-				fallthrough
-			case dto.FocusType:
+			} else if rel.Type == dto.FocusType {
 				r.IsFocused = true
 			}
 			r.PatentId = rel.PatentId

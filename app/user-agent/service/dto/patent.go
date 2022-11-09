@@ -33,7 +33,7 @@ func (m *PatentGetPageReq) GetPatentId() interface{} {
 	return m.PatentId
 }
 
-type PatentUpdateReq struct {
+type PatentReq struct {
 	PatentId int    `json:"patentId" gorm:"size:128;comment:专利ID"`
 	TI       string `json:"TI" gorm:"size:128;comment:专利名"`
 	PNM      string `json:"PNM" gorm:"size:128;comment:申请号" ` //vd:"len($)>0"
@@ -47,12 +47,12 @@ type PatentUpdateReq struct {
 	common.ControlBy
 }
 
-func (s *PatentUpdateReq) GenerateList(model *models.Patent) {
+func (s *PatentReq) GenerateList(model *models.Patent) {
 	if s.PatentId != 0 {
 		model.PatentId = s.PatentId
 	}
 	model.PNM = s.PNM
-
+	model.ControlBy = s.ControlBy
 	pbs, _ := json.Marshal(s)
 	model.PatentProperties = string(pbs)
 }
@@ -70,4 +70,9 @@ type PatentsIds struct {
 func (s *PatentsIds) GetPatentId() []int {
 	s.PatentIds = append(s.PatentIds, s.PatentId)
 	return s.PatentIds
+}
+
+type PatentBriefInfo struct {
+	PatentId int    `json:"patentId" gorm:"size:128;comment:专利ID"`
+	PNM      string `json:"PNM" gorm:"size:128;comment:申请号" vd:"len($)>0"`
 }

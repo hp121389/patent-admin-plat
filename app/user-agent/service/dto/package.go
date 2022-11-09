@@ -9,13 +9,15 @@ import (
 
 type PackageGetPageReq struct {
 	dto.Pagination `search:"-"`
-	PackageId      int    `form:"PackageId" search:"type:exact;column:package_id;table:package" comment:"专利包ID"`
-	PackageName    string `form:"PackageName" search:"type:contains;column:package_name;table:package" comment:"专利包名"`
-	Desc           string `form:"Desc" search:"type:contains;column:desc;table:package" comment:"描述"`
+	PackageId      int    `form:"packageId" search:"type:exact;column:package_id;table:package" comment:"专利包ID"`
+	PackageName    string `form:"packageName" search:"type:contains;column:package_name;table:package" comment:"专利包名"`
+	Desc           string `form:"desc" search:"type:contains;column:desc;table:package" comment:"描述"`
 }
 
 type PackageOrder struct {
-	CreatedAtOrder string `search:"type:order;column:created_at;table:package" form:"createdAtOrder"`
+	UserIdOrder    string `search:"type:order;column:user_id;table:sys_user" form:"packageIdOrder"`
+	UsernameOrder  string `search:"type:order;column:username;table:sys_user" form:"packageNameOrder"`
+	CreatedAtOrder string `search:"type:order;column:created_at;table:sys_user" form:"createdAtOrder"`
 }
 
 func (m *PackageGetPageReq) GetNeedSearch() interface{} {
@@ -23,9 +25,9 @@ func (m *PackageGetPageReq) GetNeedSearch() interface{} {
 }
 
 type PackageInsertReq struct {
-	PackageId   int    `json:"PackageId" comment:"专利包ID"` // 专利包ID
-	PackageName string `json:"PackageName" comment:"专利包名" vd:"len($)>0"`
-	Desc        string `json:"Desc" comment:"描述"`
+	PackageId   int    `json:"packageId" comment:"专利包ID"` // 专利包ID
+	PackageName string `json:"packageName" comment:"专利包名" vd:"len($)>0"`
+	Desc        string `json:"desc" comment:"描述"`
 	common.ControlBy
 }
 
@@ -42,9 +44,9 @@ func (s *PackageInsertReq) GetId() interface{} {
 }
 
 type PackageUpdateReq struct {
-	PackageId   int    `json:"PackageId" comment:"专利包ID"` // 专利包ID
-	PackageName string `json:"PackageName" comment:"专利包名"`
-	Desc        string `json:"Desc" comment:"描述"`
+	PackageId   int    `json:"packageId" comment:"专利包ID"` // 专利包ID
+	PackageName string `json:"packageName" comment:"专利包名"`
+	Desc        string `json:"desc" comment:"描述"`
 	common.ControlBy
 }
 

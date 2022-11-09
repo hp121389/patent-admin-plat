@@ -72,8 +72,26 @@ func (e *Patent) Get(d *dto.PatentById, model *models.Patent) error {
 	return nil
 }
 
+// GeByPNM 获取Patent对象
+func (e *Patent) GeByPNM(d *dto.PatentBriefInfo, model *models.Patent) error {
+	//引用传递、函数名、形参、返回值
+	var err error
+	db := e.Orm.First(model, d.PNM)
+	err = db.Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		err = errors.New("查看专利不存在或无权查看")
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	if db.Error != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
 // Insert 添加Patent对象
-func (e *Patent) Insert(c *dto.PatentUpdateReq) error {
+func (e *Patent) Insert(c *dto.PatentReq) error {
 	var err error
 	var data models.Patent
 	var i int64
@@ -97,11 +115,11 @@ func (e *Patent) Insert(c *dto.PatentUpdateReq) error {
 }
 
 // InsertIfAbsent 返回值与上面不同
-func (e *Patent) InsertIfAbsent(c *dto.PatentUpdateReq) (*models.Patent, error) {
+func (e *Patent) InsertIfAbsent(c *dto.PatentReq) (*models.Patent, error) {
 	var err error
 	var data models.Patent
 	var i int64
-	err = e.Orm.Model(&data).Where("PNM = ?", c.PNM).Count(&i).Error
+	err = e.Orm.Model(&data).Where("PNM = ? OR patent_id = ?", c.PNM, c.PatentId).Count(&i).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return nil, err
@@ -124,7 +142,7 @@ func (e *Patent) InsertIfAbsent(c *dto.PatentUpdateReq) (*models.Patent, error) 
 }
 
 // UpdateLists 根据PatentId修改Patent对象
-func (e *Patent) UpdateLists(c *dto.PatentUpdateReq) error {
+func (e *Patent) UpdateLists(c *dto.PatentReq) error {
 	var err error
 	var model models.Patent
 	db := e.Orm.First(&model, c.PatentId)

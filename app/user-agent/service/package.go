@@ -2,37 +2,51 @@ package service
 
 import (
 	"errors"
-	"go-admin/app/user-agent/models"
-	"go-admin/app/user-agent/service/dto"
-
 	log "github.com/go-admin-team/go-admin-core/logger"
 	"github.com/go-admin-team/go-admin-core/sdk/service"
+	"go-admin/app/user-agent/models"
+	"go-admin/app/user-agent/service/dto"
 	"gorm.io/gorm"
-
-	cDto "go-admin/common/dto"
 )
 
 type Package struct {
 	service.Service
 }
 
-// GetPage 获取Package列表
-func (e *Package) GetPage(c *dto.PackageGetPageReq, list *[]models.Package, count *int64) error {
+//// GetPage 获取Package列表
+//func (e *Package) GetPage(c *dto.PackageGetPageReq, list *[]models.Package, count *int64) error {
+//	var err error
+//	//var data models.Package
+//	// todo: check
+//	err = e.Orm.Debug().
+//		Scopes(
+//			cDto.MakeCondition(c.GetNeedSearch()),
+//			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
+//			//actions.Permission(data.TableName(), p),
+//		).
+//		Find(list).Limit(-1).Offset(-1).
+//		Count(count).Error
+//	if err != nil {
+//		e.Log.Errorf("db error: %s", err)
+//		return err
+//	}
+//	return nil
+//}
+
+func (e *Package) ListByUserId(c *dto.PackageListReq, list *[]models.Package) error {
 	var err error
 	//var data models.Package
 	// todo: check
 	err = e.Orm.Debug().
-		Scopes(
-			cDto.MakeCondition(c.GetNeedSearch()),
-			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
-			//actions.Permission(data.TableName(), p),
-		).
+		Where("create_by = ?", c.UserId).
 		Find(list).Limit(-1).Offset(-1).
-		Count(count).Error
+		Error
+
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err
 	}
+
 	return nil
 }
 

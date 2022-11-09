@@ -29,11 +29,11 @@ func (e *PatentPackage) GetPatentIdByPackageId(c *dto.PackagePageGetReq, list *[
 }
 
 // InsertPatentPackage 创建专利标签关系
-func (e *PatentPackage) InsertPatentPackage(c *dto.PackagePageGetReq) error {
+func (e *PatentPackage) InsertPatentPackage(c *dto.PatentPackageReq) error {
 	var err error
 	var data models.PatentPackage
 	var i int64
-	err = e.Orm.Model(&data).Where("Patent_Id = ? AND Package_Id = ? ", c.PatentId, c.PackageId).
+	err = e.Orm.Model(&data).Where("PNM = ? AND Package_Id = ? ", c.PNM, c.PackageId).
 		Count(&i).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
@@ -60,7 +60,7 @@ func (e *PatentPackage) RemovePackagePatent(c *dto.PackagePageGetReq) error {
 	var err error
 	var data models.PatentPackage
 
-	db := e.Orm.Where("Patent_Id = ? AND Package_Id = ? ", c.PatentId, c.PackageId).
+	db := e.Orm.Where("PNM = ? AND Package_Id = ? ", c.PNM, c.PackageId).
 		Delete(&data)
 
 	if db.Error != nil {
@@ -73,4 +73,22 @@ func (e *PatentPackage) RemovePackagePatent(c *dto.PackagePageGetReq) error {
 		return err
 	}
 	return nil
+}
+
+// IsPatentInPackage 判断专利是否在专利包中
+func (e *PatentPackage) IsPatentInPackage(c *dto.PatentPackageReq) (bool, error) {
+	var err error
+	var data models.PatentPackage
+	var i int64
+
+	err = e.Orm.Model(&data).Where("PNM = ? AND Package_Id = ? ", c.PNM, c.PackageId).
+		Count(&i).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return false, err
+	}
+	if i > 0 {
+		return true, nil
+	}
+	return false, nil
 }

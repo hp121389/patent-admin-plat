@@ -91,39 +91,39 @@ func (e Patent) GetPatentLists(c *gin.Context) { //gin框架里的上下文
 	e.OK(list, "查询成功")
 }
 
-// InsertPatent
-// @Summary 添加专利
-// @Description 添加专利到本地
-// @Tags 专利表
-// @Accept  application/json
-// @Product application/json
-// @Param data body dto.PatentInsertReq true "专利表数据"
-// @Router /api/v1/user-agent/patent [post]
-// @Security Bearer
-func (e Patent) InsertPatent(c *gin.Context) {
-	s := service.Patent{}
-	req := dto.PatentUpdateReq{}
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req, binding.JSON).
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-	// 设置创建人
-	req.SetCreateBy(user.GetUserId(c))
-	err = s.Insert(&req)
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-
-	e.OK(req, "创建成功")
-}
+//// InsertPatent
+//// @Summary 添加专利
+//// @Description 添加专利到本地
+//// @Tags 专利表
+//// @Accept  application/json
+//// @Product application/json
+//// @Param data body dto.PatentReq true "专利表数据"
+//// @Router /api/v1/user-agent/patent [post]
+//// @Security Bearer
+//func (e Patent) InsertPatent(c *gin.Context) {
+//	s := service.Patent{}
+//	req := dto.PatentReq{}
+//	err := e.MakeContext(c).
+//		MakeOrm().
+//		Bind(&req, binding.JSON).
+//		MakeService(&s.Service).
+//		Errors
+//	if err != nil {
+//		e.Logger.Error(err)
+//		e.Error(500, err, err.Error())
+//		return
+//	}
+//	// 设置创建人
+//	req.SetCreateBy(user.GetUserId(c))
+//	err = s.Insert(&req)
+//	if err != nil {
+//		e.Logger.Error(err)
+//		e.Error(500, err, err.Error())
+//		return
+//	}
+//
+//	e.OK(req, "创建成功")
+//}
 
 // UpdatePatent
 // @Summary 修改专利
@@ -131,12 +131,12 @@ func (e Patent) InsertPatent(c *gin.Context) {
 // @Tags 专利表
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.PatentUpdateReq true "body"
+// @Param data body dto.PatentReq true "body"
 // @Router /api/v1/user-agent/patent [put]
 // @Security Bearer
 func (e Patent) UpdatePatent(c *gin.Context) {
 	s := service.Patent{}
-	req := dto.PatentUpdateReq{}
+	req := dto.PatentReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -184,6 +184,11 @@ func (e Patent) DeletePatent(c *gin.Context) {
 	}
 
 	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
 	req.UpdateBy = user.GetUserId(c)
 
 	// 数据权限检查
@@ -269,7 +274,7 @@ func (e Patent) GetUserPatentsPages(c *gin.Context) {
 // @Tags 专利表
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.PatentInsertReq true "Type和PatentId为必要输入"
+// @Param data body dto.PatentReq true "Type和PatentId为必要输入"
 // @Router /api/v1/user-agent/patent/claim [post]
 // @Security Bearer
 func (e Patent) ClaimPatent(c *gin.Context) {
@@ -315,7 +320,7 @@ func (e Patent) ClaimPatent(c *gin.Context) {
 // @Tags 专利表
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.PatentInsertReq true "Type和PatentId为必要输入"
+// @Param data body dto.PatentReq true "Type和PatentId为必要输入"
 // @Router /api/v1/user-agent/patent/focus [post]
 // @Security Bearer
 func (e Patent) FocusPatent(c *gin.Context) {
@@ -354,9 +359,37 @@ func (e Patent) FocusPatent(c *gin.Context) {
 	e.OK(req, "关注成功")
 }
 
+// InsertIfAbsent
+// @Summary 添加专利
+// @Description 添加专利到本地
+// @Tags 专利表
+// @Accept  application/json
+// @Product application/json
+// @Param data body dto.PatentReq true "专利表数据"
+// @Router /api/v1/user-agent/patent [post]
+// @Security Bearer
+func (e Patent) InsertIfAbsent(c *gin.Context) {
+	pid, pnm, err := e.internalInsertIfAbsent(c)
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+
+	err = e.MakeContext(c).
+		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+
+	e.OK(&dto.PatentBriefInfo{PatentId: pid, PNM: pnm}, "success")
+}
+
 func (e Patent) internalInsertIfAbsent(c *gin.Context) (int, string, error) {
 	ps := service.Patent{}
-	req := dto.PatentUpdateReq{}
+	req := dto.PatentReq{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, binding.JSON).
@@ -365,6 +398,7 @@ func (e Patent) internalInsertIfAbsent(c *gin.Context) (int, string, error) {
 	if err != nil {
 		return 0, "", err
 	}
+	req.CreateBy = user.GetUserId(c)
 	p, err := ps.InsertIfAbsent(&req)
 	if err != nil {
 		return 0, "", err
@@ -412,7 +446,7 @@ func (e Patent) GetFocusPages(c *gin.Context) {
 	err = e.MakeContext(c).
 		MakeOrm().
 		Bind(&req1).
-		MakeService(&s.Service).
+		MakeService(&s1.Service).
 		Errors
 	req1.PatentIds = make([]int, len(list))
 	for i := 0; i < len(list); i++ {
@@ -472,8 +506,13 @@ func (e Patent) GetClaimPages(c *gin.Context) {
 	err = e.MakeContext(c).
 		MakeOrm().
 		Bind(&req1).
-		MakeService(&s.Service).
+		MakeService(&s1.Service).
 		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
 
 	req1.PatentIds = make([]int, len(list))
 
@@ -834,156 +873,4 @@ func (e Patent) GetTags(c *gin.Context) {
 
 	e.OK(list1, "查询成功")
 
-}
-
-//----------------------------------------patent-package---------------------------------------
-
-// GetPackagePatents
-// @Summary 显示专利包内专利
-// @Description 显示专利包内专利
-// @Tags 专利表
-// @Param TagId query string false "标签ID"
-// @Router /api/v1/user-agent/patent/package/{package_id} [get]
-// @Security Bearer
-func (e Patent) GetPackagePatents(c *gin.Context) {
-
-	s := service.PatentPackage{}
-	s1 := service.Patent{}
-	req := dto.PackagePageGetReq{}
-	req1 := dto.PatentsIds{}
-
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req).
-		MakeService(&s.Service).
-		Errors
-
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-
-	req.PackageId, err = strconv.Atoi(c.Param("package_id"))
-
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-
-	//数据权限检查
-	//p := actions.GetPermissionFromContext(c)
-
-	list := make([]models.PatentPackage, 0)
-	list1 := make([]models.Patent, 0)
-	var count int64
-
-	err = s.GetPatentIdByPackageId(&req, &list, &count)
-
-	if err != nil {
-		e.Error(500, err, "查询失败")
-		return
-	}
-
-	var count2 int64
-
-	err = e.MakeContext(c).
-		MakeOrm().
-		Bind(&req1).
-		MakeService(&s.Service).
-		Errors
-
-	req1.PatentIds = make([]int, len(list))
-
-	for i := 0; i < len(list); i++ {
-		req1.PatentIds[i] = list[i].PatentId
-	}
-
-	err = s1.GetPageByIds(&req1, &list1, &count2)
-	if err != nil {
-		e.Error(500, err, "查询失败")
-		return
-	}
-	e.OK(list1, "查询成功")
-
-}
-
-// InsertPackagePatent
-// @Summary 将专利加入专利包
-// @Description  将专利加入专利包
-// @Tags 专利表
-// @Accept  application/json
-// @Product application/json
-// @Param data body dto.PackagePageGetReq true "PackageId和PatentId为必要输入"
-// @Router /api/v1/user-agent/patent/package [post]
-// @Security Bearer
-func (e Patent) InsertPackagePatent(c *gin.Context) {
-	s := service.PatentPackage{}
-	req := dto.PackagePageGetReq{}
-
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req, binding.JSON).
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-	// 设置创建人
-	req.SetCreateBy(user.GetUserId(c))
-
-	if req.PatentId == 0 || req.PackageId == 0 {
-		e.Logger.Error(err)
-		e.Error(404, err, "您输入的专利id不存在！")
-		return
-	}
-	err = s.InsertPatentPackage(&req)
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-	e.OK(req.PackageBack, "创建成功")
-}
-
-// DeletePackagePatent
-// @Summary 取消加入该专利包
-// @Description  取消加入该专利包
-// @Tags 专利表
-// @Param PatentId query string false "专利ID"
-// @Param PackageId query string false "专利包ID"
-// @Router /api/v1/user-agent/patent/package/{package_id}/patent/{patent_id} [delete]
-// @Security Bearer
-func (e Patent) DeletePackagePatent(c *gin.Context) {
-	s := service.PatentPackage{}
-	req := dto.PackagePageGetReq{}
-	req.SetUpdateBy(user.GetUserId(c))
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req).
-		MakeService(&s.Service).
-		Errors
-
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-
-	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
-	req.PackageId, err = strconv.Atoi(c.Param("package_id"))
-
-	// 数据权限检查
-	//p := actions.GetPermissionFromContext(c)
-
-	err = s.RemovePackagePatent(&req)
-
-	if err != nil {
-		e.Logger.Error(err)
-		return
-	}
-	e.OK(req.PackageBack, "删除成功")
 }

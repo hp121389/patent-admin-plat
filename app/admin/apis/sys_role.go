@@ -204,13 +204,13 @@ func (e SysRole) Update2Status(c *gin.Context) {
 // @Tags 角色/Role
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.RoleDataScopeReq true "body"
+// @Param data body dtos.RoleDataScopeReq true "body"
 // @Success 200 {object} response.Response "{"code": 200, "data": [...]}"
 // @Router /api/v1/role-status/{id} [put]
 // @Security Bearer
 //func (e SysRole) Update2DataScope(c *gin.Context) {
 //	s := service.SysRole{}
-//	req := dto.RoleDataScopeReq{}
+//	req := dtos.RoleDataScopeReq{}
 //	err := e.MakeContext(c).
 //		MakeOrm().
 //		Bind(&req, binding.JSON, nil).

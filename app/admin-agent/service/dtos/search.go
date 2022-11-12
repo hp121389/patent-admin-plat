@@ -1,4 +1,4 @@
-package dto
+package dtos
 
 import "go-admin/common/dto"
 

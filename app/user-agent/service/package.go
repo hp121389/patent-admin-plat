@@ -14,7 +14,7 @@ type Package struct {
 }
 
 //// GetPage 获取Package列表
-//func (e *Package) GetPage(c *dto.PackageGetPageReq, list *[]models.Package, count *int64) error {
+//func (e *Package) GetPage(c *dtos.PackageGetPageReq, list *[]models.Package, count *int64) error {
 //	var err error
 //	//var data models.Package
 //	// todo: check

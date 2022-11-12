@@ -17,8 +17,8 @@ type Search struct {
 // @Summary 专利搜索
 // @Description 根据查询字符串进行搜索（已登陆）
 // @Tags 专利检索
-// @Param data body dto.SimpleSearchReq true "用户数据"
-// @Success 200 {object} dto.SwagSearchListResp
+// @Param data body dtos.SimpleSearchReq true "用户数据"
+// @Success 200 {object} dtos.SwagSearchListResp
 // @Router /api/v1/user-agent/auth-search [post]
 // @Security Bearer
 func (e Search) AuthSearch(c *gin.Context) {
@@ -69,8 +69,8 @@ func (e Search) AuthSearch(c *gin.Context) {
 // @Summary 专利搜索
 // @Description 根据查询字符串进行搜索（未登录）
 // @Tags 专利检索
-// @Param data body dto.SimpleSearchReq true "用户数据"
-// @Success 200 {object} dto.SwagSearchListResp
+// @Param data body dtos.SimpleSearchReq true "用户数据"
+// @Success 200 {object} dtos.SwagSearchListResp
 // @Router /api/v1/user-agent/search [post]
 // @Security Bearer
 func (e Search) Search(c *gin.Context) {

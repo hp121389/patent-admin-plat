@@ -67,7 +67,7 @@ func genFile() error {
 	if err != nil {
 		return err
 	}
-	dtoPath := appPath + "/service/dto/"
+	dtoPath := appPath + "/service/dtos/"
 	err = utils.IsNotExistMkDir(dtoPath)
 	if err != nil {
 		return err

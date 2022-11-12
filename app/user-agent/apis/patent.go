@@ -43,17 +43,17 @@ func (e Patent) GetPatentById(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-	var object models.Patent
+	var object2 models.Patent
 	//数据权限检查
 	//p := actions.GetPermissionFromContext(c)
 	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
 
-	err = s.Get(&req, &object)
+	err = s.Get(&req, &object2)
 	if err != nil {
 		e.Error(http.StatusUnprocessableEntity, err, "查询失败")
 		return
 	}
-	e.OK(object, "查询成功")
+	e.OK(object2, "查询成功")
 }
 
 // GetPatentLists
@@ -63,8 +63,8 @@ func (e Patent) GetPatentById(c *gin.Context) {
 // @Router /api/v1/user-agent/patent [get]
 // @Security Bearer
 func (e Patent) GetPatentLists(c *gin.Context) { //gin框架里的上下文
-	s := service.Patent{}        //service中查询或者返回的结果赋值给s变量
-	req := dto.PatentUpdateReq{} //被绑定的数据
+	s := service.Patent{}  //service中查询或者返回的结果赋值给s变量
+	req := dto.PatentReq{} //被绑定的数据
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req).
@@ -97,12 +97,12 @@ func (e Patent) GetPatentLists(c *gin.Context) { //gin框架里的上下文
 //// @Tags 专利表
 //// @Accept  application/json
 //// @Product application/json
-//// @Param data body dto.PatentReq true "专利表数据"
+//// @Param data body dtos.PatentReq true "专利表数据"
 //// @Router /api/v1/user-agent/patent [post]
 //// @Security Bearer
 //func (e Patent) InsertPatent(c *gin.Context) {
 //	s := service.Patent{}
-//	req := dto.PatentReq{}
+//	req := dtos.PatentReq{}
 //	err := e.MakeContext(c).
 //		MakeOrm().
 //		Bind(&req, binding.JSON).
@@ -238,6 +238,7 @@ func (e Patent) GetUserPatentsPages(c *gin.Context) {
 	list1 := make([]models.Patent, 0)
 
 	var count int64
+
 	err = s.GetUserPatentIds(&req, &list, &count)
 
 	if err != nil {
@@ -618,12 +619,12 @@ func (e Patent) DeleteClaim(c *gin.Context) {
 //// @Tags 专利表
 //// @Accept  application/json
 //// @Product application/json
-//// @Param data body dto.UpDateUserPatentObject true "body"
+//// @Param data body dtos.UpDateUserPatentObject true "body"
 //// @Router /api/v1/user-agent/patent [put]
 //// @Security Bearer
 //func (e Patent) UpdateUserPatentRelationship(c *gin.Context) {
 //	s := service.UserPatent{}
-//	req := dto.UpDateUserPatentObject{}
+//	req := dtos.UpDateUserPatentObject{}
 //	req.UserId = user.GetUserId(c)
 //	err := e.MakeContext(c).
 //		MakeOrm().

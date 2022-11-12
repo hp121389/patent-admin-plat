@@ -1,4 +1,4 @@
-package dto
+package dtos
 
 type InnojoySearchResult struct {
 	ReturnValue int    `json:"ReturnValue"`

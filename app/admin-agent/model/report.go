@@ -9,6 +9,7 @@ type Report struct {
 	ReportName       string `json:"reportName" gorm:"comment:报告名称"`
 	ReportProperties string `json:"reportProperties" gorm:"comment:报告详情"`
 	Type             string `json:"Type" gorm:"size:64;comment:报告类型（侵权/估值）"`
+	RejectTag        string `json:"rejectTag" gorm:"size:8;comment:驳回标签(null:未审核/reject/upload)"`
 	models.ControlBy
 }
 

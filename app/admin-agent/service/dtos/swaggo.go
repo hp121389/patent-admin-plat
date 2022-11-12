@@ -1,4 +1,4 @@
-package dto
+package dtos
 
 type SwagSearchListResp struct {
 	RequestId string `json:"requestId"`

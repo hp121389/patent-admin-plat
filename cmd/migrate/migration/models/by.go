@@ -20,3 +20,13 @@ type ModelTime struct {
 	UpdatedAt time.Time      `json:"updatedAt" gorm:"comment:最后更新时间"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index;comment:删除时间"`
 }
+
+// SetCreateBy 设置创建人id
+func (e *ControlBy) SetCreateBy(createBy int) {
+	e.CreateBy = createBy
+}
+
+// SetUpdateBy 设置修改人id
+func (e *ControlBy) SetUpdateBy(updateBy int) {
+	e.UpdateBy = updateBy
+}

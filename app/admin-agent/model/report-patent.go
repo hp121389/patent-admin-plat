@@ -9,6 +9,7 @@ type PatentReport struct {
 	PatentId int `json:"patentId" gorm:"size:128;comment:专利ID"`
 	ReportId int `json:"reportId" gorm:"size:128;comment:报告ID"`
 	models.ControlBy
+	models.ModelTime
 }
 
 func (PatentReport) TableName() string {

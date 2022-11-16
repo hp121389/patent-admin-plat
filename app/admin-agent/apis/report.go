@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
+	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	_ "github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
 	"go-admin/app/admin-agent/model"
 	service "go-admin/app/admin-agent/service"
@@ -78,74 +79,6 @@ func (e Report) GetPatentByReId(c *gin.Context) {
 	e.OK(model, "查询成功")
 }
 
-// GetInfringementReportById
-// @Summary 检索侵权报告
-// @Description  通过ReportId检索报告
-// @Tags 侵权报告
-// @Param ReportId query string false "报告ID"
-// @Router /apis/v1/admin-agent/infringement-report/{report_id} [get]
-// @Security Bearer
-func (e Report) GetInfringementReportById(c *gin.Context) {
-	s := service.Report{}
-	req := dtos.ReportById{}
-
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req, nil).
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-	var object model.Report
-	//数据权限检查
-	//p := actions.GetPermissionFromContext(c)
-	req.ReportId, err = strconv.Atoi(c.Param("report_id"))
-
-	err = s.GetInfringementReportById(&req, &object)
-	if err != nil {
-		e.Error(http.StatusUnprocessableEntity, err, "查询失败")
-		return
-	}
-	e.OK(object, "查询成功")
-}
-
-// GetValuationReportById
-// @Summary 查看估值报告
-// @Description  通过ReportId检索报告
-// @Tags 估值报告
-// @Param ReportId query string false "报告ID"
-// @Router /apis/v1/admin-agent/valuation-report/{report_id} [get]
-// @Security Bearer
-func (e Report) GetValuationReportById(c *gin.Context) {
-
-	s := service.Report{}
-	req := dtos.ReportById{}
-
-	err := e.MakeContext(c).
-		MakeOrm().
-		Bind(&req, nil).
-		MakeService(&s.Service).
-		Errors
-	if err != nil {
-		e.Logger.Error(err)
-		e.Error(500, err, err.Error())
-		return
-	}
-	var object model.Report
-
-	req.ReportId, err = strconv.Atoi(c.Param("report_id"))
-
-	err = s.GetValuationReportById(&req, &object)
-	if err != nil {
-		e.Error(http.StatusUnprocessableEntity, err, "查询失败")
-		return
-	}
-	e.OK(object, "查询成功")
-}
-
 // GetInfringementLists
 // @Summary 列表侵权报告
 // @Description 列表侵权报告
@@ -179,6 +112,40 @@ func (e Report) GetInfringementLists(c *gin.Context) {
 	}
 
 	e.OK(list, "查询成功")
+}
+
+// GetReportById
+// @Summary 查看报告
+// @Description  通过ReportId检索报告
+// @Tags 报告
+// @Param ReportId query string false "报告ID"
+// @Router /apis/v1/admin-agent/report/{report_id} [get]
+// @Security Bearer
+func (e Report) GetReportById(c *gin.Context) {
+
+	s := service.Report{}
+	req := dtos.ReportById{}
+
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req, nil).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	var object model.Report
+
+	req.ReportId, err = strconv.Atoi(c.Param("report_id"))
+
+	err = s.GetReportById(&req, &object)
+	if err != nil {
+		e.Error(http.StatusUnprocessableEntity, err, "查询失败")
+		return
+	}
+	e.OK(object, "查询成功")
 }
 
 // GetValuationLists
@@ -241,50 +208,15 @@ func (e Report) Upload(c *gin.Context, rtype string, patentname string) error {
 // @Router /apis/v1/admin-agent/valuation-report/upload/{report_id} [post]
 // @Security Bearer
 func (e Report) UploadValuationReport(c *gin.Context) {
-	////拿到专利Id,得到TI
-	//req := dto.PatentReq{}
-	//s := service.Report{}
-	//req1 := dtos.PatentReport{}
 	err := e.MakeContext(c).
 		MakeOrm().
-		//Bind(&req1).
-		//MakeService(&s.Service).
 		Errors
-
-	//req1.ReportId, err = strconv.Atoi(c.Param("report_id"))
-
-	//if err != nil {
-	//	e.Logger.Error(err)
-	//	e.Error(500, err, err.Error())
-	//	return
-	//}
-
 	name := "1"
 	err = e.Upload(c, dtos.ValuationType, name)
-
-	//fmt.Println(reqrs.ReportId)
-	//
-	//if err != nil {
-	//	e.Logger.Error(err)
-	//	e.Error(500, err, err.Error())
-	//	return
-	//}
-	//
-	//req.PatentId = reqrs.PatentId
-	//
-	//var object model.PatentReport
-	//
-	//err = s.GetValuationPatentById(&req, &object)
-	//
 	if err != nil {
 		e.Error(500, err, "上传失败")
 		return
 	}
-	//
-	//e.OK(req, "查询成功")
-
-	//var name string
-	//name = req.TI
 
 }
 
@@ -308,55 +240,77 @@ func (e Report) UploadInfringementReport(c *gin.Context) {
 //----------------------------------------驳回请求----------------------------------------
 
 // Reject
-// @Summary 驳回侵权请求
-// @Description
-// @Tags 侵权报告
+// @Summary 驳回请求
+// @Description 必须要有主键ReportId值
+// @Tags 报告
 // @Router /apis/v1/admin-agent/report/reject/{report_id} [post]
 // @Security Bearer
 func (e Report) Reject(c *gin.Context) {
 
+	s := service.Report{}
+	req := dtos.ReportGetPageReq{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+
+	req.SetUpdateBy(user.GetUserId(c))
+	req.ReportId, err = strconv.Atoi(c.Param("report_id"))
+
+	fmt.Println(req)
+	//数据权限检查
+	//p := actions.GetPermissionFromContext(c)
+	req.RejectTag = dtos.RejectTag
+
+	err = s.UpdateReports(&req)
+	if err != nil {
+		e.Logger.Error(err)
+		return
+	}
+	e.OK(req, "更新成功")
+
 }
 
-// RejectInfringement
-// @Summary 驳回侵权请求
-// @Description
-// @Tags 侵权报告
-// @Router /apis/v1/admin-agent/infringement-report/upload/{report_id} [post]
+// UnReject
+// @Summary 撤销驳回请求
+// @Description 必须要有主键ReportId值
+// @Tags 报告
+// @Router /apis/v1/admin-agent/report/unReject/{report_id} [post]
 // @Security Bearer
-func (e Report) RejectInfringement(c *gin.Context) {
+func (e Report) UnReject(c *gin.Context) {
 
-}
+	s := service.Report{}
+	req := dtos.ReportGetPageReq{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
 
-// RejectValuation
-// @Summary 驳回估值请求
-// @Description
-// @Tags 估值报告
-// @Router /apis/v1/admin-agent/infringement-report/upload/{report_id} [post]
-// @Security Bearer
-func (e Report) RejectValuation(c *gin.Context) {
-	//s := service.Report{}
-	//req := dtos.ReportReject{}
-	//
-	//err := e.MakeContext(c).
-	//	MakeOrm().
-	//	Bind(&req).
-	//	MakeService(&s.Service).
-	//	Errors
-	//if err != nil {
-	//	e.Logger.Error(err)
-	//	e.Error(500, err, err.Error())
-	//	return
-	//}
-	//var object model.Report
-	//
-	//req.ReportId, err = strconv.Atoi(c.Param("report_id"))
-	//
-	//err = s.GetValuationReportById(&req, &object)
-	//if err != nil {
-	//	e.Error(http.StatusUnprocessableEntity, err, "查询失败")
-	//	return
-	//}
-	//e.OK(object, "查询成功")
+	req.SetUpdateBy(user.GetUserId(c))
+	req.ReportId, err = strconv.Atoi(c.Param("report_id"))
+
+	//数据权限检查
+	//p := actions.GetPermissionFromContext(c)
+	req.RejectTag = dtos.ProcessTag
+
+	err = s.UpdateReports(&req)
+	if err != nil {
+		e.Logger.Error(err)
+		return
+	}
+	e.OK(req, "更新成功")
 
 }
 
@@ -371,36 +325,36 @@ func (e Report) RejectValuation(c *gin.Context) {
 // @Param data body dtos.PackagePageGetReq true "PackageId和PatentId为必要输入"
 // @Router /apis/v1/user-agent/patent/package [post]
 // @Security Bearer
-func (e Report) InsertReportPatent(c *gin.Context) {
-	//s := service.PatentPackage{}
-	//req := dtos.PackagePageGetReq{}
-	//
-	//err := e.MakeContext(c).
-	//	MakeOrm().
-	//	Bind(&req, binding.JSON).
-	//	MakeService(&s.Service).
-	//	Errors
-	//if err != nil {
-	//	e.Logger.Error(err)
-	//	e.Error(500, err, err.Error())
-	//	return
-	//}
-	//// 设置创建人
-	//req.SetCreateBy(user.GetUserId(c))
-	//
-	//if req.PatentId == 0 || req.PackageId == 0 {
-	//	e.Logger.Error(err)
-	//	e.Error(404, err, "您输入的专利id不存在！")
-	//	return
-	//}
-	//err = s.InsertPatentPackage(&req)
-	//if err != nil {
-	//	e.Logger.Error(err)
-	//	e.Error(500, err, err.Error())
-	//	return
-	//}
-	//e.OK(req.PackageBack, "创建成功")
-}
+//func (e Report) InsertReportPatent(c *gin.Context) {
+//s := service.PatentPackage{}
+//req := dtos.PackagePageGetReq{}
+//
+//err := e.MakeContext(c).
+//	MakeOrm().
+//	Bind(&req, binding.JSON).
+//	MakeService(&s.Service).
+//	Errors
+//if err != nil {
+//	e.Logger.Error(err)
+//	e.Error(500, err, err.Error())
+//	return
+//}
+//// 设置创建人
+//req.SetCreateBy(user.GetUserId(c))
+//
+//if req.PatentId == 0 || req.PackageId == 0 {
+//	e.Logger.Error(err)
+//	e.Error(404, err, "您输入的专利id不存在！")
+//	return
+//}
+//err = s.InsertPatentPackage(&req)
+//if err != nil {
+//	e.Logger.Error(err)
+//	e.Error(500, err, err.Error())
+//	return
+//}
+//e.OK(req.PackageBack, "创建成功")
+//}
 
 //// GetUserPatentsPages
 //// @Summary 获取用户的专利列表

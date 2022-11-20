@@ -6,6 +6,7 @@ type Package struct {
 	PackageId   int    `gorm:"primaryKey;autoIncrement;comment:编码"  json:"packageId"`
 	PackageName string `json:"packageName" gorm:"size:128;comment:专利包"`
 	Desc        string `json:"desc" gorm:"size:128;comment:描述"`
+	Files       string `json:"files" gorm:"comment:专利包附件"`
 	models.ControlBy
 	models.ModelTime
 }

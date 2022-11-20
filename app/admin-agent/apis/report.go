@@ -139,6 +139,11 @@ func (e Report) GetReportById(c *gin.Context) {
 	var object model.Report
 
 	req.ReportId, err = strconv.Atoi(c.Param("report_id"))
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
 
 	err = s.GetReportById(&req, &object)
 	if err != nil {
@@ -262,8 +267,12 @@ func (e Report) Reject(c *gin.Context) {
 
 	req.SetUpdateBy(user.GetUserId(c))
 	req.ReportId, err = strconv.Atoi(c.Param("report_id"))
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
 
-	fmt.Println(req)
 	//数据权限检查
 	//p := actions.GetPermissionFromContext(c)
 	req.RejectTag = dtos.RejectTag

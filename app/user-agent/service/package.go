@@ -105,33 +105,19 @@ func (e *Package) Update(c *dto.PackageUpdateReq) error {
 		return err
 	}
 	if db.RowsAffected == 0 {
-		return errors.New("无权更新该数据")
+		return errors.New("package not found")
 
 	}
-	c.Generate(&model)
-	update := e.Orm.Model(&model).Where("package_id = ?", &model.PackageId).Updates(&model)
-	if err = update.Error; err != nil {
-		e.Log.Errorf("db error: %s", err)
-		return err
-	}
-	if update.RowsAffected == 0 {
-		err = errors.New("update userinfo error")
-		log.Warnf("db update error")
-		return err
-	}
-	return nil
-}
 
-// InternalUpdate internal修改Package对象
-func (e *Package) InternalUpdate(c *dto.PackageUpdateReq) error {
-	var err error
-	var model models.Package
-	db := e.Orm.First(&model, c.GetId())
-	if err = db.Error; err != nil {
-		e.Log.Errorf("Service UpdateSysUser error: %s", err)
-		return err
+	switch c.FilesOpt {
+	case dto.FilesAdd:
+		c.GenerateAndAddFiles(&model)
+	case dto.FilesDelete:
+		c.GenerateAndDeleteFiles(&model)
+	default:
+		c.Generate(&model)
 	}
-	c.Generate(&model)
+
 	update := e.Orm.Model(&model).Where("package_id = ?", &model.PackageId).Updates(&model)
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)

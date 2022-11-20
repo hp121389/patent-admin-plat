@@ -19,7 +19,7 @@ func registerPackageRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddle
 		r.GET("", api.ListByCurrentUser)
 		r.GET("/:id", api.Get)
 		r.POST("", api.Insert)
-		r.PUT("/", api.Update)
+		r.PUT("/:id", api.Update)
 		r.DELETE("/:id", api.Delete)
 
 		r.GET("/:id/patent", api.GetPackagePatents)              //显示专利包内专利√

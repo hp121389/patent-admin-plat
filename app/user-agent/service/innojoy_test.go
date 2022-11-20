@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service/dto"
 	cDto "go-admin/common/dto"
 	"testing"
@@ -31,7 +32,7 @@ func TestInnojoySimpleSearch(t *testing.T) {
 			PageSize:  100,
 		},
 		Query: "请求处理方法",
-	})
+	}, []models.UserPatent{})
 	assert.NoError(t, err)
 	for _, r := range res {
 		fmt.Println(r)

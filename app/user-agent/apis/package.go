@@ -175,6 +175,14 @@ func (e Package) Update(c *gin.Context) {
 		return
 	}
 
+	if pid, err := strconv.Atoi(c.Param("id")); err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	} else {
+		req.PackageId = pid
+	}
+
 	req.SetUpdateBy(user.GetUserId(c))
 
 	//数据权限检查
@@ -185,7 +193,7 @@ func (e Package) Update(c *gin.Context) {
 		e.Logger.Error(err)
 		return
 	}
-	e.OK(req.GetId(), "更新成功")
+	e.OK(nil, "更新成功")
 }
 
 // Delete

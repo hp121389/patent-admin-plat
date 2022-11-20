@@ -114,7 +114,7 @@ func (e File) multipleFile(c *gin.Context, urlPerfix string) []FileResponse {
 	var multipartFile []FileResponse
 	for _, f := range files {
 		guid := uuid.New().String()
-		fileName := guid + utils.GetExt(f.Filename)
+		fileName := guid + "." + f.Filename
 
 		err := utils.IsNotExistMkDir(path)
 		if err != nil {
@@ -156,7 +156,7 @@ func (e File) singleFile(c *gin.Context, fileResponse FileResponse, urlPerfix st
 	// 上传文件至指定目录
 	guid := uuid.New().String()
 
-	fileName := guid + utils.GetExt(files.Filename)
+	fileName := guid + "." + files.Filename
 
 	err = utils.IsNotExistMkDir(path)
 	if err != nil {

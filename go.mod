@@ -3,6 +3,7 @@ module go-admin
 go 1.17
 
 require (
+	github.com/AlasdairF/Tokenize v0.0.0-20151218070831-dc54600920d2
 	github.com/Gleiphir2769/s-cache v0.1.1
 	github.com/alibaba/sentinel-golang v1.0.4
 	github.com/alibaba/sentinel-golang/pkg/adapters/gin v0.0.0-20220808015021-c5f1f1d055c5
@@ -12,12 +13,14 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-admin-team/go-admin-core v1.4.1-0.20220809101213-21187928f7d9
 	github.com/go-admin-team/go-admin-core/sdk v1.4.1-0.20220809101213-21187928f7d9
+	github.com/go-ego/gse v0.70.2
 	github.com/google/uuid v1.3.0
 	github.com/huaweicloud/huaweicloud-sdk-go-obs v3.21.12+incompatible
 	github.com/mssola/user_agent v0.5.2
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/prometheus/client_golang v1.11.0
 	github.com/qiniu/go-sdk/v7 v7.11.1
+	github.com/rhnvrm/textsimilarity v0.1.0
 	github.com/shirou/gopsutil/v3 v3.22.1
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.4.0
@@ -26,6 +29,7 @@ require (
 	github.com/swaggo/gin-swagger v1.5.0
 	github.com/swaggo/swag v1.8.7
 	github.com/unrolled/secure v1.0.8
+	github.com/yanyiwu/gojieba v1.2.0
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
 	gorm.io/driver/mysql v1.3.5
 	gorm.io/driver/postgres v1.3.8
@@ -131,6 +135,10 @@ require (
 )
 
 require (
+	github.com/AlasdairF/Conv v0.0.0-20170228095014-b55e025a049e // indirect
+	github.com/AlasdairF/Custom v0.0.0-20161026102731-1889d7b07a22 // indirect
+	github.com/AlasdairF/Deaccent v0.0.0-20141217170736-6d8bd09110fd // indirect
+	github.com/AlasdairF/snappy v0.0.0-20160114083434-d1c9103b7e94 // indirect
 	github.com/BurntSushi/toml v1.1.0 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
@@ -141,6 +149,8 @@ require (
 	github.com/go-openapi/spec v0.20.7 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/klauspost/compress v1.4.0 // indirect
+	github.com/klauspost/cpuid v0.0.0-20180405133222-e7e905edc00e // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/magiconair/properties v1.8.0 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
@@ -149,6 +159,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/spf13/afero v1.1.2 // indirect
 	github.com/spf13/jwalterweatherman v1.0.0 // indirect
+	github.com/vcaesar/cedar v0.20.1 // indirect
 	go.uber.org/zap v1.15.0 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect

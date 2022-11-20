@@ -2,6 +2,7 @@ package apis
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
@@ -25,8 +26,11 @@ type Patent struct {
 // @Router /api/v1/user-agent/patent/{patent_id} [get]
 // @Security Bearer
 func (e Patent) GetPatentById(c *gin.Context) {
+	fmt.Println("c在这里！", c)
 	s := service.Patent{}
+	fmt.Println("22222222222222")
 	req := dto.PatentById{}
+
 	err := e.MakeContext(c).
 		MakeOrm().
 		Bind(&req, nil).
@@ -40,6 +44,8 @@ func (e Patent) GetPatentById(c *gin.Context) {
 	var object models.Patent
 	//数据权限检查
 	//p := actions.GetPermissionFromContext(c)
+	fmt.Println("123154252/n")
+	fmt.Println(req)
 	err = s.Get(&req, &object)
 	if err != nil {
 		e.Error(http.StatusUnprocessableEntity, err, "查询失败")
@@ -52,14 +58,14 @@ func (e Patent) GetPatentById(c *gin.Context) {
 // @Summary 列表专利信息数据
 // @Description 获取JSON
 // @Tags 专利表
-// @Router /api/v1/user-agent/patent [get]
+// @Router /api/v1/user-agent/patent/novelty [get]
 // @Security Bearer
 func (e Patent) GetPatentLists(c *gin.Context) { //gin框架里的上下文
 	s := service.Patent{}         //service中查询或者返回的结果赋值给s变量
 	req := dto.PatentGetPageReq{} //被绑定的数据
 	err := e.MakeContext(c).
 		MakeOrm().
-		Bind(&req).
+		Bind(&req, nil).
 		MakeService(&s.Service).
 		Errors
 	if err != nil {
@@ -211,6 +217,7 @@ func (e Patent) ClaimPatent(c *gin.Context) {
 	err = e.MakeContext(c).
 		MakeOrm().
 		//Bind(&req, binding.JSON).
+
 		MakeService(&s.Service).
 		Errors
 	if err != nil {

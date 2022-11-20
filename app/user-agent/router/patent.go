@@ -17,10 +17,10 @@ func registerPatentRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlew
 
 	r := v1.Group("/patent").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
-		r.GET("", api.GetPatentLists)           //显示专利本地数据
-		r.GET("/:patent_id", api.GetPatentById) //查询专利
-		r.GET("/claim", api.GetClaimPages)      //显示认领专利
-		r.GET("/focus", api.GetFocusPages)      //显示关注专利
+		r.GET("/novelty/:PId", api.GetPatentLists) //显示专利本地数据
+		r.GET("/:patent_id", api.GetPatentById)    //查询专利
+		r.GET("/claim", api.GetClaimPages)         //显示认领专利
+		r.GET("/focus", api.GetFocusPages)         //显示关注专利
 		//显示专利包内专利
 		//显示标签为xxx的专利
 		//显示专利的标签

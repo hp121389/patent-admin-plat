@@ -17,6 +17,10 @@ type ObjectByPatentId struct {
 	PatentId int `uri:"patent_id"`
 }
 
+type ObjectByPId struct {
+	PId int `uri:"PId"`
+}
+
 type ObjectOfPatentId struct {
 	PatentId  int   `uri:"patent_id"`
 	PatentIds []int `json:"Patent_Ids"`

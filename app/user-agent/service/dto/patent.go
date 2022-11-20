@@ -10,7 +10,7 @@ import (
 
 type PatentGetPageReq struct {
 	dto.Pagination `search:"-"`
-	PatentId       int    `form:"PatentId" search:"type:exact;column:PatentId;table:patent" comment:"专利ID"`
+	PatentId       int    `form:"PatentId" search:"type:exact;column:patent_id;table:patent" comment:"专利ID"`
 	TI             string `form:"TI" search:"type:exact;column:TI;table:patent" comment:"专利名"`
 	PNM            string `form:"PNM" search:"type:exact;column:PNN;table:patent" comment:"申请号"`
 	AD             string `form:"AD" search:"type:exact;column:AD;table:patent" comment:"申请日"`
@@ -19,6 +19,7 @@ type PatentGetPageReq struct {
 	PA             string `form:"PA" search:"type:exact;column:PA;table:patent" comment:"申请单位"`
 	AR             string `form:"AR" search:"type:exact;column:AR;table:patent" comment:"地址"`
 	INN            string `form:"INN" search:"type:exact;column:INN;table:patent" comment:"申请人"`
+	dto.ObjectByPId
 	PatentOrder
 }
 
@@ -48,8 +49,7 @@ func (m *PatentGetPageReq) GetNeedSearch() interface{} {
 	return *m
 }
 func (s *PatentGetPageReq) GetPatentId() interface{} {
-
-	return s.PatentId
+	return s.PId
 }
 
 func (s *PatentUpdateReq) GenerateList(model *models.Patent) {

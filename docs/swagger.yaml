@@ -1,25 +1,25 @@
 definitions:
   dto.ObjectById:
     properties:
-      Ids:
+      id:
+        type: integer
+      ids:
         items:
           type: integer
         type: array
-      id:
-        type: integer
     type: object
   dto.PackageInsertReq:
     properties:
-      CreateBy:
+      createBy:
         type: integer
-      Desc:
+      desc:
         type: string
-      PackageId:
+      packageId:
         description: 专利包ID
         type: integer
-      PackageName:
+      packageName:
         type: string
-      UpdateBy:
+      updateBy:
         type: integer
     type: object
   dto.PassWord:
@@ -29,75 +29,14 @@ definitions:
       oldPassword:
         type: string
     type: object
-  dto.PatentInsertReq:
-    properties:
-      AD:
-        type: string
-      AR:
-        type: string
-      CL:
-        type: string
-      CreateBy:
-        type: integer
-      INN:
-        type: string
-      PA:
-        type: string
-      PD:
-        type: string
-      PNM:
-        type: string
-      PatentId:
-        type: integer
-      TI:
-        type: string
-      UpdateBy:
-        type: integer
-    type: object
-  dto.PatentTagInsertReq:
-    properties:
-      CreateBy:
-        type: integer
-      PatentId:
-        type: integer
-      TagId:
-        type: integer
-      UpdateBy:
-        type: integer
-    type: object
-  dto.PatentUpdateReq:
-    properties:
-      AD:
-        type: string
-      AR:
-        type: string
-      CL:
-        type: string
-      CreateBy:
-        type: integer
-      INN:
-        type: string
-      PA:
-        type: string
-      PD:
-        type: string
-      PNM:
-        type: string
-      PatentId:
-        type: integer
-      TI:
-        type: string
-      UpdateBy:
-        type: integer
-    type: object
   dto.ResetSysUserPwdReq:
     properties:
-      CreateBy:
-        type: integer
-      UpdateBy:
+      createBy:
         type: integer
       password:
         type: string
+      updateBy:
+        type: integer
       userId:
         description: 用户ID
         type: integer
@@ -113,7 +52,7 @@ definitions:
       pageSize:
         type: integer
     type: object
-  dto.SwagSearchListResp:
+  dto.SwagSimpleSearchResp:
     properties:
       code:
         type: integer
@@ -162,6 +101,63 @@ definitions:
       requestId:
         type: string
     type: object
+  dto.SysListDeleteReq:
+    properties:
+      patent_ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  dto.SysListInsertReq:
+    properties:
+      AD:
+        type: string
+      AR:
+        type: string
+      CL:
+        type: string
+      INN:
+        type: string
+      PA:
+        type: string
+      PD:
+        type: string
+      PNM:
+        type: string
+      PatentId:
+        type: integer
+      TI:
+        type: string
+      createBy:
+        type: integer
+      updateBy:
+        type: integer
+    type: object
+  dto.SysListUpdateReq:
+    properties:
+      AD:
+        type: string
+      AR:
+        type: string
+      CL:
+        type: string
+      INN:
+        type: string
+      PA:
+        type: string
+      PD:
+        type: string
+      PNM:
+        type: string
+      PatentId:
+        type: integer
+      TI:
+        type: string
+      createBy:
+        type: integer
+      updateBy:
+        type: integer
+    type: object
   dto.SysLoginLogDeleteReq:
     properties:
       ids:
@@ -178,12 +174,10 @@ definitions:
     type: object
   dto.SysRoleInsertReq:
     properties:
-      CreateBy:
-        type: integer
-      UpdateBy:
-        type: integer
       admin:
         type: boolean
+      createBy:
+        type: integer
       dataScope:
         type: string
       flag:
@@ -207,17 +201,17 @@ definitions:
       status:
         description: 状态
         type: string
+      updateBy:
+        type: integer
     type: object
   dto.SysUserInsertReq:
     properties:
-      CreateBy:
-        type: integer
-      UpdateBy:
-        type: integer
       avatar:
         type: string
       bio:
         type: string
+      createBy:
+        type: integer
       departure:
         type: string
       email:
@@ -239,6 +233,8 @@ definitions:
       status:
         default: "1"
         type: string
+      updateBy:
+        type: integer
       userId:
         description: 用户ID
         type: integer
@@ -247,14 +243,12 @@ definitions:
     type: object
   dto.SysUserUpdateReq:
     properties:
-      CreateBy:
-        type: integer
-      UpdateBy:
-        type: integer
       avatar:
         type: string
       bio:
         type: string
+      createBy:
+        type: integer
       departure:
         type: string
       email:
@@ -274,47 +268,15 @@ definitions:
       status:
         default: "1"
         type: string
+      updateBy:
+        type: integer
       userId:
         description: 用户ID
         type: integer
     type: object
-  dto.TagInsertReq:
-    properties:
-      CreateBy:
-        type: integer
-      UpdateBy:
-        type: integer
-      desc:
-        description: 标签描述
-        type: string
-      tagId:
-        description: 标签ID
-        type: integer
-      tagName:
-        description: 标签名称
-        type: string
-    type: object
-  dto.TagUpdateReq:
-    properties:
-      CreateBy:
-        type: integer
-      UpdateBy:
-        type: integer
-      desc:
-        description: 标签描述
-        type: string
-      tagId:
-        description: 标签ID
-        type: integer
-      tagName:
-        description: 标签名称
-        type: string
-    type: object
   dto.UpdateStatusReq:
     properties:
-      CreateBy:
-        type: integer
-      UpdateBy:
+      createBy:
         type: integer
       roleId:
         description: 角色编码
@@ -322,15 +284,17 @@ definitions:
       status:
         description: 状态
         type: string
+      updateBy:
+        type: integer
     type: object
   dto.UpdateSysUserStatusReq:
     properties:
-      CreateBy:
-        type: integer
-      UpdateBy:
+      createBy:
         type: integer
       status:
         type: string
+      updateBy:
+        type: integer
       userId:
         description: 用户ID
         type: integer
@@ -416,6 +380,69 @@ paths:
       summary: 退出登录
       tags:
       - 登陆
+  /api/v1/package:
+    get:
+      description: 获取JSON
+      parameters:
+      - description: packageName
+        in: query
+        name: packageName
+        type: string
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 列表专利包信息数据
+      tags:
+      - 专利包
+    post:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: 专利包数据
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PackageInsertReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 创建专利包
+      tags:
+      - 专利包
+    put:
+      consumes:
+      - application/json
+      description: 获取JSON
+      parameters:
+      - description: body
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/dto.PackageInsertReq'
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 修改专利包数据
+      tags:
+      - 专利包
+  /api/v1/package/{packageId}:
+    get:
+      description: 获取JSON
+      parameters:
+      - description: 专利包编码
+        in: path
+        name: packageId
+        required: true
+        type: integer
+      responses: {}
+      security:
+      - Bearer: []
+      summary: 获取专利包
+      tags:
+      - 专利包
   /api/v1/public/uploadFile:
     post:
       consumes:
@@ -552,26 +579,6 @@ paths:
       summary: 获取Role数据
       tags:
       - 角色/Role
-  /api/v1/search:
-    post:
-      description: 根据查询字符串进行搜索（可传入逻辑表达式或简单字符串）
-      parameters:
-      - description: 用户数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SimpleSearchReq'
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.SwagSearchListResp'
-      security:
-      - Bearer: []
-      summary: 专利搜索
-      tags:
-      - 专利检索
   /api/v1/server-monitor:
     get:
       description: 获取JSON
@@ -727,66 +734,6 @@ paths:
       summary: 获取用户
       tags:
       - 用户
-  /api/v1/tag:
-    delete:
-      description: 获取JSON
-      parameters:
-      - description: 标签数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.ObjectById'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 删除标签
-      tags:
-      - 标签/Tag
-    post:
-      description: 获取JSON
-      parameters:
-      - description: 标签数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.TagInsertReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 增加标签
-      tags:
-      - 标签/Tag
-    put:
-      description: 获取JSON
-      parameters:
-      - description: 标签数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.TagUpdateReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 更新标签
-      tags:
-      - 标签/Tag
-  /api/v1/tag/{id}:
-    get:
-      description: 获取JSON
-      parameters:
-      - description: tagId
-        in: path
-        name: tagId
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 获取Tag数据
-      tags:
-      - 标签/Tag
   /api/v1/updateinfo:
     put:
       consumes:
@@ -805,305 +752,6 @@ paths:
       summary: 修改个人信息
       tags:
       - 个人中心
-  /api/v1/user-agent/package:
-    delete:
-      description: 删除数据
-      parameters:
-      - description: packageId
-        in: path
-        name: packageId
-        required: true
-        type: integer
-      - description: body
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.ObjectById'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 删除专利包数据
-      tags:
-      - 专利包
-    get:
-      description: 获取JSON
-      parameters:
-      - description: packageName
-        in: query
-        name: packageName
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 列表专利包信息数据
-      tags:
-      - 专利包
-    post:
-      consumes:
-      - application/json
-      description: 获取JSON
-      parameters:
-      - description: 专利包数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.PackageInsertReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 创建专利包
-      tags:
-      - 专利包
-    put:
-      consumes:
-      - application/json
-      description: 获取JSON
-      parameters:
-      - description: body
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.PackageInsertReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 修改专利包数据
-      tags:
-      - 专利包
-  /api/v1/user-agent/package/{packageId}:
-    get:
-      description: 获取JSON
-      parameters:
-      - description: 专利包编码
-        in: path
-        name: packageId
-        required: true
-        type: integer
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 获取专利包
-      tags:
-      - 专利包
-  /api/v1/user-agent/patent:
-    get:
-      description: 获取本地专利
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 列表专利信息数据
-      tags:
-      - 专利表
-    post:
-      consumes:
-      - application/json
-      description: 添加专利到本地
-      parameters:
-      - description: 专利表数据
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.PatentInsertReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 添加专利
-      tags:
-      - 专利表
-    put:
-      consumes:
-      - application/json
-      description: 必须要有主键PatentId值
-      parameters:
-      - description: body
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.PatentUpdateReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 修改专利
-      tags:
-      - 专利表
-  /api/v1/user-agent/patent/{patent_id}:
-    delete:
-      description: 输入专利id删除专利表
-      parameters:
-      - description: 专利ID
-        in: query
-        name: PatentId
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 删除专利
-      tags:
-      - 专利表
-    get:
-      description: 通过PatentId检索专利
-      parameters:
-      - description: 专利ID
-        in: query
-        name: PatentId
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 检索专利
-      tags:
-      - 专利表
-  /api/v1/user-agent/patent/claim:
-    get:
-      consumes:
-      - application/json
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 获取认领列表
-      tags:
-      - 专利表
-    post:
-      consumes:
-      - application/json
-      description: 认领专利
-      parameters:
-      - description: Type和PatentId为必要输入
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.PatentInsertReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 认领专利
-      tags:
-      - 专利表
-  /api/v1/user-agent/patent/claim/{patent_id}:
-    delete:
-      description: 取消认领
-      parameters:
-      - description: 专利ID
-        in: query
-        name: PatentId
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 取消认领
-      tags:
-      - 专利表
-  /api/v1/user-agent/patent/focus:
-    get:
-      consumes:
-      - application/json
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 获取关注列表
-      tags:
-      - 专利表
-    post:
-      consumes:
-      - application/json
-      description: 关注专利
-      parameters:
-      - description: Type和PatentId为必要输入
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.PatentInsertReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 关注专利
-      tags:
-      - 专利表
-  /api/v1/user-agent/patent/focus/{patent_id}:
-    delete:
-      description: 取消关注
-      parameters:
-      - description: 专利ID
-        in: query
-        name: PatentId
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 取消关注
-      tags:
-      - 专利表
-  /api/v1/user-agent/patent/patents/{tag_id}:
-    get:
-      description: 显示该标签下的专利
-      parameters:
-      - description: 标签ID
-        in: query
-        name: TagId
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 显示该标签下的专利
-      tags:
-      - 专利表
-  /api/v1/user-agent/patent/tag:
-    post:
-      consumes:
-      - application/json
-      description: 为该专利添加该标签
-      parameters:
-      - description: TagId和PatentId为必要输入
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/dto.PatentTagInsertReq'
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 添加标签
-      tags:
-      - 专利表
-  /api/v1/user-agent/patent/tags/{patent_id}:
-    get:
-      description: 显示专利的标签
-      parameters:
-      - description: 专利ID
-        in: query
-        name: PatentId
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 显示专利的标签
-      tags:
-      - 专利表
-  /api/v1/user-agent/patent/tags/{patent_id}/{tag_id}:
-    delete:
-      description: 取消给该专利添加的该标签
-      parameters:
-      - description: 专利ID
-        in: query
-        name: PatentId
-        type: string
-      - description: 标签ID
-        in: query
-        name: TagId
-        type: string
-      responses: {}
-      security:
-      - Bearer: []
-      summary: 取消标签
-      tags:
-      - 专利表
   /api/v1/user/avatar:
     post:
       consumes:

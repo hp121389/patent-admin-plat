@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service/dto"
 
@@ -20,13 +19,9 @@ type Package struct {
 // GetPage 获取Package列表
 func (e *Package) GetPage(c *dto.PackageGetPageReq, list *[]models.Package, count *int64) error {
 	var err error
-	//var data models.Package
-	// todo: check
 	err = e.Orm.Debug().
 		Scopes(
-			cDto.MakeCondition(c.GetNeedSearch()),
 			cDto.Paginate(c.GetPageSize(), c.GetPageIndex()),
-			//actions.Permission(data.TableName(), p),
 		).
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
@@ -40,7 +35,6 @@ func (e *Package) GetPage(c *dto.PackageGetPageReq, list *[]models.Package, coun
 // Get 获取Package对象
 func (e *Package) Get(d *dto.PackageById, model *models.Package) error {
 	var data models.Package
-
 	err := e.Orm.Model(&data).Debug().
 		//Scopes(
 		//	actions.Permission(data.TableName(), p),
@@ -187,10 +181,7 @@ func (e Package) InsertUserPackage(c *dto.UserPackageInsertReq) error {
 	var err error
 	var data models.UserPackage
 	var i int64
-	fmt.Println("rpid，ruid已查出:", c.PackageId, c.UserId)
-	fmt.Println(e.Orm)
-	err = e.Orm.Model(&data).Where("user_id = ? and package_id = ?", c.UserId, c.PackageId).Error
-	fmt.Println("3pid，uid已查出:")
+	err = e.Orm.Model(&data).Where("user_id = ? and package_id = ?", c.UserId, c.PackageId).Count(&i).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err
@@ -202,9 +193,7 @@ func (e Package) InsertUserPackage(c *dto.UserPackageInsertReq) error {
 	}
 
 	c.GenerateUserPackage(&data)
-	fmt.Println("4pid，uid已查出:")
 	err = e.Orm.Create(&data).Error
-	fmt.Println("5pid，uid已查出:", data.Id)
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err

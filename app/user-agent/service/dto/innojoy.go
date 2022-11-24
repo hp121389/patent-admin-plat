@@ -217,3 +217,45 @@ type PatentDetail struct {
 	IsFocused bool `json:"isFocused"`
 	PatentId  int  `json:"patentId"`
 }
+
+type SearchReq struct {
+	Token              string              `json:"token"`
+	PatentSearchConfig *PatentSearchConfig `json:"patentSearchConfig"`
+}
+
+type PatentSearchConfig struct {
+	GUID      string `json:"GUID"`
+	Action    string `json:"Action"`
+	Query     string `json:"Query"`
+	Database  string `json:"Database"`
+	Page      string `json:"Page"`
+	PageSize  string `json:"PageSize"`
+	Sortby    string `json:"Sortby"`
+	FieldList string `json:"FieldList"`
+}
+
+type StatisticReq struct {
+	Token              string              `json:"token"`
+	PatentSearchConfig *PatentSearchConfig `json:"patentSearchConfig"`
+	AnalyseConfig      *AnalyseConfig      `json:"analyseConfig"`
+	Language           string              `json:"language"`
+}
+
+type AnalyseConfig struct {
+	AID string `json:"AID"`
+}
+
+type LoginReq struct {
+	UserConfig UserConfig `json:"userConfig"`
+}
+
+type UserConfig struct {
+	EMail    string `json:"EMail"`
+	Password string `json:"Password"`
+}
+
+type LoginResp struct {
+	ReturnValue int    `json:"ReturnValue"`
+	Option      string `json:"Option"`
+	ErrorInfo   string `json:"ErrorInfo"`
+}

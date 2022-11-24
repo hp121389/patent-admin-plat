@@ -18,7 +18,7 @@ func registerSearchRouter(v1 *gin.RouterGroup) {
 	r := v1.Group("/search")
 	{
 		r.POST("", api.Search)
-		//r.GET("advance", api.Insert)
+		r.POST("/charts/:aid", api.GetChart)
 	}
 }
 

@@ -140,7 +140,7 @@ func (ic *InnojoyClient) search(sr *SearchReq, cb callback) (result []*dto.Paten
 
 		if searchRes.ReturnValue != 0 {
 			if retried {
-				return nil, fmt.Errorf("user-agent search failed: %s", searchRes.ErrorInfo)
+				return nil, fmt.Errorf("patent search failed: %s", searchRes.ErrorInfo)
 			}
 			if err = cb(); err != nil {
 				return nil, fmt.Errorf("seatch call callback error: %w", err)
@@ -189,7 +189,7 @@ type loginResp struct {
 	ErrorInfo   string `json:"ErrorInfo"`
 }
 
-// refine user-agent title
+// refine patent title
 func refinePatentDetails(pds []*dto.PatentDetail) {
 	for _, pd := range pds {
 		pd.Ti = strings.Split(pd.Ti, "[ZH]")[0]
@@ -240,6 +240,73 @@ func markRelation(res []*dto.PatentDetail, related []models.UserPatent) {
 				r.IsFocused = true
 			}
 			r.PatentId = rel.PatentId
+		}
+	}
+}
+
+func (ic *InnojoyClient) GetChart(aid int, req *dto.SimpleSearchReq) (*dto.ChartProfile, error) {
+	sr := ic.genStatisticQuery(aid, req)
+	res, err := ic.statistic(sr, ic.autoLogin)
+	if err != nil {
+		return nil, err
+	}
+	c, err := charts.GetChart(aid)
+	if err != nil {
+		return nil, err
+	}
+	option, err := c.Serialize(res)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.ChartProfile{
+		Name:   c.Name(),
+		Option: option,
+	}, nil
+}
+
+func (ic *InnojoyClient) genStatisticQuery(aid int, req *dto.SimpleSearchReq) *dto.StatisticReq {
+	return &dto.StatisticReq{
+		Token: ic.token,
+		PatentSearchConfig: &dto.PatentSearchConfig{
+			Query:    req.Query,
+			Database: req.DB,
+			PageSize: "1",
+		},
+		AnalyseConfig: &dto.AnalyseConfig{AID: strconv.Itoa(aid)},
+		Language:      "zh",
+	}
+}
+
+func (ic *InnojoyClient) statistic(sr *dto.StatisticReq, cb callback) (result []byte, err error) {
+	var retried bool
+	for {
+		resp, err := ic.hc.Post(statisticUrl, sr, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		buf, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		searchRes := dto.InnojoySearchResult{}
+		if err = json.Unmarshal(buf, &searchRes); err != nil {
+			return nil, err
+		}
+
+		if searchRes.ReturnValue != 0 {
+			if retried {
+				return nil, fmt.Errorf("patent search failed: %s", searchRes.ErrorInfo)
+			}
+			if err = cb(); err != nil {
+				return nil, fmt.Errorf("search call callback error: %w", err)
+			}
+			// reset token
+			sr.Token = ic.token
+			retried = true
+		} else {
+			return buf, nil
 		}
 	}
 }

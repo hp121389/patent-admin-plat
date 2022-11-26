@@ -4,14 +4,17 @@ import (
 	"go-admin/app/user-agent/models"
 	"go-admin/common/dto"
 	common "go-admin/common/models"
+	"time"
 )
 
 //patent-package
 
 type PackageBack struct {
-	PatentId  int    `form:"patentId" search:"type:exact;column:TagId;table:patent_package" comment:"专利ID"`
-	PackageId int    `form:"packageId" search:"type:exact;column:TagId;table:patent_package" comment:"专利包ID"`
-	PNM       string `json:"PNM" gorm:"size:128;comment:申请号"`
+	PatentId  int       `form:"patentId" search:"type:exact;column:TagId;table:patent_package" comment:"专利ID"`
+	PackageId int       `form:"packageId" search:"type:exact;column:TagId;table:patent_package" comment:"专利包ID"`
+	PNM       string    `json:"PNM" gorm:"size:128;comment:申请号"`
+	CreatedAt time.Time `json:"CreatedAt" gorm:"comment:创建时间"`
+	UpdatedAt time.Time `json:"UpdatedAt" gorm:"comment:最后更新时间"`
 }
 
 type PackagePageGetReq struct {
@@ -19,6 +22,8 @@ type PackagePageGetReq struct {
 	PackageBack
 	PatentTagOrder
 	common.ControlBy
+	CreatedAt time.Time `json:"CreatedAt" gorm:"comment:创建时间"`
+	UpdatedAt time.Time `json:"UpdatedAt" gorm:"comment:最后更新时间"`
 }
 
 func (d *PackagePageGetReq) GeneratePackagePatent(g *models.PatentPackage) {
@@ -26,6 +31,9 @@ func (d *PackagePageGetReq) GeneratePackagePatent(g *models.PatentPackage) {
 	g.PackageId = d.PackageId
 	g.ControlBy = d.ControlBy
 	g.PNM = d.PNM
+	g.CreatedAt = d.CreatedAt
+	g.UpdatedAt = d.UpdatedAt
+
 }
 
 type PatentPackageReq struct {
@@ -33,6 +41,8 @@ type PatentPackageReq struct {
 	PackageId int    `form:"packageId" search:"type:exact;column:TagId;table:patent_package" comment:"专利包ID"`
 	PNM       string `json:"PNM" gorm:"size:128;comment:申请号"`
 	common.ControlBy
+	CreatedAt time.Time `json:"CreatedAt" gorm:"comment:创建时间"`
+	UpdatedAt time.Time `json:"UpdatedAt" gorm:"comment:最后更新时间"`
 }
 
 type IsPatentInPackageResp struct {
@@ -44,4 +54,6 @@ func (d *PatentPackageReq) GeneratePackagePatent(g *models.PatentPackage) {
 	g.PackageId = d.PackageId
 	g.ControlBy = d.ControlBy
 	g.PNM = d.PNM
+	g.CreatedAt = d.CreatedAt
+	g.UpdatedAt = d.UpdatedAt
 }

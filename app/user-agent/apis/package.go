@@ -158,7 +158,7 @@ func (e Package) Insert(c *gin.Context) {
 // @Tags 专利包
 // @Accept  application/json
 // @Product application/json
-// @Param data body dto.PackageInsertReq true "body"
+// @Param data body dto.PackageUpdateReq true "body"
 // @Router /api/v1/user-agent/package/{package_id} [put]
 // @Security Bearer
 func (e Package) Update(c *gin.Context) {

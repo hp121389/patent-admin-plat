@@ -2,11 +2,14 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	log "github.com/go-admin-team/go-admin-core/logger"
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"go-admin/app/admin-agent/model"
 	"go-admin/app/admin-agent/service/dtos"
+	"go-admin/app/user-agent/service/dto"
 	"gorm.io/gorm"
+	"time"
 )
 
 type Report struct {
@@ -82,7 +85,7 @@ func (e *Report) GetPatentByReId(reid int, model *model.PatentReport) error {
 	return nil
 }
 
-// UpdateReports 根据PatentId修改Patent对象
+// UpdateReports 更新报告对象
 func (e *Report) UpdateReports(c *dtos.ReportGetPageReq) error {
 	var err error
 	var model model.Report
@@ -95,7 +98,10 @@ func (e *Report) UpdateReports(c *dtos.ReportGetPageReq) error {
 		return errors.New("专利不存在")
 
 	}
-	c.Generate(&model)
+	c.GenerateNoneFile(&model)
+	CurrentTime1 := fmt.Sprintf("%v", time.Now())
+	CurrentTime2 := CurrentTime1[0:19]
+	model.UpdatedAt = CurrentTime2
 	update := e.Orm.Model(&model).Where("report_id = ?", &model.ReportId).Updates(&model)
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)
@@ -103,6 +109,44 @@ func (e *Report) UpdateReports(c *dtos.ReportGetPageReq) error {
 	}
 	if update.RowsAffected == 0 {
 		err = errors.New("update report-info error")
+		log.Warnf("db update error")
+		return err
+	}
+	return nil
+}
+
+// UploadReport 上传报告
+func (e *Report) UploadReport(c *dtos.ReportGetPageReq) error {
+	var err error
+	var model model.Report
+	db := e.Orm.First(&model, c.ReportId)
+	if err = db.Error; err != nil {
+		e.Log.Errorf("Service UpdateSysUser error: %s", err)
+		return err
+	}
+	if db.RowsAffected == 0 {
+		return errors.New("package not found")
+
+	}
+
+	switch c.FilesOpt {
+	case dto.FilesAdd:
+		c.GenerateAndAddFiles(&model)
+	case dto.FilesDelete:
+		c.GenerateAndDeleteFiles(&model)
+	default:
+		c.Generate(&model)
+	}
+	CurrentTime1 := fmt.Sprintf("%v", time.Now())
+	CurrentTime2 := CurrentTime1[0:19]
+	model.UpdatedAt = CurrentTime2
+	update := e.Orm.Model(&model).Where("report_id = ?", &model.ReportId).Updates(&model)
+	if err = update.Error; err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if update.RowsAffected == 0 {
+		err = errors.New("update userinfo error")
 		log.Warnf("db update error")
 		return err
 	}

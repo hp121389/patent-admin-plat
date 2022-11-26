@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"github.com/prometheus/common/log"
 	"go-admin/app/admin-agent/service/dtos"
 	"go-admin/app/user-agent/models"
@@ -94,9 +93,6 @@ func (e *Patent) GeByPNM(d *dto.PatentBriefInfo, model *models.Patent) error {
 
 // GeById 获取Patent对象
 func (e *Patent) GeById(d *dtos.PatentReport, model *models.Patent) error {
-
-	fmt.Println(d.PatentId)
-
 	var err error
 	db := e.Orm.Where("patent_id = ?", d.PatentId).First(model)
 	err = db.Error

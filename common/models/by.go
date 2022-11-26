@@ -19,6 +19,7 @@ func (e *ControlBy) SetCreateBy(createBy int) {
 // SetUpdateBy 设置修改人id
 func (e *ControlBy) SetUpdateBy(updateBy int) {
 	e.UpdateBy = updateBy
+
 }
 
 type Model struct {
@@ -27,6 +28,6 @@ type Model struct {
 
 type ModelTime struct {
 	CreatedAt time.Time      `json:"CreatedAt" gorm:"comment:创建时间"`
-	UpdatedAt time.Time      `json:"CpdatedAt" gorm:"comment:最后更新时间"`
+	UpdatedAt time.Time      `json:"UpdatedAt" gorm:"comment:最后更新时间"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index;comment:删除时间"`
 }

@@ -32,7 +32,7 @@ type File struct {
 
 // UploadFile 上传图片
 // @Summary 上传图片
-// @Description 获取JSON
+// @Description 获取form-data
 // @Tags 公共接口
 // @Accept multipart/form-data
 // @Param type query string true "type" (1：单图，2：多图, 3：base64图片)

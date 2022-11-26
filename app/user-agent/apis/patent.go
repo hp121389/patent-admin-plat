@@ -47,7 +47,10 @@ func (e Patent) GetPatentById(c *gin.Context) {
 	//数据权限检查
 	//p := actions.GetPermissionFromContext(c)
 	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
-
+	if err != nil {
+		e.Error(http.StatusUnprocessableEntity, err, "not found params from router")
+		return
+	}
 	err = s.Get(&req, &object2)
 	if err != nil {
 		e.Error(http.StatusUnprocessableEntity, err, "查询失败")
@@ -683,7 +686,10 @@ func (e Patent) DeleteTag(c *gin.Context) {
 	}
 
 	req.TagId, err = strconv.Atoi(c.Param("tag_id"))
-
+	if err != nil {
+		e.Logger.Error(err)
+		return
+	}
 	// 数据权限检查
 	//p := actions.GetPermissionFromContext(c)
 
@@ -839,7 +845,10 @@ func (e Patent) GetTags(c *gin.Context) {
 	//p := actions.GetPermissionFromContext(c)
 
 	req.PatentId, err = strconv.Atoi(c.Param("patent_id"))
-
+	if err != nil {
+		e.Logger.Error(err)
+		return
+	}
 	list := make([]models.PatentTag, 0)
 	list1 := make([]models.Tag, 0)
 	var count int64

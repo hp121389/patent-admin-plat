@@ -27,18 +27,20 @@ INSERT INTO `patent` (`patent_id`, `pnm`, `patent_properties`, `create_by`, `upd
 INSERT INTO `patent` (`patent_id`, `pnm`, `patent_properties`, `create_by`, `update_by`) VALUES (3, '103', '{\"patentId\":3,\"TI\":\"基于3的专利\",\"PNM\":\"103\",\"AD\":\"20220101\",\"PD\":\"20220105\",\"CL\":\"a patent of TwoSoftware\",\"PA\":\"BUPT\",\"AR\":\"Beijing\",\"PINN\":\"author003\",\"CLS\":\"a patent of TwoSoftware\",\"CreateBy\":1,\"UpdateBy\":0}', 0, 0);
 INSERT INTO `patent` (`patent_id`, `pnm`, `patent_properties`, `create_by`, `update_by`) VALUES (4, '104', '{\"patentId\":4,\"TI\":\"基于4的专利\",\"PNM\":\"104\",\"AD\":\"20220101\",\"PD\":\"20220106\",\"CL\":\"a patent of ThreeSoftware\",\"PA\":\"BUPT\",\"AR\":\"Beijing\",\"PINN\":\"author004\",\"CLS\":\"a patent of ThreeSoftware\",\"CreateBy\":1,\"UpdateBy\":0}', 0, 0);
 INSERT INTO `patent` (`patent_id`, `pnm`, `patent_properties`, `create_by`, `update_by`) VALUES (5, '105', '{\"patentId\":5,\"TI\":\"基于5的专利\",\"PNM\":\"105\",\"AD\":\"20220101\",\"PD\":\"20220107\",\"CL\":\"a patent of T0Software\",\"PA\":\"BUPT\",\"AR\":\"Beijing\",\"PINN\":\"author005\",\"CLS\":\"a patent of T0Software\",\"CreateBy\":1,\"UpdateBy\":0}', 0, 0);
-INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`,`reject_tag`, `create_by`, `update_by`) VALUES (1, 'infringe1', 'important!', 'infringement',0,1, 0);
-INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`,`create_by`, `update_by`) VALUES (2, 'infringe2', 'important!', 'infringement',0,1, 0);
-INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`,`create_by`, `update_by`) VALUES (3, 'infringe3', 'important!', 'infringement',0,1, 0);
-INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`,`create_by`, `update_by`) VALUES (4, 'valuation1', 'important!', 'valuation',0,1, 0);
-INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`,`create_by`, `update_by`) VALUES (5, 'valuation2', 'important!', 'valuation',0,1, 0);
-INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`,`create_by`, `update_by`) VALUES (6, 'valuation3', 'important!', 'valuation',0,1, 0);
+INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`, `create_by`, `update_by`, `created_at`, `updated_at`, `files`) VALUES (1, 'infringe1', 'important!', 'infringement', '未审核', 1, 0, '2022-10-18 18:49:24', NULL, NULL);
+INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`, `create_by`, `update_by`, `created_at`, `updated_at`, `files`) VALUES (2, 'infringe2', 'important!', 'infringement', '未审核', 1, 0, '2022-10-18 18:49:24', NULL, NULL);
+INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`, `create_by`, `update_by`, `created_at`, `updated_at`, `files`) VALUES (3, 'infringe3', 'important!', 'infringement', '未审核', 1, 0, '2022-10-18 18:49:24', NULL, NULL);
+INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`, `create_by`, `update_by`, `created_at`, `updated_at`, `files`) VALUES (4, 'valuation1', 'important!', 'valuation', '未审核', 1, 0, '2022-10-18 18:49:24', NULL, NULL);
+INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`, `create_by`, `update_by`, `created_at`, `updated_at`, `files`) VALUES (5, 'valuation2', 'important!', 'valuation', '未审核', 1, 0, '2022-10-18 18:49:24', NULL,NULL);
+INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`, `create_by`, `update_by`, `created_at`, `updated_at`, `files`) VALUES (6, 'valuation3', 'important!', 'valuation', '未审核', 1, 0, '2022-10-18 18:49:24', NULL, NULL);
 INSERT INTO `patent_report` (`id`, `patent_id`, `report_id`, `create_by`, `update_by`) VALUES (1, 1, 1, 1, 0);
 INSERT INTO `patent_report` (`id`, `patent_id`, `report_id`, `create_by`, `update_by`) VALUES (2, 2, 3, 1, 0);
 INSERT INTO `patent_report` (`id`, `patent_id`, `report_id`, `create_by`, `update_by`) VALUES (3, 2, 4, 1, 0);
 INSERT INTO `patent_report` (`id`, `patent_id`, `report_id`, `create_by`, `update_by`) VALUES (4, 3, 5, 1, 0);
 INSERT INTO `patent_report` (`id`, `patent_id`, `report_id`, `create_by`, `update_by`) VALUES (5, 3, 2, 1, 0);
-INSERT INTO `package` (`package_id`, `package_name`, `desc`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (1, 'golang', 'patents of Golang software', 1, 0, '2022-10-18 18:49:24.070', NULL, NULL);
-INSERT INTO `package` (`package_id`, `package_name`, `desc`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (2, 'CPP', 'patents of CPP software', 1, 0, '2022-10-18 18:49:53.081', NULL, NULL);
+INSERT INTO `package` (`package_id`, `package_name`, `desc`, `files`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (1, 'golang', 'patents of Golang software', '[{\"FileName\":\"github头像7.jpg\",\"FilePath\":\"/static/uploadfile/c566a5c8-363c-41fc-b664-523f1e67f9a3.github头像7.jpg\"}]', 1, 0, '2022-10-18 18:49:24', '2022-11-25 23:12:55', NULL);
+INSERT INTO `package` (`package_id`, `package_name`, `desc`, `files`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (2, 'CPP', 'patents of CPP software', NULL, 1, 0, '2022-10-18 18:49:53', NULL, NULL);
 
+INSERT INTO `patent_package` (`id`, `patent_id`, `package_id`, `pnm`, `create_by`, `update_by`) VALUES (1, 1, 1, '101', 0, 0);
+INSERT INTO `patent_package` (`id`, `patent_id`, `package_id`, `pnm`, `create_by`, `update_by`) VALUES (2, 1, 2, '102', 0, 0);
 -- 数据完成 ;

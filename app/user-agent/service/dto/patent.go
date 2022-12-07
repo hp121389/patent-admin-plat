@@ -5,7 +5,6 @@ import (
 	"go-admin/app/user-agent/models"
 	"go-admin/common/dto"
 	common "go-admin/common/models"
-	"time"
 )
 
 type PatentGetPageReq struct {
@@ -46,8 +45,8 @@ type PatentReq struct {
 	PINN     string `json:"PINN" gorm:"size:128;comment:申请人"`
 	CLS      string `json:"CLS" gorm:"size:128;comment:法律状态"`
 	common.ControlBy
-	CreatedAt time.Time `json:"CreatedAt" gorm:"comment:创建时间"`
-	UpdatedAt time.Time `json:"UpdatedAt" gorm:"comment:最后更新时间"`
+	CreatedAt string `json:"CreatedAt" gorm:"comment:创建时间"`
+	UpdatedAt string `json:"UpdatedAt" gorm:"comment:最后更新时间"`
 }
 
 func (s *PatentReq) GenerateList(model *models.Patent) {

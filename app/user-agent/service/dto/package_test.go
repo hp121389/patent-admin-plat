@@ -21,7 +21,7 @@ func TestGenAndDelFiles(t *testing.T) {
 	}
 
 	ureq.GenerateAndAddFiles(&pm)
-	fmt.Println(pm.Files)
+	fmt.Println(pm.Files) //添加成功
 
 	ureq.Files = []string{"/a/b/c/123-123.1.txt", "/a/b/c/123-123.3.txt"}
 	ureq.GenerateAndDeleteFiles(&pm)

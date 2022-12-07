@@ -14,11 +14,11 @@ type UserPatent struct {
 }
 
 // GetUserPatentIds 通过UserId获得专利列表的ID数组
-func (e *UserPatent) GetUserPatentIds(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
+func (e *UserPatent) GetUserPatentIds(c *dto.UserPatentObject, list *[]models.UserPatent, count *int64) error {
 	var err error
 	var data models.UserPatent
 	err = e.Orm.Model(&data).
-		Where("User_Id = ?", c.GetUserId()).
+		Where("User_Id = ?", c.UserId).
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
 	if err != nil {
@@ -29,26 +29,28 @@ func (e *UserPatent) GetUserPatentIds(c *dto.UserPatentGetPageReq, list *[]model
 }
 
 // GetClaimLists 通过专利列表的ID数组获得认领专利列表
-func (e *UserPatent) GetClaimLists(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
+func (e *UserPatent) GetClaimLists(c *dto.UserPatentObject, list *[]models.UserPatent, count *int64) error {
 	var err error
 	var data models.UserPatent
 	err = e.Orm.Model(&data).
-		Where("Type = ? AND User_Id = ?", dto.ClaimType, c.GetUserId()).
+		Where("Type = ? AND User_Id = ?", dto.ClaimType, c.UserId).
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
+
 	if err != nil {
 		e.Log.Errorf("db error:%s", err)
 		return err
 	}
+
 	return nil
 }
 
 // GetFocusLists 通过专利列表的ID数组获得关注专利列表
-func (e *UserPatent) GetFocusLists(c *dto.UserPatentGetPageReq, list *[]models.UserPatent, count *int64) error {
+func (e *UserPatent) GetFocusLists(c *dto.UserPatentObject, list *[]models.UserPatent, count *int64) error {
 	var err error
 	var data models.UserPatent
 	err = e.Orm.Model(&data).
-		Where("Type = ? AND User_Id = ?", dto.FocusType, c.GetUserId()).
+		Where("Type = ? AND User_Id = ?", dto.FocusType, c.UserId).
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
 	if err != nil {

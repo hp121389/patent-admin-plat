@@ -219,7 +219,7 @@ func (e Patent) GetUserPatentsPages(c *gin.Context) {
 
 	s := service.UserPatent{}
 	s1 := service.Patent{}
-	req := dto.UserPatentGetPageReq{}
+	req := dto.UserPatentObject{}
 	req1 := dto.PatentsIds{}
 
 	req.UserId = user.GetUserId(c)
@@ -421,7 +421,7 @@ func (e Patent) internalInsertIfAbsent(c *gin.Context) (int, string, error) {
 func (e Patent) GetFocusPages(c *gin.Context) {
 	s := service.UserPatent{}
 	s1 := service.Patent{}
-	req := dto.UserPatentGetPageReq{}
+	req := dto.UserPatentObject{}
 	req.UserId = user.GetUserId(c)
 	req1 := dto.PatentsIds{}
 
@@ -475,7 +475,7 @@ func (e Patent) GetFocusPages(c *gin.Context) {
 func (e Patent) GetClaimPages(c *gin.Context) {
 	s := service.UserPatent{}
 	s1 := service.Patent{}
-	req := dto.UserPatentGetPageReq{} //被绑定的数据
+	req := dto.UserPatentObject{} //被绑定的数据
 	req1 := dto.PatentsIds{}
 
 	req.UserId = user.GetUserId(c)
@@ -491,13 +491,10 @@ func (e Patent) GetClaimPages(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-	//数据权限检查
-	//p := actions.GetPermissionFromContext(c)
 	list := make([]models.UserPatent, 0)
 	list1 := make([]models.Patent, 0)
 
 	var count int64
-
 	err = s.GetClaimLists(&req, &list, &count)
 
 	if err != nil {

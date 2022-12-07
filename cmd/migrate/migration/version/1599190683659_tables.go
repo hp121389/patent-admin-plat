@@ -3,7 +3,9 @@ package version
 import (
 	"github.com/go-admin-team/go-admin-core/sdk/config"
 	"go-admin/app/admin-agent/model"
-	"go-admin/cmd/migrate/migration/models"
+	"go-admin/app/admin/models"
+	modelsUser "go-admin/app/user-agent/models"
+	modelsCmd "go-admin/cmd/migrate/migration/models"
 	"runtime"
 
 	"go-admin/cmd/migrate/migration"
@@ -23,17 +25,17 @@ func _1599190683659Tables(db *gorm.DB, version string) error {
 			tx = tx.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4")
 		}
 		err := tx.Migrator().AutoMigrate(
-			new(models.SysLoginLog),
-			new(models.SysUser),
-			new(models.SysRole),
-			new(models.Patent),
-			new(models.Package),
-			new(models.PatentTag),
-			new(models.Tag),
-			new(models.UserPatent),
-			new(models.PatentPackage),
+			new(modelsCmd.SysLoginLog),
+			new(modelsCmd.SysUser),
+			new(modelsCmd.SysRole),
+			new(modelsUser.Patent),
+			new(modelsUser.Package),
+			new(modelsUser.PatentTag),
+			new(modelsUser.Tag),
+			new(modelsUser.UserPatent),
+			new(modelsUser.PatentPackage),
 			new(model.Report),
-			new(model.PatentReport),
+			new(model.ReportRelation),
 		)
 		if err != nil {
 			return err

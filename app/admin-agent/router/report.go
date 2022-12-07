@@ -9,33 +9,26 @@ import (
 )
 
 func init() {
-	routerCheckRole = append(routerCheckRole, registerTagRouter)
+	routerCheckRole = append(routerCheckRole, registerReportRouter)
 }
 
 // 需认证的路由代码
-func registerTagRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
-	//----------------------------------User-------------------------------
-	//用户对report的权限有：get（查看报告，查看是否被驳回状态）；post（申请某个专利的报告(+report-patent关系)）；
-	//----------------------------------Admin-------------------------------
+func registerReportRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
+
 	api := apis.Report{}
 
 	r := v1.Group("/report").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
-		r.POST("/unReject/:report_id", api.UnReject)     //管理员撤销驳回，处理中   √
-		r.POST("/reject/:report_id", api.Reject)         //管理员驳回请求(标记)   √
-		r.PUT("/upload", api.UploadReport)               //管理员更新上传文件相关数据   √
-		r.GET("/:report_id", api.GetReportById)          //管理员通过ID查看报告申请表   √
-		r.GET("/patent/:report_id", api.GetPatentByReId) //管理员通过ID查看报告申请的专利   √
-	}
+		r.PUT("/unReject/:report_id", api.UnReject)        //管理员撤销驳回，处理中   √
+		r.PUT("/reject/:report_id", api.Reject)            //管理员驳回请求(标记)   √
+		r.PUT("/upload", api.UploadReport)                 //管理员更新上传文件相关数据   √（真正的上传接口在public）
+		r.PUT("/files/:report_id", api.DeleteUploadReport) //管理员删除报告（删除files）   √
 
-	r1 := v1.Group("/valuation-report").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
-	{
-		r1.GET("", api.GetValuationLists) //管理员查看所有估值报告申请表   √
-	}
-
-	r2 := v1.Group("/infringement-report").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
-	{
-		r2.GET("", api.GetInfringementLists) //管理员查看所有估值报告申请表   √
+		r.GET("/:report_id", api.GetReportById)                      //管理员通过ID查看报告申请表   √
+		r.GET("/patent/:report_id", api.GetPatentByReId)             //管理员通过ID查看报告申请的专利   √
+		r.GET("/reportList/:patent_id", api.GetReportListByPatentId) //管理员通过PatentId去查看他申请的报告有哪些   √
+		r.GET("/type/:type", api.GetListsByType)                     //管理员查看Type类型报告申请表   √
+		//r.GET("/infringementList", api.GetInfringementLists)         //管理员查看所有估值报告申请表   √
 	}
 
 }

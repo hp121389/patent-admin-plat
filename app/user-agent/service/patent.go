@@ -2,12 +2,11 @@ package service
 
 import (
 	"errors"
+	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"github.com/prometheus/common/log"
 	"go-admin/app/admin-agent/service/dtos"
 	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service/dto"
-
-	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"gorm.io/gorm"
 )
 
@@ -19,7 +18,6 @@ type Patent struct {
 func (e *Patent) GetPage(c *dto.PatentReq, list *[]models.Patent, count *int64) error {
 	var err error
 	var data models.Patent
-
 	err = e.Orm.Model(&data).
 		Find(list).Limit(-1).Offset(-1).
 		Count(count).Error
@@ -48,6 +46,7 @@ func (e *Patent) GetPageByIds(d *dto.PatentsIds, list *[]models.Patent, count *i
 			}
 		}
 	}
+
 	if err != nil {
 		e.Log.Errorf("db error:%s", err)
 		return err
@@ -57,7 +56,6 @@ func (e *Patent) GetPageByIds(d *dto.PatentsIds, list *[]models.Patent, count *i
 
 // Get 获取Patent对象
 func (e *Patent) Get(d *dto.PatentById, model *models.Patent) error {
-	//引用传递、函数名、形参、返回值
 	var err error
 	db := e.Orm.First(model, d.PatentId)
 	err = db.Error
@@ -92,7 +90,7 @@ func (e *Patent) GeByPNM(d *dto.PatentBriefInfo, model *models.Patent) error {
 }
 
 // GeById 获取Patent对象
-func (e *Patent) GeById(d *dtos.PatentReport, model *models.Patent) error {
+func (e *Patent) GeById(d *dtos.ReportRelaReq, model *models.Patent) error {
 	var err error
 	db := e.Orm.Where("patent_id = ?", d.PatentId).First(model)
 	err = db.Error
@@ -124,6 +122,7 @@ func (e *Patent) Insert(c *dto.PatentReq) error {
 		return err
 	}
 	c.GenerateList(&data)
+	data.UpdatedAt = dtos.UpdateTime()
 	err = e.Orm.Create(&data).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
@@ -151,6 +150,7 @@ func (e *Patent) InsertIfAbsent(c *dto.PatentReq) (*models.Patent, error) {
 		return &data, nil
 	}
 	c.GenerateList(&data)
+	data.UpdatedAt = dtos.UpdateTime()
 	err = e.Orm.Create(&data).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
@@ -173,6 +173,7 @@ func (e *Patent) UpdateLists(c *dto.PatentReq) error {
 
 	}
 	c.GenerateList(&model)
+	model.UpdatedAt = dtos.UpdateTime()
 	update := e.Orm.Model(&model).Where("patent_id = ?", &model.PatentId).Updates(&model)
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)
@@ -192,7 +193,7 @@ func (e *Patent) Remove(c *dto.PatentById) error {
 	var data models.Patent
 
 	db := e.Orm.Delete(&data, c.PatentId)
-
+	data.UpdatedAt = dtos.UpdateTime()
 	if db.Error != nil {
 		err = db.Error
 		e.Log.Errorf("Delete error: %s", err)

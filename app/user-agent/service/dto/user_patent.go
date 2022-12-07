@@ -2,7 +2,6 @@ package dto
 
 import (
 	"go-admin/app/user-agent/models"
-	"go-admin/common/dto"
 	common "go-admin/common/models"
 )
 
@@ -13,27 +12,14 @@ const (
 	FocusType = "关注"
 )
 
-type UserPatentGetPageReq struct {
-	dto.Pagination `search:"-"`
-	UserId         int    `form:"UserId" search:"type:exact;column:UserId;table:user_patent" comment:"用户ID" `
-	PatentId       int    `form:"PatentId" search:"type:exact;column:TagId;table:user_patent" comment:"专利ID" `
-	Type           string `json:"Type" gorm:"size:64;comment:关系类型（关注/认领）"`
-	UserPatentOrder
-}
-
-type UserPatentOrder struct {
-	CreatedAtOrder string `search:"type:order;column:created_at;table:user_patent" form:"createdAtOrder"`
-}
-
-func (d *UserPatentGetPageReq) GetUserId() interface{} {
-	return d.UserId
-}
-
 type UserPatentObject struct {
-	UserId   int    `json:"userId" gorm:"size:128;comment:用户ID"`
-	PatentId int    `form:"patentId" search:"type:exact;column:TagId;table:user_patent" comment:"专利ID" `
-	Type     string `json:"type" gorm:"size:64;comment:关系类型（关注/认领）"`
-	PNM      string `json:"PNM" gorm:"size:128;comment:申请号"`
+	UserId    int    `json:"userId" gorm:"size:128;comment:用户ID"`
+	PatentId  int    `form:"patentId" search:"type:exact;column:TagId;table:user_patent" comment:"专利ID" `
+	Type      string `json:"type" gorm:"size:64;comment:关系类型（关注/认领）"`
+	PNM       string `json:"PNM" gorm:"size:128;comment:申请号"`
+	CreatedAt string `json:"createdAt" gorm:"comment:创建时间"`
+	UpdatedAt string `json:"updatedAt" gorm:"comment:最后更新时间"`
+
 	common.ControlBy
 }
 
@@ -50,6 +36,9 @@ func (d *UserPatentObject) GenerateUserPatent(g *models.UserPatent) {
 	g.UserId = d.UserId
 	g.Type = d.Type
 	g.PNM = d.PNM
+	g.CreatedAt = d.CreatedAt
+	g.UpdatedAt = d.UpdatedAt
+
 }
 
 func NewUserPatentClaim(userId, patentId, createdBy, updatedBy int, PNM string) *UserPatentObject {

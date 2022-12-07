@@ -2,14 +2,12 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	log "github.com/go-admin-team/go-admin-core/logger"
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"go-admin/app/admin-agent/model"
 	"go-admin/app/admin-agent/service/dtos"
 	"go-admin/app/user-agent/service/dto"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Report struct {
@@ -36,24 +34,11 @@ func (e *Report) GetReportById(d *dtos.ReportById, model *model.Report) error {
 	return nil
 }
 
-// GetValuationReportPages 获取ValuationReport对象列表
-func (e *Report) GetValuationReportPages(list *[]model.Report) error {
+// GetPagesByType 获取Type类型Report对象列表
+func (e *Report) GetPagesByType(typeRepo string, list *[]model.Report) error {
 	var err error
 	var data []model.Report
-	err = e.Orm.Model(&data).Where("Type = ?", dtos.ValuationType).
-		Find(list).Limit(-1).Offset(-1).Error
-	if err != nil {
-		e.Log.Errorf("db error:%s", err)
-		return err
-	}
-	return nil
-}
-
-// GetInfringementReportPages 获取InfringementReport对象列表
-func (e *Report) GetInfringementReportPages(list *[]model.Report) error {
-	var err error
-	var data []model.Report
-	err = e.Orm.Model(&data).Where("Type = ?", dtos.InfringementType).
+	err = e.Orm.Model(&data).Where("Type = ?", typeRepo).
 		Find(list).Limit(-1).Offset(-1).Error
 	if err != nil {
 		e.Log.Errorf("db error:%s", err)
@@ -64,14 +49,11 @@ func (e *Report) GetInfringementReportPages(list *[]model.Report) error {
 
 //--------------------------------------------patent---------------------------------------------------------
 
-// GetPatentByReId 获取Report对象
-func (e *Report) GetPatentByReId(reid int, model *model.PatentReport) error {
+// GetPatentByReId 获取patent对象
+func (e *Report) GetPatentByReId(reid int, model *model.ReportRelation) error {
 
 	var err error
 	db := e.Orm.Where("report_Id = ? ", reid).First(model)
-
-	//fmt.Println(model.PatentId)   //1：为什么一直是1:First在where后
-
 	err = db.Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		err = errors.New("报告对应专利不存在或无权查看")
@@ -79,6 +61,84 @@ func (e *Report) GetPatentByReId(reid int, model *model.PatentReport) error {
 		return err
 	}
 	if db.Error != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// GetReportIdsByPatentId 通过PatentId获取report对象ids
+func (e *Report) GetReportIdsByPatentId(patentId int, userId int, list *[]model.ReportRelation) error {
+
+	var err error
+	db := e.Orm.Where("patent_id = ? and user_id = ?", patentId, userId).Find(list)
+	err = db.Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		err = errors.New("报告对应专利不存在或无权查看")
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	if db.Error != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// GetReportIdsByUserId 通过UserId获取report对象ids
+func (e *Report) GetReportIdsByUserId(userId int, list *[]model.ReportRelation) error {
+
+	var err error
+	db := e.Orm.Where("user_id = ? ", userId).Find(list)
+	err = db.Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		err = errors.New("报告对应专利不存在或无权查看")
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	if db.Error != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// GetReportIdsByType 通过type获取report对象ids
+func (e *Report) GetReportIdsByType(d *dtos.ReportRelaReq, list *[]model.ReportRelation) error {
+	var err error
+	db := e.Orm.Where("user_id = ? and type = ?", d.UserId, d.Type).Find(list)
+	err = db.Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		err = errors.New("报告对应专利不存在或无权查看")
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	if db.Error != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// GetReportListByIds 通过ReportIds找到对应的ReportList
+func (e *Report) GetReportListByIds(d *dtos.ReportIds, list *[]model.Report) error {
+	var err error
+	var ids []int = d.GetReportId()
+	for i := 0; i < len(ids); i++ {
+		if ids[i] != 0 {
+			var data1 model.Report
+			err = e.Orm.Model(&data1).
+				Where("report_Id = ? ", ids[i]).
+				First(&data1).Limit(-1).Offset(-1).
+				Error
+			*list = append(*list, data1)
+			if err != nil {
+				e.Log.Errorf("db error:%s", err)
+				return err
+			}
+		}
+	}
+	if err != nil {
 		e.Log.Errorf("db error:%s", err)
 		return err
 	}
@@ -99,9 +159,7 @@ func (e *Report) UpdateReports(c *dtos.ReportGetPageReq) error {
 
 	}
 	c.GenerateNoneFile(&model)
-	CurrentTime1 := fmt.Sprintf("%v", time.Now())
-	CurrentTime2 := CurrentTime1[0:19]
-	model.UpdatedAt = CurrentTime2
+	model.UpdatedAt = dtos.UpdateTime()
 	update := e.Orm.Model(&model).Where("report_id = ?", &model.ReportId).Updates(&model)
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)
@@ -121,12 +179,11 @@ func (e *Report) UploadReport(c *dtos.ReportGetPageReq) error {
 	var model model.Report
 	db := e.Orm.First(&model, c.ReportId)
 	if err = db.Error; err != nil {
-		e.Log.Errorf("Service UpdateSysUser error: %s", err)
+		e.Log.Errorf("Service Report error: %s", err)
 		return err
 	}
 	if db.RowsAffected == 0 {
-		return errors.New("package not found")
-
+		return errors.New("report not found")
 	}
 
 	switch c.FilesOpt {
@@ -137,16 +194,16 @@ func (e *Report) UploadReport(c *dtos.ReportGetPageReq) error {
 	default:
 		c.Generate(&model)
 	}
-	CurrentTime1 := fmt.Sprintf("%v", time.Now())
-	CurrentTime2 := CurrentTime1[0:19]
-	model.UpdatedAt = CurrentTime2
+
+	model.UpdatedAt = dtos.UpdateTime()
 	update := e.Orm.Model(&model).Where("report_id = ?", &model.ReportId).Updates(&model)
+
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err
 	}
 	if update.RowsAffected == 0 {
-		err = errors.New("update userinfo error")
+		err = errors.New("update report error")
 		log.Warnf("db update error")
 		return err
 	}

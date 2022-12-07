@@ -2,7 +2,6 @@ package models
 
 import (
 	"go-admin/common/models"
-	"time"
 )
 
 type Patent struct {
@@ -10,8 +9,8 @@ type Patent struct {
 	PNM              string `json:"PNM" gorm:"size:128;comment:申请号"`
 	PatentProperties string `json:"patentProperties" gorm:"comment:专利详情"`
 	models.ControlBy
-	CreatedAt time.Time `json:"CreatedAt" gorm:"comment:创建时间"`
-	UpdatedAt time.Time `json:"UpdatedAt" gorm:"comment:最后更新时间"`
+	CreatedAt string `json:"CreatedAt" gorm:"comment:创建时间"`
+	UpdatedAt string `json:"UpdatedAt" gorm:"comment:最后更新时间"`
 }
 
 func (Patent) TableName() string {

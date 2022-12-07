@@ -122,7 +122,6 @@ func (s *PackageUpdateReq) GenerateAndDeleteFiles(model *models.Package) {
 			}
 		}
 		files = files[:slow]
-
 		fbs, _ := json.Marshal(files)
 		model.Files = string(fbs)
 	}

@@ -11,9 +11,13 @@ import (
 	"go-admin/app/user-agent/service/dto"
 	"gorm.io/gorm"
 	"math"
+	"math/rand"
 	"os"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	cDto "go-admin/common/dto"
 )
@@ -33,9 +37,7 @@ func (e *Patent) GetPage(c *dto.PatentGetPageReq, list *[]models.Patent, count *
 	var data models.Patent
 	var model models.Patent
 	var list1 []models.Patent
-
 	//fmt.Println("id在这里？", c.GetPatentId())
-	//fmt.Println("pid在这里", c.PId)
 	db := e.Orm.First(&model, c.GetPatentId())
 	err = db.Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
@@ -53,7 +55,7 @@ func (e *Patent) GetPage(c *dto.PatentGetPageReq, list *[]models.Patent, count *
 	var seg gse.Segmenter
 	seg.LoadDict()
 	segments := seg.Segment([]byte(sentence))
-	see := gse.GetResult(segments)
+	see := GetResult(segments)
 	resWords := RemoveStop(see)
 	result := unique(resWords)
 	var sqlse2 = "CONCAT_WS(\" \", TI, CL) REGEXP \"" + strings.Join(result, separator) + "\""
@@ -87,16 +89,32 @@ func (e *Patent) GetPage(c *dto.PatentGetPageReq, list *[]models.Patent, count *
 			}
 		}
 		segments1 := seg.Segment([]byte(list1[j].TI + list1[j].CL))
-		resWords1 := gse.GetResult(segments1)
+		resWords1 := GetResult(segments1)
 		result1 := RemoveStop(unique(resWords1))
 		temp.score, _ = ts.Similarity(result1, result)
-		//keywords := ts.Keywords(0.2, 0.5)
-		//fmt.Println("keywords %d : %s", j, keywords)
-		//temp.score = CosineSimilar(result1, result)
 		sims = append(sims, temp)
 	}
+	keywords := ts.Keywords(0.2, 0.8)
+	keywords = unique(keywords)
+	fmt.Println("keywords222222 ", keywords)
+	fmt.Println("检索词：\n")
+	var searchlist string
+	var searchword = make([][]string, 50)
+	for i := 0; i < len(keywords); i++ {
+		searchlist += keywords[i] + " " + toString(getSimilar(keywords[i])) + "\n"
+		//fmt.Println(keywords[i], " ", getSimilar(keywords[i]))
+		temp := getSimilar(keywords[i])
+		searchword[i] = make([]string, 0)
+		searchword[i] = append(searchword[i], keywords[i])
+		for j := 0; j < len(temp); j++ {
+			searchword[i] = append(searchword[i], temp[j])
+		}
+	}
+	searchtype := getSearchType(searchword)
+	fmt.Println("检索式：", searchtype)
 	n := len(sims)
 	var conclusion []string
+	var count1 = 1
 	for i := 0; i < n-1; i++ {
 		maxNumIndex := i // 无序区第一个
 		for j := i + 1; j < n; j++ {
@@ -106,14 +124,34 @@ func (e *Patent) GetPage(c *dto.PatentGetPageReq, list *[]models.Patent, count *
 		}
 		sims[i], sims[maxNumIndex] = sims[maxNumIndex], sims[i]
 		list1[i], list1[maxNumIndex] = list1[maxNumIndex], list1[i]
-		fmt.Println("\n申请号：", list1[i].PNM, "\n专利名称：", list1[i].TI, "\n相似度：", sims[i].score)
-		if sims[i].score > 0.48 {
-			conclusion = append(conclusion, "对比文件 ", ": ", list1[i].CL, "\n\n")
+		if sims[i].score > 0.3 {
+			temp := strconv.Itoa(count1) + ".申请人: " + list1[i].INN + "\n申请单位:" + list1[i].PA + "\n专利名称:" + list1[i].TI + "\n申请号：" + list1[i].PNM + "\n申请日：" + list1[i].AD + "\n简介：" + list1[i].CL + "\n"
+			conclusion = append(conclusion, temp)
+			count1++
 		}
 	}
-	conclusion = append(conclusion, "基于以上对比文件，本申请的区别特征在于：", model.CL, "因此，本专利具备新颖性和创造性")
-	fmt.Println(conclusion)
+	str1 := html()
+	str1 = strings.Replace(str1, "number", GetRandomString(10), -1)
+	str1 = strings.Replace(str1, "pname", model.TI, -1)
+	str1 = strings.Replace(str1, "pearson", "北京邮电大学 胡泊", -1)
+	str1 = strings.Replace(str1, "startdate", getTime(), -1)
+	str1 = strings.Replace(str1, "institution", "教育部科技查新工作站", -1)
+	str1 = strings.Replace(str1, "finishdate", getTime(), -1)
+	str1 = strings.Replace(str1, "cname", model.TI, -1)
+	str1 = strings.Replace(str1, "telepoint", toHtml(model.CLAIMS), -1)
+	str1 = strings.Replace(str1, "retWord", toHtml(searchlist), -1)
+	str1 = strings.Replace(str1, "retType", toHtml(searchtype), -1)
+	str1 = strings.Replace(str1, "num1", strconv.Itoa(len(list1)), -1)
+	str1 = strings.Replace(str1, "num2", strconv.Itoa(count1-1), -1)
+	str1 = strings.Replace(str1, "retResult", toHtml(toString2(conclusion)), -1)
+	str1 = strings.Replace(str1, "retConclusion", toHtml(model.CL), -1)
+	fileName := "./app/user-agent/mytest.html"
+	dstFile, err := os.Create(fileName)
+	defer dstFile.Close()
+	dstFile.WriteString(str1 + "\n")
+	fmt.Println("写入文档" + fileName + "成功!")
 
+	//fmt.Println("str1在这里！", str1)
 	list = &list1
 	return nil
 }
@@ -179,6 +217,32 @@ func count(key string, a []string) int {
 	return count
 }
 
+func getTime() string {
+	Year := time.Now().Year()
+	Month := int(time.Now().Month())
+	Day := time.Now().Day()
+	time := strconv.Itoa(Year) + "年" + strconv.Itoa(Month) + "月" + strconv.Itoa(Day) + "日"
+	return time
+}
+func GetRandomString(l int) string {
+	str := "123456789ABCDEFGHIJKLMNPQRSTUVWXYZ"
+	bytes := []byte(str)
+	result := []byte{}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i := 0; i < l; i++ {
+		result = append(result, bytes[r.Intn(len(bytes))])
+	}
+
+	ok1, _ := regexp.MatchString(".[1|2|3|4|5|6|7|8|9]", string(result))
+	ok2, _ := regexp.MatchString(".[Z|X|C|V|B|N|M|A|S|D|F|G|H|J|K|L|Q|W|E|R|T|Y|U|I|P]", string(result))
+	if ok1 && ok2 {
+		return string(result)
+	} else {
+		return GetRandomString(l)
+	}
+
+}
+
 func tfidf(v string, tokens []string, n int, documentFrequency map[string]int) float64 {
 	tf := float64(count(v, tokens)) / float64(documentFrequency[v])
 	idf := math.Log(float64(n) / (float64(documentFrequency[v])))
@@ -237,7 +301,7 @@ func New(documents []string) *TextSimilarity {
 	for _, doc := range documents {
 
 		segments1 := seg.Segment([]byte(doc))
-		resWords := RemoveStop(gse.GetResult(segments1))
+		resWords := RemoveStop(GetResult(segments1))
 		allTokens = append(allTokens, resWords...)
 	}
 
@@ -287,7 +351,7 @@ func (ts *TextSimilarity) Keywords(threshLower, threshUpper float64) []string {
 	seg.LoadDict()
 	for _, doc := range ts.documents {
 		segments1 := seg.Segment([]byte(doc))
-		tokens := RemoveStop(gse.GetResult(segments1))
+		tokens := RemoveStop(GetResult(segments1))
 		n := len(tokens)
 		mapper := map[string]float64{}
 
@@ -313,10 +377,6 @@ func (ts *TextSimilarity) Keywords(threshLower, threshUpper float64) []string {
 		})
 
 		// Select the most common words relative to the corpus for this doc.
-		min, _ := minMaxKvSlice(vector)
-		vector = filter(vector, func(v kv) bool {
-			return (v.Value == min)
-		})
 
 		docKeywords = append(docKeywords, vector...)
 	}
@@ -353,67 +413,13 @@ func unique(resWords []string) []string {
 	return result[:result_idx]
 }
 
-//func CosineSimilar(srcWords, dstWords []string) float64 {
-//	// get all words
-//	allWordsMap := make(map[string]int, 0)
-//	for _, word := range srcWords {
-//		allWordsMap[word] += 1
-//	}
-//	for _, word := range dstWords {
-//		allWordsMap[word] += 1
-//	}
-//
-//	// stable the sort
-//	allWordsSlice := make([]string, 0)
-//	for word, _ := range allWordsMap {
-//		allWordsSlice = append(allWordsSlice, word)
-//	}
-//
-//	// assemble vector
-//	srcVector := make([]int, len(allWordsSlice))
-//	dstVector := make([]int, len(allWordsSlice))
-//	for _, word := range srcWords {
-//		if index := indexOfSclie(allWordsSlice, word); index != -1 {
-//			srcVector[index] += 1
-//		}
-//	}
-//	for _, word := range dstWords {
-//		if index := indexOfSclie(allWordsSlice, word); index != -1 {
-//			dstVector[index] += 1
-//		}
-//	}
-//	//fmt.Printf("srcVector:%v\n", srcVector)
-//	//fmt.Printf("dstVector:%v\n", dstVector)
-//
-//	// calc cos
-//	numerator := float64(0)
-//	srcSq := 0
-//	dstSq := 0
-//	for i, srcCount := range srcVector {
-//		dstCount := dstVector[i]
-//		numerator += float64(srcCount * dstCount)
-//		srcSq += srcCount * srcCount
-//		dstSq += dstCount * dstCount
-//	}
-//	denominator := math.Sqrt(float64(srcSq * dstSq))
-//
-//	return numerator / denominator
-//}
-//
-//func indexOfSclie(ss []string, s string) (index int) {
-//	index = -1
-//	for k, v := range ss {
-//		if s == v {
-//			index = k
-//			break
-//		}
-//	}
-//
-//	return
-//}
+func html() string {
+	str := "<p>\n    报告编号：number\n</p>\n<p>\n    &nbsp;\n</p>\n<p>\n    &nbsp;\n</p>\n<p>\n    &nbsp;\n</p>\n<p style=\"text-align:center\">\n    <strong><span style=\"font-size:29px;font-family: 宋体\">科 技 查 新 报 告</span></strong>\n</p>\n<p style=\"text-align:center\">\n    <strong><span style=\"font-size:29px;font-family:宋体\">&nbsp;</span></strong>\n</p>\n<p style=\"text-align:center\">\n    <strong><span style=\"font-size:29px;font-family:宋体\">&nbsp;</span></strong>\n</p>\n<p style=\"margin-top:16px;margin-right:0;margin-bottom:16px;margin-left:140px;text-align:left;line-height:150%\">\n    <strong><span style=\"font-size:19px;line-height: 150%\">项目名称：&nbsp;&nbsp;&nbsp; </span></strong><span style=\"font-size:16px;line-height:150%\">pname</span>\n</p>\n<p style=\"margin-top:16px;margin-right:0;margin-bottom:16px;margin-left:140px;text-align:left;line-height:150%\">\n    <strong><span style=\"font-size:19px;line-height: 150%\">委 托 人 ：&nbsp;&nbsp;&nbsp; </span></strong><span style=\"font-size:16px;line-height:150%\">pearson</span>\n</p>\n<p style=\"margin-top:16px;margin-right:0;margin-bottom:16px;margin-left:140px;text-align:left;line-height:150%\">\n    <strong><span style=\"font-size:19px;line-height: 150%\">委托日期：&nbsp;&nbsp;&nbsp; </span></strong><span style=\"font-size:16px;line-height:150%\">startdate</span>\n</p>\n<p style=\"margin-top:16px;margin-right:0;margin-bottom:16px;margin-left:140px;text-align:left;line-height:150%\">\n    <strong><span style=\"font-size:19px;line-height: 150%\">查新机构：&nbsp;&nbsp;&nbsp; </span></strong><span style=\"font-size:16px;line-height:150%\">institution</span>\n</p>\n<p style=\"margin-top:16px;margin-right:0;margin-bottom:16px;margin-left:140px;text-align:left;line-height:150%\">\n    <strong><span style=\"font-size:19px;line-height: 150%\">完成日期：&nbsp;&nbsp;&nbsp; </span></strong><span style=\"font-size:16px;line-height:150%\">finishdate</span>\n</p>\n<p style=\"text-align:left\">\n    <strong><span style=\"font-size:21px\">&nbsp;</span></strong>\n</p>\n<p style=\"text-align:left\">\n    <strong><span style=\"font-size:16px\">&nbsp;</span></strong>\n</p>\n<p style=\"text-align:left\">\n    <strong><span style=\"font-size:16px\">&nbsp;</span></strong>\n</p>\n<p style=\"text-align:left\">\n    <strong><span style=\"font-size:16px\">&nbsp;</span></strong>\n</p>\n<p style=\"text-align:left\">\n    <strong><span style=\"font-size:21px\">&nbsp;</span></strong>\n</p>\n<p style=\"text-align:left\">\n    <strong><span style=\"font-size:21px\">&nbsp;</span></strong>\n</p>\n<p style=\"text-align:left\">\n    <strong><span style=\"font-size:21px\">&nbsp;</span></strong>\n</p>\n<p style=\"text-align:center\">\n    <strong><span style=\"font-size:16px\">教育部科技发展中心</span></strong>\n</p>\n<p style=\"text-align:center\">\n    <span style=\"font-size:16px\">二O一三年制</span>\n</p>\n<p>\n    <br/>\n</p>\n<table cellspacing=\"0\" cellpadding=\"0\">\n    <tbody>\n        <tr style=\";height:36px\" class=\"firstRow\">\n            <td rowspan=\"2\" style=\"border: 1px solid windowtext; padding: 0px 7px; word-break: break-all;\" width=\"77\" height=\"36\">\n                <p style=\"text-align:justify;text-justify:distribute-all-lines\">\n                    查新项目\n                </p>\n                <p style=\"text-align:justify;text-justify:distribute-all-lines\">\n                    名称\n                </p>\n            </td>\n            <td colspan=\"6\" style=\"border-color: windowtext windowtext windowtext currentcolor; border-style: solid solid solid none; border-width: 1px 1px 1px medium; border-image: none 100% / 1 / 0 stretch; padding: 0px 7px; word-break: break-all;\" width=\"476\" height=\"36\">\n                <p>\n                    中文：cname\n                </p>\n            </td>\n        </tr>\n        <tr style=\";height:36px\">\n            <td colspan=\"6\" style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"476\" height=\"36\">\n                <p>\n                    英文：略\n                </p>\n            </td>\n        </tr>\n        <tr style=\";height:23px\">\n            <td rowspan=\"5\" style=\"border-color: currentcolor windowtext windowtext; border-style: none solid solid; border-width: medium 1px 1px; border-image: none 100% / 1 / 0 stretch; padding: 0px 7px; word-break: break-all;\" width=\"77\" height=\"23\">\n                <p style=\"text-align:center\">\n                    查新机构\n                </p>\n            </td>\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px;\" width=\"75\" height=\"23\">\n                <p>\n                    名称\n                </p>\n            </td>\n            <td colspan=\"5\" style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"401\" height=\"23\">\n                insName<br/>\n            </td>\n        </tr>\n        <tr style=\";height:23px\">\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px;\" width=\"75\" height=\"23\">\n                <p>\n                    通信地址\n                </p>\n            </td>\n            <td colspan=\"3\" style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"232\" height=\"23\">\n                insAddress<br/>\n            </td>\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px;\" width=\"67\" height=\"23\">\n                <p>\n                    邮政编码\n                </p>\n            </td>\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"102\" height=\"23\">\n                insPost<br/>\n            </td>\n        </tr>\n        <tr style=\";height:17px\">\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"75\" height=\"17\">\n                <p>\n                    负责人\n                </p>\n            </td>\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"93\" height=\"17\">\n                pic<br/>\n            </td>\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px;\" width=\"58\" height=\"17\">\n                <p>\n                    电话\n                </p>\n            </td>\n            <td colspan=\"3\" style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"250\" height=\"17\">\n                tele1<br/>\n            </td>\n        </tr>\n        <tr style=\";height:16px\">\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"75\" height=\"16\">\n                <p>\n                    联系人\n                </p>\n            </td>\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"93\" height=\"16\">\n                ptc<br/>\n            </td>\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px;\" width=\"58\" height=\"16\">\n                <p>\n                    电话\n                </p>\n            </td>\n            <td colspan=\"3\" style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"250\" height=\"16\">\n                tele2<br/>\n            </td>\n        </tr>\n        <tr style=\";height:27px\">\n            <td style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px;\" width=\"75\" height=\"27\">\n                <p>\n                    电子邮箱\n                </p>\n            </td>\n            <td colspan=\"5\" style=\"border-color: currentcolor windowtext windowtext currentcolor; border-style: none solid solid none; border-width: medium 1px 1px medium; padding: 0px 7px; word-break: break-all;\" width=\"401\" height=\"27\">\n                insEamil<br/>\n            </td>\n        </tr>\n        <tr style=\";height:107px\">\n            <td colspan=\"7\" style=\"border-color: currentcolor windowtext windowtext; border-style: none solid solid; border-width: medium 1px 1px; border-image: none 100% / 1 / 0 stretch; padding: 0px 7px; word-break: break-all;\" width=\"553\" valign=\"top\" height=\"107\">\n                <p>\n                    一、项目的科学技术要点\n                </p> <p style=\"text-indent:28px\">&nbsp;telepoint\n       </p>      </td>\n        </tr>\n        <tr style=\";height:107px\">\n            <td colspan=\"7\" style=\"border-color: currentcolor windowtext windowtext; border-style: none solid solid; border-width: medium 1px 1px; border-image: none 100% / 1 / 0 stretch; padding: 0px 7px; word-break: break-all;\" width=\"553\" valign=\"top\" height=\"107\">\n                <p>\n                    二、专利检索范围及检索策略\n                </p>\n                <p style=\"text-indent:28px\">\n                    检索的中文数据库\n                </p>\n                <p style=\"text-indent:28px\">\n                    &nbsp;cDataBase\n                </p>\n                <p style=\"text-indent:28px\">\n                    &nbsp;\n                </p>\n                <p style=\"text-indent:28px\">\n                    检索词\n                </p>\n                              retWord\n                              <p style=\"text-indent:28px\">\n                    &nbsp;\n                </p>\n                <p style=\"text-indent:28px\">\n                    检索式\n                </p>\n                                   &nbsp;retType\n              &nbsp;\n                <p style=\"text-indent:28px\">\n                    &nbsp;\n                </p>\n            </td>\n        </tr>\n        <tr style=\";height:89px\">\n            <td colspan=\"7\" style=\"border-color: currentcolor windowtext windowtext; border-style: none solid solid; border-width: medium 1px 1px; border-image: none 100% / 1 / 0 stretch; padding: 0px 7px; word-break: break-all;\" width=\"553\" valign=\"top\" height=\"89\">\n                <p>\n                    三、检索结果\n                </p>\n                <p style=\"text-indent:28px\">\n                    依据上专利检索范围和检索式，共检索出相专利 num1 项，其中密切相关专利 num2 项，题录为：\n                </p>&nbsp;retResult\n                <p style=\"text-indent:28px\">\n                    &nbsp;\n                </p>\n            </td>\n        </tr>\n        <tr style=\";height:89px\">\n            <td colspan=\"7\" style=\"border-color: currentcolor windowtext windowtext; border-style: none solid solid; border-width: medium 1px 1px; border-image: none 100% / 1 / 0 stretch; padding: 0px 7px; word-break: break-all;\" width=\"553\" valign=\"top\" height=\"89\">\n                <p>\n                    四、查新结论\n                </p>\n                                        <p style=\"text-indent:28px\">   经对检出的相关文献进行阅读、分析、对比，结论如下：</p> <p style=\"text-indent:28px\"> retConclusion </p> <p style=\"text-indent:28px\"> 本次查新在国内公开发表的中文文献中，尚未见有与本项目研究内容一致的文献报道，本项目研究内容在国内外具备新颖性。<br/>\n                </p>&nbsp;\n                <p>\n                    &nbsp;\n                </p>\n            </td>\n        </tr>\n    </tbody>\n</table>\n<p>\n    <br/>\n</p>"
+	return str
+}
 
 func RemoveStop(unstop []string) []string {
-	file, err := os.Open("E:/下载/testgit/app/user-agent/file1.txt")
+	file, err := os.Open("./app/user-agent/file1.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -439,6 +445,120 @@ func RemoveStop(unstop []string) []string {
 		}
 	}
 	return result
+}
+
+func getSimilar(word string) []string {
+	var max = 4
+	file, err := os.Open("./app/user-agent/cilin.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	similarwords := make([]string, 0)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		similarword := strings.Split(line, "\n")
+		similarwords = append(similarwords, similarword[0])
+	}
+	for i := 0; i < len(similarwords); i++ {
+		result := make([]string, 0)
+		temp := strings.Split(similarwords[i], " ")
+		var include = false
+		var count = 0
+		for j := 1; j < len(temp) && count < max; j++ {
+			if temp[j] == word {
+				include = true
+			} else {
+				result = append(result, temp[j])
+				count++
+			}
+		}
+		if include {
+			return result
+		}
+	}
+	return nil
+}
+
+func toString(list []string) string {
+	var result string
+	for i := 0; i < len(list); i++ {
+		result = result + list[i] + " "
+	}
+	return result
+}
+func toString2(list []string) string {
+	var result string
+	for i := 0; i < len(list); i++ {
+		result = result + list[i] + "\n"
+	}
+	return result
+}
+
+func GetResult(segs []gse.Segment, searchMode ...bool) []string {
+	var mode bool
+	var output []string
+	if len(searchMode) > 0 {
+		mode = searchMode[0]
+	}
+
+	if mode {
+		for _, seg := range segs {
+			output = append(output, seg.Token().Text())
+		}
+		return output
+	}
+	partOfSpeech := []string{"v", "n", "vn", "x", "an", "nz", "a", "l", "ns"}
+
+	for _, seg := range segs {
+		for i := 0; i < len(partOfSpeech); i++ {
+			if seg.Token().Pos() == partOfSpeech[i] {
+				output = append(output, seg.Token().Text())
+				break
+			}
+		}
+	}
+
+	return output
+}
+
+func toHtml(word string) string {
+	result := strings.Replace(word, "\n", "<br>", -1)
+	return result
+
+}
+
+func getSearchType(word [][]string) string {
+	resultt := ""
+	num := 0
+	for num = 0; word[num] != nil; num++ {
+	}
+	for k := 0; k < 3; k++ {
+		resultt += strconv.Itoa(k+1) + ".  "
+		for i := k * num / 3; i < (k+1)*num/3; i++ {
+			temp := ""
+			if word[i] != nil {
+				temp += " ( "
+				for j := 0; j < len(word[i]); j++ {
+					if j < len(word[i])-1 {
+						temp += word[i][j] + " OR "
+					} else {
+						temp += word[i][j]
+					}
+				}
+				temp += " ) "
+				if i < (k+1)*num/3-1 {
+					resultt += temp + " AND "
+				} else {
+					resultt += temp
+				}
+			}
+		}
+		resultt += "\n"
+	}
+	return resultt
+
 }
 
 // Get 获取Patent对象

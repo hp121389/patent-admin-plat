@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service/dto"
@@ -11,20 +12,21 @@ type PatentPackage struct {
 	service.Service
 }
 
-//GetPatentIdByPackageId 通过PackageId获得PatentId
+// GetPatentIdByPackageId 通过PackageId获得PatentId
 func (e *PatentPackage) GetPatentIdByPackageId(c *dto.PackagePageGetReq, list *[]models.PatentPackage, count *int64) error {
 	var err error
 	var data models.PatentPackage
 
 	err = e.Orm.Model(&data).
 		Where("Package_Id = ?", c.PackageId).
-		Find(list).Limit(-1).Offset(-1).
+		Find(&list).Limit(-1).Offset(-1).
 		Count(count).Error
 
 	if err != nil {
 		e.Log.Errorf("db error:%s", err)
 		return err
 	}
+	fmt.Println(list)
 	return nil
 }
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	log "github.com/go-admin-team/go-admin-core/logger"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg"
 	"gorm.io/gorm"
@@ -24,6 +25,8 @@ func (u *Login) GetUser(tx *gorm.DB) (user SysUser, role SysRole, err error) {
 		log.Errorf("user login error, %s", err.Error())
 		return
 	}
+	fmt.Println(user.Password)
+	fmt.Println(user.RoleIds)
 	err = tx.Table("sys_role").Where("role_id = ? ", user.RoleId).First(&role).Error
 	if err != nil {
 		log.Errorf("get role error, %s", err.Error())

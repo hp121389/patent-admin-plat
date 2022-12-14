@@ -1,6 +1,6 @@
 module go-admin
 
-go 1.17
+go 1.18
 
 require (
 	github.com/alibaba/sentinel-golang v1.0.4

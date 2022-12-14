@@ -9,12 +9,11 @@ type Patent struct {
 	PNM              string `json:"PNM" gorm:"size:128;comment:申请号"`
 	PatentProperties string `json:"patentProperties" gorm:"comment:专利详情"`
 	models.ControlBy
-	CreatedAt string `json:"CreatedAt" gorm:"comment:创建时间"`
-	UpdatedAt string `json:"UpdatedAt" gorm:"comment:最后更新时间"`
+	//嵌入结构体：先写好models然后嵌入，等效于models本体
 }
 
 func (Patent) TableName() string {
-	return "user-agent"
+	return "patent"
 }
 
 func (e *Patent) Generate() models.ActiveRecord {

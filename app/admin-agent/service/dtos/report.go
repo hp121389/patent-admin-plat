@@ -18,6 +18,7 @@ const (
 	ProcessTag = "处理中"
 	ApplyTag   = "未审核"
 	CancelTag  = "已撤销"
+	OKTag      = "已完成"
 )
 
 type ReportInsertGetReq struct {
@@ -29,16 +30,18 @@ type ReportInsertGetReq struct {
 }
 
 type ReportGetPageReq struct {
-	ReportId         int    `form:"reportId" search:"type:exact;column:ReportId;table:report" comment:"报告ID"`
-	ReportProperties string `form:"reportProperties" search:"type:exact;column:报告详情;table:report" comment:"报告详情""`
-	ReportName       string `form:"reportName" search:"type:exact;column:reportName;table:report" comment:"报告名称"`
-	Type             string `form:"Type" search:"type:exact;column:Type;table:report" comment:"报告类型"`
+	ReportId         int      `form:"reportId" search:"type:exact;column:ReportId;table:report" comment:"报告ID"`
+	ReportProperties string   `form:"reportProperties" search:"type:exact;column:报告详情;table:report" comment:"报告详情""`
+	ReportName       string   `form:"reportName" search:"type:exact;column:reportName;table:report" comment:"报告名称"`
+	Type             string   `form:"Type" search:"type:exact;column:Type;table:report" comment:"报告类型"`
+	CreatedAt        string   `json:"createdAt" gorm:"comment:创建时间"`
+	UpdatedAt        string   `json:"updatedAt" gorm:"comment:最后更新时间"`
+	FilesOpt         string   `json:"filesOpt" comment:"文件操作"`
+	Files            []string `json:"files" comment:"报告文件"`
+	UserId           int      `json:"userId" gorm:"size:128;comment:用户ID"`
+	UserName         int      `json:"userName" gorm:"size:128;comment:用户名"`
 	ReportReject
 	models.ControlBy
-	CreatedAt string   `json:"createdAt" gorm:"comment:创建时间"`
-	UpdatedAt string   `json:"updatedAt" gorm:"comment:最后更新时间"`
-	FilesOpt  string   `json:"filesOpt" comment:"文件操作"`
-	Files     []string `json:"files" comment:"报告文件"`
 }
 
 func (s *ReportGetPageReq) Generate(model *model.Report) {
@@ -53,7 +56,6 @@ func (s *ReportGetPageReq) Generate(model *model.Report) {
 	model.UpdatedAt = s.UpdatedAt
 	model.CreateBy = s.CreateBy
 	model.UpdateBy = s.UpdateBy
-
 }
 
 func (s *ReportGetPageReq) GenerateNoneFile(model *model.Report) {

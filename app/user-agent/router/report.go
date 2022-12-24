@@ -17,7 +17,7 @@ func registerReportRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlew
 	apiUser := apiUser.Report{}
 	r := v1.Group("/report").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
-		r.GET("/reportList/:patent_id", apiUser.GetReportListByPatentId) // 用户查看该专利的报告有哪些   √
+		r.GET("/reportList/:patent_id", apiUser.GetReportListByPatentId) // 用户查看该专利的报告   √
 		r.GET("/query/:report_id", apiUser.UserGetReportById)            // 用户查询报告   √
 		r.GET("", apiUser.UserGetReports)                                // 用户查看认领专利的报告申请表   √
 		r.GET("/patent/:report_id", apiUser.GetPatentByReId)             // 用户通过 reportID 查看报告申请的专利   √

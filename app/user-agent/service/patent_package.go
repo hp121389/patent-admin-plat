@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service/dto"
@@ -26,7 +25,7 @@ func (e *PatentPackage) GetPatentIdByPackageId(c *dto.PackagePageGetReq, list *[
 		e.Log.Errorf("db error:%s", err)
 		return err
 	}
-	fmt.Println(list)
+	//fmt.Println(list)
 	return nil
 }
 

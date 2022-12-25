@@ -7,10 +7,11 @@ type Tag struct {
 	TagName string `json:"tagName" gorm:"size:128;"`              //标签名称
 	Desc    string `json:"desc"  gorm:"size:255"  `               //标签描述
 	models.ControlBy
+	models.ModelTime
 }
 
 func (Tag) TableName() string {
-	return "tag_table"
+	return "tag"
 
 }
 func (e *Tag) Generate() models.ActiveRecord {

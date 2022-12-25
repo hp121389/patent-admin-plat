@@ -3,8 +3,9 @@ package service
 import (
 	"errors"
 	"fmt"
+
 	"github.com/go-admin-team/go-admin-core/sdk/service"
-	models "go-admin/app/user-agent/models"
+	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service/dto"
 )
 
@@ -26,23 +27,6 @@ func (e *UserPatent) GetUserPatentIds(c *dto.UserPatentObject, list *[]models.Us
 	}
 	return nil
 }
-
-//// GetUserFocusPatentIds 通过UserId获得专利列表的ID数组
-//func (e *UserPatent) GetUserFocusPatentIds(c *dto.UserPatentGetPageReq, list *[]models.UserPatent) error {
-//	var err error
-//	var data models.UserPatent
-//	fmt.Println(c)
-//
-//	err = e.Orm.Model(&data).
-//		Where("User_Id = ? AND type = ?", c.GetUserId(), dto.FocusType).
-//		Find(&list).Limit(-1).Offset(-1).Error
-//	fmt.Println(list)
-//	if err != nil {
-//		e.Log.Errorf("db error:%s", err)
-//		return err
-//	}
-//	return nil
-//}
 
 // GetClaimLists 通过专利列表的ID数组获得认领专利列表
 func (e *UserPatent) GetClaimLists(c *dto.UserPatentObject, list *[]models.UserPatent, count *int64) error {
@@ -130,32 +114,6 @@ func (e *UserPatent) RemoveFocus(c *dto.UserPatentObject) error {
 	return nil
 }
 
-// InsertUserPatent insert relationship between user and patent
-func (e *UserPatent) InsertUserPatent(c *dto.UserPatentObject) error {
-	var err error
-	var data models.UserPatent
-	var i int64
-	err = e.Orm.Model(&data).Where("Patent_Id = ? AND User_Id = ? AND Type = ?", c.PatentId, c.UserId, c.Type).
-		Count(&i).Error
-	if err != nil {
-		e.Log.Errorf("db error: %s", err)
-		return err
-	}
-	if i > 0 {
-		err = fmt.Errorf("%w, (p:%d, u:%d, t:%s) existed", ErrConflictBindPatent, c.PatentId, c.UserId, c.Type)
-		e.Log.Errorf("db error: %s", err)
-		return err
-	}
-
-	c.GenerateUserPatent(&data)
-	err = e.Orm.Create(&data).Error
-	if err != nil {
-		e.Log.Errorf("db error: %s", err)
-		return err
-	}
-	return nil
-}
-
 // GetUsersByPatentId  通过专利id数组获取关注或者认领的用户
 func (e *UserPatent) GetUsersByPatentId(list *[]models.UserPatent, pid *dto.PatentsIds) error {
 	var err error
@@ -181,7 +139,7 @@ func (e *UserPatent) GetUsersByPatentId(list *[]models.UserPatent, pid *dto.Pate
 	return nil
 }
 
-// GetUsersByPatentId  通过专利id数组获取关注或者认领的用户
+// GetFocusUsersByPatentId   通过专利id数组获取关注或者认领的用户
 func (e *UserPatent) GetFocusUsersByPatentId(list *[]models.UserPatent, pid *dto.PatentsIds) error {
 	var err error
 	var data models.UserPatent
@@ -206,24 +164,28 @@ func (e *UserPatent) GetFocusUsersByPatentId(list *[]models.UserPatent, pid *dto
 	return nil
 }
 
-//// Get
-//func (e *UserPatent) GetTwoUserRelationshipInThisPackage(plist *dto.PatentsIds, member1 int, member2 int) (int, error) {
-//	var data models.UserPatent
-//	sum := 0
-//	for i := 0; i < len(plist.PatentIds); i++ {
-//		var count1 int64
-//		var count2 int64
-//		err := e.Orm.Model(data).Where("Patent_Id = ? and User_Id = ?", plist.PatentIds[i], member1).Count(&count1).Error
-//		err = e.Orm.Model(data).Where("Patent_Id = ? and User_Id = ?", plist.PatentIds[i], member2).Count(&count2).Error
-//		if err != nil {
-//			e.Log.Errorf("db error: %s", err)
-//			return 0, err
-//		}
-//		if count1 != 0 && count2 != 0 {
-//			sum++
-//		}
-//
-//	}
-//	return sum, nil
-//
-//}
+// InsertUserPatent insert relationship between user and patent
+func (e *UserPatent) InsertUserPatent(c *dto.UserPatentObject) error {
+	var err error
+	var data models.UserPatent
+	var i int64
+	err = e.Orm.Model(&data).Where("Patent_Id = ? AND User_Id = ? AND Type = ?", c.PatentId, c.UserId, c.Type).
+		Count(&i).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if i > 0 {
+		err = fmt.Errorf("%w, (p:%d, u:%d, t:%s) existed", ErrConflictBindPatent, c.PatentId, c.UserId, c.Type)
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+
+	c.GenerateUserPatent(&data)
+	err = e.Orm.Create(&data).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	return nil
+}

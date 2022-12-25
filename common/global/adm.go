@@ -1,7 +1,7 @@
 package global
 
 const (
-	// Version user-agent-admin-plat version info
+	// Version patent-admin-plat version info
 	Version = "0.1.0"
 )
 

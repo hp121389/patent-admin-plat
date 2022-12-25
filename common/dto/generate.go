@@ -13,23 +13,7 @@ type ObjectById struct {
 	Ids []int `json:"Ids"`
 }
 
-type ObjectByPatentId struct {
-	PatentId int `uri:"patent_id"`
-}
-
-type ObjectByPId struct {
-	PId int `uri:"PId"`
-}
-
-type ObjectOfPatentId struct {
-	PatentId  int   `uri:"patent_id"`
-	PatentIds []int `json:"Patent_Ids"`
-}
-
-type ObjectOfPackageId struct {
-	PackageId  int   `uri:"package_id"`
-	PackageIds []int `json:"Package_ids"`
-}
+//等待删除
 
 type ObjectOfTagId struct {
 	TagId  int   `uri:"tag_id"`

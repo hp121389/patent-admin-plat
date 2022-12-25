@@ -14,7 +14,7 @@ type Patent struct {
 }
 
 func (Patent) TableName() string {
-	return "user-agent"
+	return "patent"
 }
 
 func (e *Patent) Generate() models.ActiveRecord {

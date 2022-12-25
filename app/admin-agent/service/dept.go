@@ -68,6 +68,7 @@ func (e *Dept) InsertDept(c *dtos.DeptReq) error {
 	}
 	c.GenerateDept(&data)
 	data.UpdatedAt = dtos.UpdateTime()
+	data.CreatedAt = dtos.UpdateTime()
 	err = e.Orm.Create(&data).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
@@ -109,7 +110,7 @@ func (e *Dept) UpdateDept(c *dtos.DeptReq) error {
 func (e *Dept) UpdateDeptRela(c *dtos.DeptRelaReq) error {
 	var err error
 	var model model.DeptRelation
-	db := e.Orm.Where("Dept_Id = ?  ", c.DeptId).First(&model)
+	db := e.Orm.Where("Dept_Id = ? and user_ID = ? ", c.DeptId, c.UserId).First(&model)
 	if err = db.Error; err != nil {
 		e.Log.Errorf("Service Update Dept error: %s", err)
 		return err
@@ -121,7 +122,7 @@ func (e *Dept) UpdateDeptRela(c *dtos.DeptRelaReq) error {
 	c.GenerateRela(&model)
 	model.UpdatedAt = dtos.UpdateTime()
 
-	update := e.Orm.Model(&model).Where("Dept_id = ?", &model.DeptId).Updates(&model)
+	update := e.Orm.Model(&model).Where("Dept_id = ? and user_ID = ?", &model.DeptId, &model.UserId).Updates(&model)
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err

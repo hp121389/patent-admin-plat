@@ -648,7 +648,7 @@ func (e Package) GetTheGraphByPackageId(c *gin.Context) {
 // @Summary 获取专利包中专利的发明人的关系
 // @Description  获取专利包中专利的发明人的关系
 // @Tags 专利表
-// @Router /api/v1/user-agent/package/[:packageId]/relationship3 [get]
+// @Router /api/v1/user-agent/package/{packageId}/relationship3 [get]
 // @Security Bearer
 func (e Package) GetTheGraphByPackageId3(c *gin.Context) {
 	//spp := service.PatentPackage{}
@@ -1029,6 +1029,12 @@ func (e Package) GetTheGraphByPackageId3(c *gin.Context) {
 	//fmt.Println(links)
 	//fmt.Println(result)
 	e.GraphOK(NodeList, links, "查询成功")
+
+}
+
+// 糊弄
+
+func (e Package) GraphOK(list []models.Node, links []models.Link, s string) {
 
 }
 

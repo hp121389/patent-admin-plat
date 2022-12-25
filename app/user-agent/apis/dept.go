@@ -45,6 +45,40 @@ func (e Dept) GetRelaListByUserId(c *gin.Context) {
 	e.OK(list, "查询成功")
 }
 
+// RelaListOfUserId
+// @Summary 用户在该部门的状态
+// @Description 用户在该部门的状态
+// @Tags 用户-部门
+// @Router /apis/v1/user-agent/dept/relaListOfUserId/{dept_id} [get]
+// @Security Bearer
+func (e Dept) RelaListOfUserId(c *gin.Context) {
+	s := service.Dept{}
+	req := dtos.DeptRelaReq{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		Bind(&req).
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	list := make([]model.DeptRelation, 0)
+	req.DeptId, err = strconv.Atoi(c.Param("dept_id"))
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	err = s.GetDeptUser(req.DeptId, user.GetUserId(c), &list)
+	if err != nil {
+		e.Error(500, err, "查询失败")
+		return
+	}
+	e.OK(list, "查询成功")
+}
+
 // GetDeptList
 // @Summary 列表部门
 // @Description 列表部门信息
@@ -101,6 +135,12 @@ func (e Dept) UserJoinDept(c *gin.Context) {
 	reqIn.ExamineStatus = dtos.ApplyTag
 	reqIn.MemType = dtos.NotMember
 	reqIn.DeptId, err = strconv.Atoi(c.Param("dept_id"))
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+
 	reqIn.UserId = user.GetUserId(c)
 	reqIn.CreateBy = user.GetUserId(c)
 	err = s.InsertDeptRela(&reqIn)
@@ -132,13 +172,95 @@ func (e Dept) UserCancelJoinDept(c *gin.Context) {
 		return
 	}
 	req.DeptId, err = strconv.Atoi(c.Param("dept_id"))
-
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	req.UserId = user.GetUserId(c)
 	req.SetUpdateBy(user.GetUserId(c))
 	req.ExamineStatus = dtos.CancelTag
+	req.MemStatus = dtos.NotMember
+	req.MemType = dtos.NotMember
 	err = s.UpdateDeptRela(&req)
 	if err != nil {
 		e.Logger.Error(err)
 		return
 	}
 	e.OK(req.ExamineStatus, "取消加入成功")
+}
+
+// ReJoinDept
+// @Summary 用户重新申请加入
+// @Description 用户重新申请加入
+// @Tags 用户-部门
+// @Param DeptId query string false "部门ID"
+// @Router /api/v1/user-agent/dept/reJoin/{dept_id} [put]
+// @Security Bearer
+func (e Dept) ReJoinDept(c *gin.Context) {
+	s := serviceAdmin.Dept{}
+	req := dtos.DeptRelaReq{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	req.DeptId, err = strconv.Atoi(c.Param("dept_id"))
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	req.UserId = user.GetUserId(c)
+	req.SetUpdateBy(user.GetUserId(c))
+	req.ExamineStatus = dtos.ApplyTag
+	req.MemStatus = dtos.ApplyMember
+	req.MemType = dtos.NotMember
+	err = s.UpdateDeptRela(&req)
+	if err != nil {
+		e.Logger.Error(err)
+		return
+	}
+	e.OK(req.ExamineStatus, "重新加入成功")
+}
+
+// ExitDept
+// @Summary 用户申请退出团队
+// @Description 用户申请退出团队（前提是，已经是组员）
+// @Tags 用户-部门
+// @Param DeptId query string false "部门ID"
+// @Router /api/v1/user-agent/dept/exit/{dept_id} [put]
+// @Security Bearer
+func (e Dept) ExitDept(c *gin.Context) {
+	s := serviceAdmin.Dept{}
+	req := dtos.DeptRelaReq{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	req.DeptId, err = strconv.Atoi(c.Param("dept_id"))
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	req.UserId = user.GetUserId(c)
+	req.SetUpdateBy(user.GetUserId(c))
+	req.ExamineStatus = dtos.ApplyTag
+	req.MemStatus = dtos.ApplyEXIT
+	err = s.UpdateDeptRela(&req)
+	if err != nil {
+		e.Logger.Error(err)
+		return
+	}
+	e.OK(req.MemStatus, "申请退出成功")
 }

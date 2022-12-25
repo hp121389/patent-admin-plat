@@ -12,6 +12,8 @@ const (
 	Offline       = "暂时下线"
 	ApplyMember   = "申请成为组员"
 	AlreadyMember = "成功成为组员"
+	ApplyEXIT     = "申请退出团队"
+	AlreadyEXIT   = "成功退出团队"
 
 	//ApplyLeader   = "申请成为组长"
 	//AlreadyLeader = "成功成为组长"

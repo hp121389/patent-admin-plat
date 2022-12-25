@@ -49,6 +49,19 @@ func (e *Dept) GetDeptRelaListByUser(id int, list *[]model.DeptRelation) error {
 	return nil
 }
 
+// GetDeptUser 用户在该部门的状态
+func (e *Dept) GetDeptUser(deptId int, userId int, list *[]model.DeptRelation) error {
+	var err error
+	var data []model.DeptRelation
+	err = e.Orm.Model(&data).Where("dept_id = ? and user_id = ?", deptId, userId).
+		Find(list).Limit(-1).Offset(-1).Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
 // InsertDeptRela 添加DeptRela对象
 func (e *Dept) InsertDeptRela(c *dtos.DeptRelaReq) error {
 	var err error
@@ -66,6 +79,7 @@ func (e *Dept) InsertDeptRela(c *dtos.DeptRelaReq) error {
 	}
 	c.GenerateRela(&data)
 	data.UpdatedAt = dtos.UpdateTime()
+	data.CreatedAt = dtos.UpdateTime()
 	err = e.Orm.Create(&data).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)

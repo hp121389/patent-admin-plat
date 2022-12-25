@@ -35,3 +35,41 @@ func (e *Dept) JoinDept(c *dtos.DeptReq) error {
 	}
 	return nil
 }
+
+// GetDeptRelaListByUser 获取DeptRela对象列表通过deptId
+func (e *Dept) GetDeptRelaListByUser(id int, list *[]model.DeptRelation) error {
+	var err error
+	var data []model.DeptRelation
+	err = e.Orm.Model(&data).Where("user_id = ?", id).
+		Find(list).Limit(-1).Offset(-1).Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// InsertDeptRela 添加DeptRela对象
+func (e *Dept) InsertDeptRela(c *dtos.DeptRelaReq) error {
+	var err error
+	var data model.DeptRelation
+	var i int64
+	err = e.Orm.Model(&data).Where("dept_id = ? and user_id = ? ", c.DeptId, c.UserId).Count(&i).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if i > 0 {
+		err := errors.New("用户在该部门已存在！")
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	c.GenerateRela(&data)
+	data.UpdatedAt = dtos.UpdateTime()
+	err = e.Orm.Create(&data).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	return nil
+}

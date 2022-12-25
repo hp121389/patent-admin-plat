@@ -11,6 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-admin-team/go-admin-core v1.4.1-0.20220809101213-21187928f7d9
 	github.com/go-admin-team/go-admin-core/sdk v1.4.1-0.20220809101213-21187928f7d9
+	github.com/go-ego/gse v0.70.2
 	github.com/google/uuid v1.3.0
 	github.com/huaweicloud/huaweicloud-sdk-go-obs v3.21.12+incompatible
 	github.com/mssola/user_agent v0.5.2
@@ -147,7 +148,6 @@ require (
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
-	github.com/go-ego/gse v0.70.2 // indirect
 	github.com/go-openapi/spec v0.20.7 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect

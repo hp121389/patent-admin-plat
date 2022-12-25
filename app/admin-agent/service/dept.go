@@ -38,7 +38,7 @@ func (e *Dept) GetDeptRelaList(list *[]model.DeptRelation) error {
 	return nil
 }
 
-// GetDeptRelaListById 获取Dept对象列表
+// GetDeptRelaListById 获取DeptRela对象列表通过deptId
 func (e *Dept) GetDeptRelaListById(id int, list *[]model.DeptRelation) error {
 	var err error
 	var data []model.DeptRelation

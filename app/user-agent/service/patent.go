@@ -54,6 +54,33 @@ func (e *Patent) GetPageByIds(d *dto.PatentsIds, list *[]models.Patent, count *i
 	return nil
 }
 
+// GetPageByIds 通过Id数组获取Patent对象列表
+func (e *Patent) GetPageByIds(d *dto.PatentsIds, list *[]models.Patent, count *int64) error {
+	var err error
+	var ids []int = d.GetPatentId()
+	for i := 0; i < len(ids); i++ {
+		if ids[i] != 0 {
+			var data1 models.Patent
+			err = e.Orm.Model(&data1).
+				Where("Patent_Id = ? ", ids[i]).
+				First(&data1).Limit(-1).Offset(-1).
+				Count(count).Error
+			*list = append(*list, data1)
+
+			if err != nil {
+				e.Log.Errorf("db error:%s", err)
+				return err
+			}
+		}
+	}
+
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
 // Get 获取Patent对象
 func (e *Patent) Get(d *dto.PatentById, model *models.Patent) error {
 	var err error

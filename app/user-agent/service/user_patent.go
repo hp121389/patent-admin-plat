@@ -114,6 +114,56 @@ func (e *UserPatent) RemoveFocus(c *dto.UserPatentObject) error {
 	return nil
 }
 
+// GetUsersByPatentId  通过专利id数组获取关注或者认领的用户
+func (e *UserPatent) GetUsersByPatentId(list *[]models.UserPatent, pid *dto.PatentsIds) error {
+	var err error
+	var data models.UserPatent
+	//result := make([]models.UserPatent,0)
+	fmt.Println(pid.PatentIds)
+	for i := 0; i < len(pid.PatentIds); i++ {
+		var templist []models.UserPatent
+		//fmt.Print("now patent is:")
+		//fmt.Println(pid.PatentIds[i])
+		err = e.Orm.Where(&data).Where("Patent_Id = ? ", pid.PatentIds[i]).Find(&templist).Limit(100000).Error
+		if err != nil {
+			e.Log.Errorf("db error: %s", err)
+			return err
+		}
+		//fmt.Print("now user-patent is:")
+		fmt.Println(len(templist))
+		for j := 0; j < len(templist); j++ {
+			//fmt.Println(templist[j])
+			*list = append(*list, templist[j])
+		}
+	}
+	return nil
+}
+
+// GetFocusUsersByPatentId   通过专利id数组获取关注或者认领的用户
+func (e *UserPatent) GetFocusUsersByPatentId(list *[]models.UserPatent, pid *dto.PatentsIds) error {
+	var err error
+	var data models.UserPatent
+	//result := make([]models.UserPatent,0)
+	fmt.Println(pid.PatentIds)
+	for i := 0; i < len(pid.PatentIds); i++ {
+		var templist []models.UserPatent
+		//fmt.Print("now patent is:")
+		//fmt.Println(pid.PatentIds[i])
+		err = e.Orm.Where(&data).Where("Patent_Id = ? and type = ? ", pid.PatentIds[i], dto.FocusType).Find(&templist).Limit(100000).Error
+		if err != nil {
+			e.Log.Errorf("db error: %s", err)
+			return err
+		}
+		//fmt.Print("now user-patent is:")
+		fmt.Println(len(templist))
+		for j := 0; j < len(templist); j++ {
+			//fmt.Println(templist[j])
+			*list = append(*list, templist[j])
+		}
+	}
+	return nil
+}
+
 // InsertUserPatent insert relationship between user and patent
 func (e *UserPatent) InsertUserPatent(c *dto.UserPatentObject) error {
 	var err error

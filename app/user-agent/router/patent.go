@@ -17,13 +17,15 @@ func registerPatentRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlew
 
 	r := v1.Group("/patent").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
-		r.GET("", api.GetPatentLists)                //显示专利本地数据√
-		r.GET("/:patent_id", api.GetPatentById)      //查询专利√
-		r.GET("/claim", api.GetClaimPages)           //显示认领专利√
-		r.GET("/focus", api.GetFocusPages)           //显示关注专利√
-		r.GET("/tag-patents/:tag_id", api.GetPatent) //显示该标签下的专利√
-		r.GET("/tags/:patent_id", api.GetTags)       //显示专利的标签√
-		r.GET("/user", api.GetUserPatentsPages)      //获取该用户所有专利列表
+		//r.GET("", api.GetPatentLists)                //显示专利本地数据√
+		r.GET("/:patent_id", api.GetPatentById)           //查询专利√
+		r.GET("/claim", api.GetClaimPages)                //显示认领专利√
+		r.GET("/focus", api.GetFocusPages)                //显示关注专利√
+		r.GET("/tag-patents/:tag_id", api.GetPatent)      //显示该标签下的专利√
+		r.GET("/tags/:patent_id", api.GetTags)            //显示专利的标签√
+		r.GET("/user", api.GetUserPatentsPages)           //获取该用户所有专利列表
+		r.GET("/relationship", api.GetTheGraphByUserId)   //获取用户关注的专利的关系图(点位置固定但点的大小数量和线的数量、值根据数据生成)
+		r.GET("/relationship2", api.GetTheGraphByUserId2) //获取用户关注的专利的关系图(点位置随机、大小数量和线的数量、值根据数据生成)
 
 		r.POST("", api.InsertIfAbsent)    //添加专利√
 		r.POST("/claim", api.ClaimPatent) //认领专利√

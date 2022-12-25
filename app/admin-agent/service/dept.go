@@ -25,6 +25,32 @@ func (e *Dept) GetDeptList(list *[]model.Dept) error {
 	return nil
 }
 
+// GetDeptRelaList 获取Dept对象列表
+func (e *Dept) GetDeptRelaList(list *[]model.DeptRelation) error {
+	var err error
+	var data []model.DeptRelation
+	err = e.Orm.Model(&data).
+		Find(list).Limit(-1).Offset(-1).Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// GetDeptRelaListById 获取Dept对象列表
+func (e *Dept) GetDeptRelaListById(id int, list *[]model.DeptRelation) error {
+	var err error
+	var data []model.DeptRelation
+	err = e.Orm.Model(&data).Where("dept_id = ?", id).
+		Find(list).Limit(-1).Offset(-1).Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
 // InsertDept 添加Dept对象
 func (e *Dept) InsertDept(c *dtos.DeptReq) error {
 	var err error
@@ -96,6 +122,35 @@ func (e *Dept) UpdateDeptRela(c *dtos.DeptRelaReq) error {
 	model.UpdatedAt = dtos.UpdateTime()
 
 	update := e.Orm.Model(&model).Where("Dept_id = ?", &model.DeptId).Updates(&model)
+	if err = update.Error; err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if update.RowsAffected == 0 {
+		err = errors.New("update report-info error")
+		log.Warnf("db update error")
+		return err
+	}
+	return nil
+}
+
+// UserDeptRela 更新DeptRela对象
+func (e *Dept) UserDeptRela(c *dtos.DeptRelaReq) error {
+	var err error
+	var model model.DeptRelation
+	db := e.Orm.Where("Dept_Id = ? and User_id = ? ", c.DeptId, c.UserId).First(&model)
+	if err = db.Error; err != nil {
+		e.Log.Errorf("Service Update Dept error: %s", err)
+		return err
+	}
+	if db.RowsAffected == 0 {
+		return errors.New("dept not found")
+
+	}
+	c.GenerateRela(&model)
+	model.UpdatedAt = dtos.UpdateTime()
+
+	update := e.Orm.Model(&model).Where("Dept_id = ? and User_id = ?", &model.DeptId, &model.UserId).Updates(&model)
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err

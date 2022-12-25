@@ -4,8 +4,12 @@ INSERT INTO sys_role VALUES (2, '普通用户', '2', 'user', 0, '', '', 0, '', 0
 
 INSERT INTO sys_casbin_rule VALUES (1, 'p', 'user', '/apis/v1/user-agent/*', '*', '', '', '', '', '');
 
-INSERT INTO sys_user VALUES (1, 'admin', '$2a$10$/Glr4g9Svr6O0kvjsRJCXu3f0W8/dsP3XZyVNi1019ratWpSPMyw.', 'admin', '13818888888', 1, '', '', '1', '1@qq.com', '', '2', 1, 1, '2021-05-13 19:56:37.914', '2021-05-13 19:56:40.205', NULL);
-INSERT INTO sys_user VALUES (2, 'user', '$2a$10$/Glr4g9Svr6O0kvjsRJCXu3f0W8/dsP3XZyVNi1019ratWpSPMyw.', 'user', '13818888888', 2, '', '', '1', '1@qq.com', '', '2', 0, 0, '2021-05-13 19:56:37.914', '2021-05-13 19:56:40.205', NULL);
+INSERT INTO `sys_user` (`user_id`, `username`, `password`, `nick_name`, `phone`, `role_id`, `salt`, `avatar`, `sex`, `email`, `remark`, `status`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (1, 'admin', '$2a$10$/Glr4g9Svr6O0kvjsRJCXu3f0W8/dsP3XZyVNi1019ratWpSPMyw.', 'admin', '13818888888', 1, '', '', '1', '1@qq.com', '', '2', 1, 1, '2021-05-13 19:56:37.914', '2021-05-13 19:56:40.205', NULL);
+INSERT INTO `sys_user` (`user_id`, `username`, `password`, `nick_name`, `phone`, `role_id`, `salt`, `avatar`, `sex`, `email`, `remark`, `status`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (2, 'user', '$2a$10$/Glr4g9Svr6O0kvjsRJCXu3f0W8/dsP3XZyVNi1019ratWpSPMyw.', 'user', '13818888888', 2, '', '', '1', '1@qq.com', '', '2', 0, 0, '2021-05-13 19:56:37.914', '2021-05-13 19:56:40.205', NULL);
+INSERT INTO `sys_user` (`user_id`, `username`, `password`, `nick_name`, `phone`, `role_id`, `salt`, `avatar`, `sex`, `email`, `remark`, `status`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (3, 'user2', '$2a$10$/Glr4g9Svr6O0kvjsRJCXu3f0W8/dsP3XZyVNi1019ratWpSPMyw.', 'user2', '13818888888', 2, NULL, NULL, '1', '1@qq.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `sys_user` (`user_id`, `username`, `password`, `nick_name`, `phone`, `role_id`, `salt`, `avatar`, `sex`, `email`, `remark`, `status`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (4, 'user3', '$2a$10$/Glr4g9Svr6O0kvjsRJCXu3f0W8/dsP3XZyVNi1019ratWpSPMyw.', 'user3', '13818888888', 2, NULL, NULL, '1', '1@qq.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `sys_user` (`user_id`, `username`, `password`, `nick_name`, `phone`, `role_id`, `salt`, `avatar`, `sex`, `email`, `remark`, `status`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (5, 'user4', '$2a$10$/Glr4g9Svr6O0kvjsRJCXu3f0W8/dsP3XZyVNi1019ratWpSPMyw.', 'user4', '13818888888', 2, NULL, NULL, '1', '1@qq.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
 INSERT INTO `user_patent` (`id`, `patent_id`, `user_id`, `type`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (3, 3, 1, '认领', 1, 0, NULL, NULL);
 INSERT INTO `user_patent` (`id`, `patent_id`, `user_id`, `type`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (4, 5, 1, '认领', 1, 0, NULL, NULL);
 INSERT INTO `user_patent` (`id`, `patent_id`, `user_id`, `type`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (5, 4, 1, '认领', 1, 0, NULL, NULL);
@@ -47,16 +51,7 @@ INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `
 INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`, `create_by`, `update_by`, `created_at`, `updated_at`, `files`) VALUES (5, 'valuation2', 'important!', 'valuation', '未审核', 1, 0, '2022-10-18 18:49:24', NULL,NULL);
 INSERT INTO `report` (`report_id`, `report_name`, `report_properties`, `type`, `reject_tag`, `create_by`, `update_by`, `created_at`, `updated_at`, `files`) VALUES (6, 'valuation3', 'important!', 'valuation', '未审核', 1, 0, '2022-10-18 18:49:24', NULL, NULL);
 
-INSERT INTO `report_rela` (`id`, `patent_id`, `report_id`, `user_id`, `type`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (1, 3, 1, 1, 'infringement', 1, 0, '2022-12-05 21:03:55', '');
-INSERT INTO `report_rela` (`id`, `patent_id`, `report_id`, `user_id`, `type`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (2, 4, 3, 1, 'infringement', 1, 0, '2022-12-05 21:03:55', '');
-INSERT INTO `report_rela` (`id`, `patent_id`, `report_id`, `user_id`, `type`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (3, 3, 4, 1, 'valuation', 1, 0, '2022-12-05 21:03:55', '');
-INSERT INTO `report_rela` (`id`, `patent_id`, `report_id`, `user_id`, `type`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (4, 4, 5, 1, 'valuation', 1, 0, '2022-12-05 21:03:55', '');
-INSERT INTO `report_rela` (`id`, `patent_id`, `report_id`, `user_id`, `type`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (5, 5, 2, 1, 'infringement', 1, 0, '2022-12-05 21:03:55', '');
-INSERT INTO `report_rela` (`id`, `patent_id`, `report_id`, `user_id`, `type`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (6, 5, 6, 1, 'valuation', 1, 0, '2022-12-05 21:03:55', '');
+INSERT INTO sys_user VALUES (1, 'admin', '$2a$10$/Glr4g9Svr6O0kvjsRJCXu3f0W8/dsP3XZyVNi1019ratWpSPMyw.', 'admin', '13818888888', 1, '', '', '1', '1@qq.com', '', '2', 1, 1, '2021-05-13 19:56:37.914', '2021-05-13 19:56:40.205', NULL);
+INSERT INTO sys_user VALUES (2, 'user', '$2a$10$/Glr4g9Svr6O0kvjsRJCXu3f0W8/dsP3XZyVNi1019ratWpSPMyw.', 'user', '13818888888', 2, '', '', '1', '1@qq.com', '', '2', 0, 0, '2021-05-13 19:56:37.914', '2021-05-13 19:56:40.205', NULL);
 
-INSERT INTO `package` (`package_id`, `package_name`, `desc`, `files`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (1, 'golang', 'patents of Golang software', '[{\"FileName\":\"github头像7.jpg\",\"FilePath\":\"/static/uploadfile/c566a5c8-363c-41fc-b664-523f1e67f9a3.github头像7.jpg\"}]', 1, 0, '2022-10-18 18:49:24', '2022-11-25 23:12:55', NULL);
-INSERT INTO `package` (`package_id`, `package_name`, `desc`, `files`, `create_by`, `update_by`, `created_at`, `updated_at`, `deleted_at`) VALUES (2, 'CPP', 'patents of CPP software', NULL, 1, 0, '2022-10-18 18:49:53', NULL, NULL);
-
-INSERT INTO `patent_package` (`id`, `patent_id`, `package_id`, `pnm`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (1, 1, 1, '101', 0, 0, NULL, NULL);
-INSERT INTO `patent_package` (`id`, `patent_id`, `package_id`, `pnm`, `create_by`, `update_by`, `created_at`, `updated_at`) VALUES (2, 1, 2, '102', 0, 0, NULL, NULL);
 -- 数据完成 ;

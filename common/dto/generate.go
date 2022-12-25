@@ -15,6 +15,11 @@ type ObjectById struct {
 
 //等待删除
 
+type ObjectOfPackageId struct {
+	PackageId  int   `uri:"package_id"`
+	PackageIds []int `json:"Package_ids"`
+}
+
 type ObjectOfTagId struct {
 	TagId  int   `uri:"tag_id"`
 	TagIds []int `json:"Tag_Ids"`

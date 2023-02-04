@@ -18,6 +18,7 @@ $ bash build_linux.sh
 #### 初始化数据库：
 
 ```bash
+$ create database dbname default charset utf8
 $ bin/PatentAdminPlat-linux-amd64 migrate -c config/settings_dev.yml
 ```
 

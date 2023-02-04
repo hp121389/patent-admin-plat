@@ -26,16 +26,15 @@ func registerDeptRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewar
 		r.POST("", api.InsertDept)                               //  管理员创建部门团队    √
 		r.PUT("/offline/:dept_id", api.OfflineDept)              //  管理员下线部门团队    √
 		r.PUT("/reOnline/:dept_id", api.ReOnlineDept)            //  管理员重新上线部门团队    √
-		r.PUT("/unJoin/:dept_id/:user_id", api.UnJoinDept)       //  管理员将用户踢出团队    √
+		r.PUT("/unJoin/:dept_id/:user_id", api.UnJoinDept)       //  管理员将用户踢出团队（管理员同意用户退出团队）
 		r.PUT("/recoverJoin/:dept_id/:user_id", api.RecoverJoin) //  管理员将用户恢复加入团队    √
 		r.PUT("/join/:dept_id/:user_id", api.IfJoinDept)         //  管理员批准用户加入团队    √
 		r.PUT("/joinReject/:dept_id/:user_id", api.JoinReject)   //  管理员拒绝用户加入团队    √
 		r.PUT("/unReject/:dept_id/:user_id", api.UnReject)       //  撤销驳回     √
+		r.PUT("/exitReject/:dept_id/:user_id", api.ExitReject)   //  管理员拒绝用户退出团队
 
 		//r.PUT("/leader/:dept_id", api.GetDeptById)       //  管理员批准用户成为组长
 		//r.PUT("/leaderReject/:dept_id", api.GetDeptById) //  管理员拒绝用户成为组长
-		//r.PUT("/exit/:dept_id", api.GetDeptById)       //  管理员批准用户退出团队
-		//r.PUT("/exitReject/:dept_id", api.GetDeptById) //  管理员拒绝用户退出团队
 
 	}
 }

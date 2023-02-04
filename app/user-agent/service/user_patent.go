@@ -1,9 +1,7 @@
 package service
 
 import (
-	"errors"
 	"fmt"
-
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service/dto"
@@ -29,12 +27,28 @@ func (e *UserPatent) GetUserPatentIds(c *dto.UserPatentObject, list *[]models.Us
 }
 
 // GetClaimLists 通过专利列表的ID数组获得认领专利列表
-func (e *UserPatent) GetClaimLists(c *dto.UserPatentObject, list *[]models.UserPatent, count *int64) error {
+func (e *UserPatent) GetClaimLists(id int, list *[]models.UserPatent) error {
 	var err error
 	var data models.UserPatent
 	err = e.Orm.Model(&data).
-		Where("Type = ? AND User_Id = ?", dto.ClaimType, c.UserId).
+		Where("Type = ? AND User_Id = ?", dto.ClaimType, id).
 		Find(list).Limit(-1).Offset(-1).
+		Error
+
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+
+	return nil
+}
+
+// GetClaimCount 通过专利列表的ID数组获得认领专利数量
+func (e *UserPatent) GetClaimCount(id int, count *int64) error {
+	var err error
+	var data models.UserPatent
+	err = e.Orm.Model(&data).
+		Where("Type = ? AND User_Id = ?", dto.ClaimType, id).
 		Count(count).Error
 
 	if err != nil {
@@ -46,12 +60,26 @@ func (e *UserPatent) GetClaimLists(c *dto.UserPatentObject, list *[]models.UserP
 }
 
 // GetFocusLists 通过专利列表的ID数组获得关注专利列表
-func (e *UserPatent) GetFocusLists(c *dto.UserPatentObject, list *[]models.UserPatent, count *int64) error {
+func (e *UserPatent) GetFocusLists(id int, list *[]models.UserPatent) error {
 	var err error
 	var data models.UserPatent
 	err = e.Orm.Model(&data).
-		Where("Type = ? AND User_Id = ?", dto.FocusType, c.UserId).
+		Where("Type = ? AND User_Id = ?", dto.FocusType, id).
 		Find(list).Limit(-1).Offset(-1).
+		Error
+	if err != nil {
+		e.Log.Errorf("db error:%s", err)
+		return err
+	}
+	return nil
+}
+
+// GetFocusCount 通过专利列表的ID数组获得关注专利数量
+func (e *UserPatent) GetFocusCount(id int, count *int64) error {
+	var err error
+	var data models.UserPatent
+	err = e.Orm.Model(&data).
+		Where("Type = ? AND User_Id = ?", dto.FocusType, id).
 		Count(count).Error
 	if err != nil {
 		e.Log.Errorf("db error:%s", err)
@@ -79,16 +107,12 @@ func (e *UserPatent) RemoveClaim(c *dto.UserPatentObject) error {
 	var err error
 	var data models.UserPatent
 
-	db := e.Orm.Where("Patent_Id = ? AND User_Id = ? AND Type = ?", c.PatentId, c.UserId, dto.ClaimType).
+	db := e.Orm.Where("PNM = ? AND User_Id = ? AND Type = ?", c.PNM, c.UserId, dto.ClaimType).
 		Delete(&data)
 
 	if db.Error != nil {
 		err = db.Error
 		e.Log.Errorf("Delete error: %s", err)
-		return err
-	}
-	if db.RowsAffected == 0 {
-		err = errors.New("无权删除该数据")
 		return err
 	}
 	return nil
@@ -99,16 +123,12 @@ func (e *UserPatent) RemoveFocus(c *dto.UserPatentObject) error {
 	var err error
 	var data models.UserPatent
 
-	db := e.Orm.Where("Patent_Id = ? AND User_Id = ? AND Type = ?", c.PatentId, c.UserId, dto.FocusType).
+	db := e.Orm.Where("PNM = ? AND User_Id = ? AND Type = ?", c.PNM, c.UserId, dto.FocusType).
 		Delete(&data)
 
 	if db.Error != nil {
 		err = db.Error
 		e.Log.Errorf("Delete error: %s", err)
-		return err
-	}
-	if db.RowsAffected == 0 {
-		err = errors.New("无权删除该数据")
 		return err
 	}
 	return nil
@@ -185,6 +205,36 @@ func (e *UserPatent) InsertUserPatent(c *dto.UserPatentObject) error {
 	err = e.Orm.Create(&data).Error
 	if err != nil {
 		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	return nil
+}
+
+func (e *UserPatent) UpdateUserPatentDesc(c *dto.UserPatentObject) error {
+	var err error
+	var data models.UserPatent
+	var i int64
+	err = e.Orm.Model(&data).Where("PNM = ? AND User_Id = ? AND Type = ?", c.PNM, c.UserId, c.Type).
+		Count(&i).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if i == 0 {
+		err = fmt.Errorf("%w, (PNM:%s, user_id:%d, type: %s) not existed", ErrCanNotUpdate, c.PNM, c.UserId, c.Type)
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+
+	c.GenerateUserPatent(&data)
+	update := e.Orm.Model(&data).Where("PNM = ? AND User_Id = ? AND Type = ?", c.PNM, c.UserId, c.Type).Updates(&data)
+	if err = update.Error; err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if update.RowsAffected == 0 {
+		err = fmt.Errorf("update desc for patent %s failed", c.PNM)
+		e.Log.Errorf("db update error")
 		return err
 	}
 	return nil

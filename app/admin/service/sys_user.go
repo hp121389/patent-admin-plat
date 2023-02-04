@@ -2,12 +2,11 @@ package service
 
 import (
 	"errors"
-	"go-admin/app/admin/models"
-	"go-admin/app/admin/service/dto"
-
 	log "github.com/go-admin-team/go-admin-core/logger"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg"
 	"github.com/go-admin-team/go-admin-core/sdk/service"
+	"go-admin/app/admin/models"
+	"go-admin/app/admin/service/dto"
 	"gorm.io/gorm"
 
 	cDto "go-admin/common/dto"
@@ -42,9 +41,6 @@ func (e *SysUser) Get(d *dto.SysUserById, model *models.SysUser) error {
 	var data models.SysUser
 
 	err := e.Orm.Model(&data).Debug().
-		//Scopes(
-		//	actions.Permission(data.TableName(), p),
-		//).
 		First(model, d.GetId()).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		err = errors.New("查看对象不存在或无权查看")
@@ -79,14 +75,27 @@ func (e *SysUser) Insert(c *dto.SysUserInsertReq) error {
 		e.Log.Errorf("db error: %s", err)
 		return err
 	}
+
+	if data.DepartID != 0 {
+		deptRela := models.DeptRelation{
+			UserId: data.UserId,
+			DeptId: data.DepartID,
+		}
+		err = e.Orm.Create(&deptRela).Error
+		if err != nil {
+			e.Log.Errorf("db error: %s", err)
+			return err
+		}
+	}
+
 	return nil
 }
 
 // Update 修改SysUser对象
 func (e *SysUser) Update(c *dto.SysUserUpdateReq) error {
 	var err error
-	var model models.SysUser
-	db := e.Orm.First(&model, c.GetId())
+	var data models.SysUser
+	db := e.Orm.First(&data, c.GetId())
 	if err = db.Error; err != nil {
 		e.Log.Errorf("Service UpdateSysUser error: %s", err)
 		return err
@@ -95,8 +104,8 @@ func (e *SysUser) Update(c *dto.SysUserUpdateReq) error {
 		return errors.New("无权更新该数据")
 
 	}
-	c.Generate(&model)
-	update := e.Orm.Model(&model).Where("user_id = ?", &model.UserId).Omit("password", "salt").Updates(&model)
+	c.Generate(&data)
+	update := e.Orm.Model(&data).Where("user_id = ?", &data.UserId).Omit("password", "salt").Updates(&data)
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err
@@ -106,20 +115,36 @@ func (e *SysUser) Update(c *dto.SysUserUpdateReq) error {
 		log.Warnf("db update error")
 		return err
 	}
+
+	if c.DepartID != 0 {
+		deptRela := models.DeptRelation{
+			UserId: data.UserId,
+			DeptId: data.DepartID,
+		}
+		err = e.Orm.Model(&deptRela).
+			Where("user_id = ?", data.UserId).
+			Updates(&deptRela).
+			Error
+		if err != nil {
+			e.Log.Errorf("db error: %s", err)
+			return err
+		}
+	}
+
 	return nil
 }
 
 // InternalUpdate internal修改SysUser对象
 func (e *SysUser) InternalUpdate(c *dto.SysUserUpdateReq) error {
 	var err error
-	var model models.SysUser
-	db := e.Orm.First(&model, c.GetId())
+	var data models.SysUser
+	db := e.Orm.First(&data, c.GetId())
 	if err = db.Error; err != nil {
 		e.Log.Errorf("Service UpdateSysUser error: %s", err)
 		return err
 	}
-	c.Generate(&model)
-	update := e.Orm.Model(&model).Where("user_id = ?", &model.UserId).Omit("password", "salt").Updates(&model)
+	c.Generate(&data)
+	update := e.Orm.Model(&data).Where("user_id = ?", &data.UserId).Omit("password", "salt").Updates(&data)
 	if err = update.Error; err != nil {
 		e.Log.Errorf("db error: %s", err)
 		return err
@@ -129,6 +154,27 @@ func (e *SysUser) InternalUpdate(c *dto.SysUserUpdateReq) error {
 		log.Warnf("db update error")
 		return err
 	}
+
+	if c.DepartID != 0 {
+		deptRela := models.DeptRelation{
+			UserId: data.UserId,
+			DeptId: data.DepartID,
+		}
+		db = e.Orm.Model(&deptRela).
+			Where("user_id = ?", data.UserId).
+			Updates(&deptRela)
+		if db.Error != nil {
+			e.Log.Errorf("db error: %s", err)
+			return err
+		}
+		if db.RowsAffected == 0 {
+			if err = e.Orm.Create(&deptRela).Error; err != nil {
+				e.Log.Errorf("db error: %s", err)
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -259,7 +305,7 @@ func (e *SysUser) UpdatePwd(id int, oldPassword, newPassword string) error {
 }
 
 func (e *SysUser) GetProfile(c *dto.SysUserById, user *models.SysUser, roles *[]models.SysRole) error {
-	err := e.Orm.Preload("Dept").First(user, c.GetId()).Error
+	err := e.Orm.Preload("SysDept").First(user, c.GetId()).Error
 	if err != nil {
 		return err
 	}

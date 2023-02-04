@@ -20,8 +20,9 @@ const (
 	searchUrl    = "http://www.innojoy.com/service/patentSearch.aspx"
 	statisticUrl = "http://www.innojoy.com/service/patentStat.aspx"
 
-	searchListFields = "TI,AN,AD,PNM,PD,PA,PINN,CL,CD,AR,CLS"
-	searchSortBy     = "-公开（公告）日,公开（公告）号"
+	searchListFields     = "TI,AN,AD,PNM,PD,PA,PINN,CL,CD,AR,CLS,INN,ABST,IDX"
+	searchFullTextFields = "TI,AN,AD,PNM,PD,PA,PINN,CL,CD,AR,CLS,ABST,ABSTEN,CLM,DESCR"
+	searchSortBy         = "-公开（公告）日,公开（公告）号"
 
 	defaultCacheExpire     = time.Hour * 24
 	defaultCleanupInterval = time.Minute
@@ -102,6 +103,15 @@ func (ic *InnojoyClient) Search(req *dto.SimpleSearchReq, relatedPatents []model
 	return res, nil
 }
 
+func (ic *InnojoyClient) SearchFullText(req *dto.SimpleSearchReq) (result *dto.PatentDetail, err error) {
+	fsr := ic.parseSearchFullTextQuery(req.Query, req.DB)
+	res, err := ic.search(fsr, ic.autoLogin)
+	if err != nil {
+		return nil, err
+	}
+	return res[0], nil
+}
+
 func (ic *InnojoyClient) parseSearchQuery(query string, db string, pageIndex int, pageSize int) *dto.SearchReq {
 	var guid string
 	if pageIndex > 0 {
@@ -118,6 +128,21 @@ func (ic *InnojoyClient) parseSearchQuery(query string, db string, pageIndex int
 			PageSize:  strconv.Itoa(pageSize),
 			Sortby:    searchSortBy,
 			FieldList: searchListFields,
+		},
+	}
+}
+
+func (ic *InnojoyClient) parseSearchFullTextQuery(query string, db string) *dto.SearchReq {
+	return &dto.SearchReq{
+		Token: ic.token,
+		PatentSearchConfig: &dto.PatentSearchConfig{
+			Action:    "Search",
+			Query:     query,
+			Database:  db,
+			Page:      "1",
+			PageSize:  "1",
+			Sortby:    searchSortBy,
+			FieldList: searchFullTextFields,
 		},
 	}
 }

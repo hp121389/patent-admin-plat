@@ -3,6 +3,7 @@ package charts
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 var ErrNoSuchChart = errors.New("no such chart")
@@ -45,4 +46,18 @@ func intListTemplate(l []int) string {
 		res += fmt.Sprintf("%d, ", d)
 	}
 	return fmt.Sprintf("[%s]", res)
+}
+
+type profile string
+
+func newProfile(raw string) profile {
+	return profile(raw)
+}
+
+func (p profile) replace(old string, new string) profile {
+	return profile(strings.Replace(p.String(), old, new, 1))
+}
+
+func (p profile) String() string {
+	return string(p)
 }

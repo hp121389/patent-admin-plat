@@ -445,10 +445,12 @@ func (e SysUser) GetInfo(c *gin.Context) {
 	req := dto.SysUserById{}
 	s := service.SysUser{}
 	r := service.SysRole{}
+	d := service.SysDept{}
 	err := e.MakeContext(c).
 		MakeOrm().
 		MakeService(&r.Service).
 		MakeService(&s.Service).
+		MakeService(&d.Service).
 		Errors
 	if err != nil {
 		e.Logger.Error(err)
@@ -469,6 +471,7 @@ func (e SysUser) GetInfo(c *gin.Context) {
 		e.Error(http.StatusUnauthorized, err, "登录失败")
 		return
 	}
+	dept, _ := d.GetDeptByUserID(user.GetUserId(c))
 	mp["avatar"] = "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif"
 	if sysUser.Avatar != "" {
 		mp["avatar"] = sysUser.Avatar
@@ -479,7 +482,7 @@ func (e SysUser) GetInfo(c *gin.Context) {
 	mp["email"] = sysUser.Email
 	mp["phone"] = sysUser.Phone
 	mp["bio"] = sysUser.Bio
-	mp["departure"] = sysUser.Departure
+	mp["departure"] = dept
 	mp["interest"] = sysUser.Interest
 	e.OK(mp, "")
 }

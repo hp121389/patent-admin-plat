@@ -1,7 +1,5 @@
 package charts
 
-import "strings"
-
 const barProfile = `{
   "tooltip": {
     "trigger": "axis",
@@ -19,13 +17,7 @@ const barProfile = `{
     {
       "type": "category",
       "data": $CATE,
-      "axisTick": {
-        "alignWithLabel": true
-      },
-      "axisLabel": {
-        "interval": 0,
-        "rotate": 45
-      }
+      $ROTATE
     }
   ],
   "yAxis": [
@@ -43,8 +35,27 @@ const barProfile = `{
   ]
 }`
 
-func genBarProfile(cate []string, data []int) string {
+const ROTATE = `
+      "axisTick": {
+        "alignWithLabel": true
+      },
+      "axisLabel": {
+        "interval": 0,
+        "rotate": 45
+      }`
+
+func genBarProfile(cate []string, data []int, isRotate bool) string {
+	p := newProfile(barProfile)
+	if isRotate {
+		p = p.replace("$ROTATE", ROTATE)
+	} else {
+		p = p.replace("$ROTATE", "").
+			replace("$CATE,", "$CATE")
+	}
 	cateTemp := strListTemplate(cate)
 	dataTemp := intListTemplate(data)
-	return strings.Replace(strings.Replace(barProfile, "$CATE", cateTemp, 1), "$DATA", dataTemp, 1)
+
+	return p.replace("$CATE", cateTemp).
+		replace("$DATA", dataTemp).
+		String()
 }

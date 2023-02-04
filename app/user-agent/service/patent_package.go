@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service/dto"
@@ -68,10 +69,6 @@ func (e *PatentPackage) RemovePackagePatent(c *dto.PackagePageGetReq) error {
 		e.Log.Errorf("Delete error: %s", err)
 		return err
 	}
-	if db.RowsAffected == 0 {
-		err = errors.New("无权删除该数据")
-		return err
-	}
 	return nil
 }
 
@@ -91,4 +88,34 @@ func (e *PatentPackage) IsPatentInPackage(c *dto.PatentPackageReq) (bool, error)
 		return true, nil
 	}
 	return false, nil
+}
+
+func (e *PatentPackage) UpdatePackagePatentDesc(c *dto.PatentDescReq) error {
+	var err error
+	var data models.PatentPackage
+	var i int64
+	err = e.Orm.Model(&data).Where("PNM = ? AND Package_Id = ?", c.PNM, c.PackageID).
+		Count(&i).Error
+	if err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if i == 0 {
+		err = fmt.Errorf("%w, (p:%d, u:%d) not existed", ErrConflictBindPatent, c.PNM, c.UserId)
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+
+	c.GeneratePatentPackage(&data)
+	update := e.Orm.Model(&data).Where("PNM = ? AND Package_Id = ?", c.PNM, c.PackageID).Updates(&data)
+	if err = update.Error; err != nil {
+		e.Log.Errorf("db error: %s", err)
+		return err
+	}
+	if update.RowsAffected == 0 {
+		err = fmt.Errorf("update desc for patent %s failed", c.PNM)
+		e.Log.Errorf("db update error")
+		return err
+	}
+	return nil
 }

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"go-admin/common/utils"
 	"net/http"
 	"runtime"
 	"strconv"
@@ -53,6 +54,7 @@ func CustomError(c *gin.Context) {
 					"msg":  errStr.Error(),
 				})
 			default:
+				utils.PrintStack()
 				panic(err)
 			}
 		}

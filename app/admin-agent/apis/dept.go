@@ -398,3 +398,36 @@ func (e Dept) UnReject(c *gin.Context) {
 	}
 	e.OK(req, "撤销驳回成功")
 }
+
+// ExitReject
+// @Summary 管理员Reject用户退出团队
+// @Description 管理员Reject用户退出团队
+// @Tags 管理员-部门
+// @Param DeptId query string false "部门ID"
+// @Router /api/v1/admin-agent/dept/exitReject/{dept_id}/{user_id} [put]
+// @Security Bearer
+func (e Dept) ExitReject(c *gin.Context) {
+	s := service.Dept{}
+	req := dtos.DeptRelaReq{}
+	err := e.MakeContext(c).
+		MakeOrm().
+		MakeService(&s.Service).
+		Errors
+	if err != nil {
+		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
+		return
+	}
+	req.DeptId, err = strconv.Atoi(c.Param("dept_id"))
+	req.UserId, err = strconv.Atoi(c.Param("user_id"))
+	req.MemStatus = dtos.Member
+	req.ExamineStatus = dtos.RejectTag
+	req.MemType = dtos.Member
+
+	err = s.UserDeptRela(&req)
+	if err != nil {
+		e.Logger.Error(err)
+		return
+	}
+	e.OK(req, "拒绝退出成功")
+}

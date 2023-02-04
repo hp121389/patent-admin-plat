@@ -89,20 +89,20 @@ func (s *UpdateSysUserStatusReq) Generate(model *models.SysUser) {
 }
 
 type SysUserInsertReq struct {
-	UserId    int    `json:"userId" comment:"用户ID"` // 用户ID
-	Username  string `json:"username" comment:"用户名" vd:"len($)>0"`
-	Password  string `json:"password" comment:"密码"`
-	NickName  string `json:"nickName" comment:"昵称"`
-	Phone     string `json:"phone" comment:"手机号"`
-	RoleId    int    `json:"roleId" comment:"角色ID"`
-	Avatar    string `json:"avatar" comment:"头像"`
-	Sex       string `json:"sex" comment:"性别"`
-	Email     string `json:"email" comment:"邮箱"`
-	Departure string `json:"departure" comment:"单位"`
-	Remark    string `json:"remark" comment:"备注"`
-	Bio       string `json:"bio" comment:"个人简介"`
-	Interest  string `json:"interest" comment:"科研兴趣"`
-	Status    string `json:"status" comment:"状态" default:"1"`
+	UserId   int    `json:"userId" comment:"用户ID"` // 用户ID
+	Username string `json:"username" comment:"用户名" vd:"len($)>0"`
+	Password string `json:"password" comment:"密码"`
+	NickName string `json:"nickName" comment:"昵称"`
+	Phone    string `json:"phone" comment:"手机号"`
+	RoleId   int    `json:"roleId" comment:"角色ID"`
+	Avatar   string `json:"avatar" comment:"头像"`
+	Sex      string `json:"sex" comment:"性别"`
+	Email    string `json:"email" comment:"邮箱"`
+	DepartID int    `json:"departID" comment:"单位"`
+	Remark   string `json:"remark" comment:"备注"`
+	Bio      string `json:"bio" comment:"个人简介"`
+	Interest string `json:"interest" comment:"科研兴趣"`
+	Status   string `json:"status" comment:"状态" default:"1"`
 	common.ControlBy
 }
 
@@ -121,7 +121,7 @@ func (s *SysUserInsertReq) Generate(model *models.SysUser) {
 	model.Remark = s.Remark
 	model.Bio = s.Bio
 	model.Interest = s.Interest
-	model.Departure = s.Departure
+	model.DepartID = s.DepartID
 	model.Status = s.Status
 	model.CreateBy = s.CreateBy
 }
@@ -131,18 +131,18 @@ func (s *SysUserInsertReq) GetId() interface{} {
 }
 
 type SysUserUpdateReq struct {
-	UserId    int    `json:"userId" comment:"用户ID"` // 用户ID
-	NickName  string `json:"nickName" comment:"昵称"`
-	Phone     string `json:"phone" comment:"手机号"`
-	RoleId    int    `json:"roleId" comment:"角色ID"`
-	Avatar    string `json:"avatar" comment:"头像"`
-	Sex       string `json:"sex" comment:"性别"`
-	Email     string `json:"email" comment:"邮箱"`
-	Departure string `json:"departure" comment:"单位"`
-	Remark    string `json:"remark" comment:"备注"`
-	Bio       string `json:"bio" comment:"个人简介"`
-	Interest  string `json:"interest" comment:"科研兴趣"`
-	Status    string `json:"status" comment:"状态" default:"1"`
+	UserId   int    `json:"userId" comment:"用户ID"` // 用户ID
+	NickName string `json:"nickName" comment:"昵称"`
+	Phone    string `json:"phone" comment:"手机号"`
+	RoleId   int    `json:"roleId" comment:"角色ID"`
+	Avatar   string `json:"avatar" comment:"头像"`
+	Sex      string `json:"sex" comment:"性别"`
+	Email    string `json:"email" comment:"邮箱"`
+	DepartID int    `json:"departID" comment:"单位"`
+	Remark   string `json:"remark" comment:"备注"`
+	Bio      string `json:"bio" comment:"个人简介"`
+	Interest string `json:"interest" comment:"科研兴趣"`
+	Status   string `json:"status" comment:"状态" default:"1"`
 	common.ControlBy
 }
 
@@ -159,7 +159,7 @@ func (s *SysUserUpdateReq) Generate(model *models.SysUser) {
 	model.Remark = s.Remark
 	model.Bio = s.Bio
 	model.Interest = s.Interest
-	model.Departure = s.Departure
+	model.DepartID = s.DepartID
 	model.Status = s.Status
 }
 

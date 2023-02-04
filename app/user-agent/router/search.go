@@ -12,13 +12,14 @@ func init() {
 	routerCheckRole = append(routerCheckRole, registerAuthedSearchRouter)
 }
 
-// 需认证的路由代码
+// 无需认证的路由代码
 func registerSearchRouter(v1 *gin.RouterGroup) {
 	api := apis.Search{}
 	r := v1.Group("/search")
 	{
 		r.POST("", api.Search)
 		r.POST("/charts/:aid", api.GetChart)
+
 	}
 }
 
@@ -29,5 +30,12 @@ func registerAuthedSearchRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTM
 	{
 		r.POST("", api.AuthSearch)
 		//r.GET("advance", api.Insert)
+		r.GET("/queries", api.GetStoredQueryPages)
+		r.POST("/queries", api.InsertStoredQuery)
+		r.DELETE("/queries/:qid", api.RemoveStoredQuery)
+		r.PUT("/queries/:qid", api.UpdateStoredQuery)
+
+		r.POST("/full", api.SearchFullText)
+		r.GET("/queries/search", api.FindStoredQueryPages)
 	}
 }

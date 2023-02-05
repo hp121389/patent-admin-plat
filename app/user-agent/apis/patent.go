@@ -203,6 +203,7 @@ func (e Patent) DeletePatent(c *gin.Context) {
 	err = s.Remove(&req)
 	if err != nil {
 		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
 		return
 	}
 	e.OK(req, "删除成功")

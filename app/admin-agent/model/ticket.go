@@ -10,6 +10,7 @@ type Ticket struct {
 	Type       string `json:"type" gorm:"size:64;comment:工单类型"`
 	Status     string `json:"status" gorm:"size:64;comment:工单状态"`
 	OptLogs    string `json:"optLogs" gorm:"comment:操作日志"`
+	Files      string `json:"files" comment:"工单附件"`
 	models.ControlBy
 	models.ModelTime
 

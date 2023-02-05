@@ -7,6 +7,7 @@ import (
 	"go-admin/app/admin-agent/model"
 	"go-admin/app/admin-agent/service/dtos"
 	aModels "go-admin/app/admin/models"
+	"go-admin/app/user-agent/service/dto"
 	cDto "go-admin/common/dto"
 	"time"
 )
@@ -100,7 +101,15 @@ func (e *Ticket) Update(id int, req *dtos.TicketDBReq) error {
 		return err
 	}
 
-	req.Generate(&t)
+	switch req.FilesOpt {
+	case dto.FilesAdd:
+		req.GenerateAndAddFiles(&t)
+	case dto.FilesDelete:
+		req.GenerateAndDeleteFiles(&t)
+	default:
+		req.Generate(&t)
+	}
+
 	t.UpdateBy = req.UserID
 
 	// gen logs

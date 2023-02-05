@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-admin-team/go-admin-core/sdk/api"
 	"github.com/go-admin-team/go-admin-core/sdk/pkg/jwtauth/user"
+	"go-admin/app/admin-agent/service/dtos"
 	"go-admin/app/user-agent/models"
 	"go-admin/app/user-agent/service"
 	"go-admin/app/user-agent/service/dto"
@@ -142,22 +143,29 @@ func (e Dashboard) GetDashboard(c *gin.Context) {
 	}
 	pkgCount := len(pkgList)
 
-	var reportCount int64
-	err = rps.GetCountByUserID(user.GetUserId(c), &reportCount)
+	finishedReports, err := rps.GetReportListByUidAndTicketStatus(userID, dtos.TicketStatusFinished)
 	if err != nil {
 		e.Logger.Error(err)
 		e.Error(500, err, err.Error())
 		return
 	}
+	reportStatus := make(map[string]int)
+	for _, fp := range finishedReports {
+		if num, ok := reportStatus[fp.Type]; ok {
+			reportStatus[fp.Type] = num + 1
+		} else {
+			reportStatus[fp.Type] = 1
+		}
+	}
 
 	res := &dto.Dashboard{
-		PatentClaimCount:     int(claimCount),
-		PatentFocusCount:     int(focusCount),
+		PatentClaimCount:     claimCount,
+		PatentFocusCount:     focusCount,
 		PatentStatus:         patentStatus,
 		PublicationDates:     publicationDates.List(),
 		PackageCount:         pkgCount,
 		PatentRecommendation: nil,
-		ReportCount:          int(reportCount),
+		ReportStatus:         reportStatus,
 		PatentTotalPrice:     totalPrice,
 		Collaborators:        covertNodesToResearchers(collaboratorNodes),
 		Competitors:          covertNodesToResearchers(competitorNodes),

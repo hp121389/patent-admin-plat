@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/spf13/viper"
-	"go-admin/app/user-agent/my_config"
+
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +19,9 @@ import (
 	"github.com/go-admin-team/go-admin-core/sdk/pkg"
 	"github.com/go-admin-team/go-admin-core/sdk/runtime"
 	"github.com/spf13/cobra"
+
+	otherConfig "go-admin/app/other/my_config"
+	userConfig "go-admin/app/user-agent/my_config"
 
 	"go-admin/app/admin/models"
 	"go-admin/app/admin/router"
@@ -202,5 +205,6 @@ func initViper(configPath string) error {
 
 func loadConfig() {
 	// load your config
-	my_config.LoadPatentConfig()
+	userConfig.LoadPatentConfig()
+	otherConfig.LoadPatentConfig()
 }

@@ -4,20 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-admin/app/admin-agent/model"
-	"go-admin/app/user-agent/my_config"
+	"go-admin/app/other/apis"
 	"go-admin/app/user-agent/service/dto"
 	cDto "go-admin/common/dto"
-	"path"
 	"strings"
-)
-
-const (
-	RejectTag  = "已驳回"
-	UploadTag  = "已上传"
-	ProcessTag = "处理中"
-	ApplyTag   = "未审核"
-	CancelTag  = "已撤销"
-	OKTag      = "已完成"
 )
 
 const (
@@ -25,29 +15,6 @@ const (
 	ReportTypeTort    = "侵权报告"
 	ReportTypeEval    = "估值报告"
 )
-
-type innerFile struct {
-	FileName string `json:"FileName"`
-	FilePath string `json:"FilePath"`
-}
-
-//newInnerFiles这个函数生成了文件这个结构体？（文件+路径）
-
-func newInnerFiles(files ...string) []*innerFile {
-	res := make([]*innerFile, 0, len(files))
-	for _, f := range files {
-		tmp := strings.Split(f, "/")
-		fmt.Println(tmp)
-		fn := strings.Join(strings.Split(tmp[len(tmp)-1], ".")[1:], ".")
-		fmt.Println(fn)
-
-		res = append(res, &innerFile{
-			FileName: fn,
-			FilePath: path.Join(my_config.CurrentPatentConfig.FileUrl, f),
-		})
-	}
-	return res
-}
 
 type ReportPagesReq struct {
 	cDto.Pagination
@@ -66,12 +33,12 @@ func (s *ReportPagesReq) GetConditions() string {
 }
 
 type ReportReq struct {
-	ReportId         int        `json:"-"`
-	ReportName       string     `json:"reportName" gorm:"comment:报告名称"`
-	ReportProperties Properties `json:"reportProperties" gorm:"comment:报告详情"`
-	Type             string     `json:"reportType" gorm:"size:64;comment:报告类型（侵权/估值）"`
-	FilesOpt         string     `json:"filesOpt" comment:"文件操作"`
-	Files            []string   `json:"files" comment:"报告文件"`
+	ReportId         int                 `json:"-"`
+	ReportName       string              `json:"reportName" gorm:"comment:报告名称"`
+	ReportProperties Properties          `json:"reportProperties" gorm:"comment:报告详情"`
+	Type             string              `json:"reportType" gorm:"size:64;comment:报告类型（侵权/估值）"`
+	FilesOpt         string              `json:"filesOpt" comment:"文件操作"`
+	Files            []apis.FileResponse `json:"files" comment:"报告文件"`
 }
 
 func (s *ReportReq) Generate(model *model.Report) {
@@ -83,15 +50,13 @@ func (s *ReportReq) Generate(model *model.Report) {
 func (s *ReportReq) GenerateAndAddFiles(model *model.Report) {
 	s.Generate(model)
 	if len(model.Files) == 0 {
-		innerFiles := newInnerFiles(s.Files...)
-		fbs, _ := json.Marshal(innerFiles)
+		fbs, _ := json.Marshal(s.Files)
 		model.Files = string(fbs)
 	} else {
-		files := make([]*innerFile, 0)
+		files := make([]apis.FileResponse, 0)
 		_ = json.Unmarshal([]byte(model.Files), &files)
-		innerFiles := newInnerFiles(s.Files...)
-		innerFiles = append(innerFiles, files...)
-		fbs, _ := json.Marshal(innerFiles)
+		files = append(files, s.Files...)
+		fbs, _ := json.Marshal(files)
 		model.Files = string(fbs)
 	}
 }
@@ -99,17 +64,17 @@ func (s *ReportReq) GenerateAndAddFiles(model *model.Report) {
 func (s *ReportReq) GenerateAndDeleteFiles(model *model.Report) {
 	s.Generate(model)
 	if len(model.Files) != 0 {
-		files := make([]*innerFile, 0)
+		files := make([]apis.FileResponse, 0)
 		_ = json.Unmarshal([]byte(model.Files), &files)
 
 		needToDel := make(map[string]struct{})
 		for _, df := range s.Files {
-			needToDel[df] = struct{}{}
+			needToDel[df.FullPath] = struct{}{}
 		}
 
 		slow := 0
 		for _, f := range files {
-			if _, ok := needToDel[f.FilePath]; !ok {
+			if _, ok := needToDel[f.FullPath]; !ok {
 				files[slow] = f
 				slow++
 			}
@@ -131,12 +96,19 @@ func (s ReportReq) GenUpdateLogs() []string {
 	if len(s.ReportProperties) != 0 {
 		logs = append(logs, "修改报告信息")
 	}
+
+	filenames := make([]string, 0, len(s.Files))
+	for _, f := range s.Files {
+		filenames = append(filenames, f.Name)
+	}
+	filenamesStr := strings.Join(filenames, ",")
 	switch s.FilesOpt {
 	case dto.FilesAdd:
-		logs = append(logs, fmt.Sprintf("上传文件%s", s.Files))
+		logs = append(logs, fmt.Sprintf("上传文件: %s", filenamesStr))
 	case dto.FilesDelete:
-		logs = append(logs, fmt.Sprintf("删除文件%s", s.Files))
+		logs = append(logs, fmt.Sprintf("删除文件: %s", filenamesStr))
 	}
+
 	return logs
 }
 

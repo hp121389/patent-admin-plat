@@ -193,6 +193,7 @@ func (e Package) Update(c *gin.Context) {
 	err = s.Update(&req)
 	if err != nil {
 		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
 		return
 	}
 	e.OK(nil, "更新成功")
@@ -234,6 +235,7 @@ func (e Package) Delete(c *gin.Context) {
 	err = s.Remove(&req)
 	if err != nil {
 		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
 		return
 	}
 	e.OK(req.GetId(), "删除成功")
@@ -468,6 +470,7 @@ func (e Package) DeletePackagePatent(c *gin.Context) {
 
 	if err != nil {
 		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
 		return
 	}
 	e.OK(req.PackageBack, "删除成功")
@@ -517,6 +520,7 @@ func (e Package) UpdatePackagePatentDesc(c *gin.Context) {
 
 	if err != nil {
 		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
 		return
 	}
 	e.OK(req, "更新成功")
@@ -579,6 +583,7 @@ func (e Package) GetRelationGraphByPackage(c *gin.Context) {
 	InventorGraph, err = sp.GetGraphByPatents(Inventors, Relations)
 	if err != nil {
 		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
 		return
 	}
 	e.OK(InventorGraph, "查询成功")
@@ -622,16 +627,19 @@ func (e Package) GetTechGraphByPackage(c *gin.Context) {
 	listp, err := sp.GetPatentsByIds(ids, &count)
 	if err != nil {
 		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
 		return
 	}
 	keyWords, Relations, err := sp.FindKeywordsAndRelationsFromPatents(listp) //relations is an Upper Triangle
 	if err != nil {
 		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
 		return
 	}
 	InventorGraph, err = sp.GetGraphByPatents(keyWords, Relations)
 	if err != nil {
 		e.Logger.Error(err)
+		e.Error(500, err, err.Error())
 		return
 	}
 	e.OK(InventorGraph, "查询成功")

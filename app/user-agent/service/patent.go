@@ -274,7 +274,7 @@ func (e *Patent) GetGraphByPatents(simplifiedNodes []models.SimplifiedNode, Rela
 	PreLinkList := make([]models.PreLink, 0) //Similar to link struct and need change some attributes type to become LinkList
 	InventorGraph := models.Graph{}
 	if len(simplifiedNodes) == 0 {
-		err = fmt.Errorf("simplifiedNodes is null")
+		err = fmt.Errorf("there are no related patents and we can't generate the graph")
 		return InventorGraph, err
 	}
 	StrongRelationInventors := MinResult(len(simplifiedNodes), 10) //chose the top10%(maximum is 10) inventors as StrongRelationInventors(must show)

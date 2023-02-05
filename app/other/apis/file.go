@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"go-admin/app/other/my_config"
 	"io/ioutil"
 	"strings"
 
@@ -137,7 +138,7 @@ func (e File) multipleFile(c *gin.Context, urlPerfix string) []FileResponse {
 				}
 				if source != "1" {
 					fileResponse.Path = "/static/uploadfile/" + fileName
-					fileResponse.FullPath = "/static/uploadfile/" + fileName
+					fileResponse.FullPath = my_config.CurrentOtherConfig.FileServerHost + "/static/uploadfile/" + fileName
 				}
 				multipartFile = append(multipartFile, fileResponse)
 			}
@@ -179,7 +180,7 @@ func (e File) singleFile(c *gin.Context, fileResponse FileResponse, urlPerfix st
 	//	return FileResponse{}, true
 	//}
 	fileResponse.Path = "/static/uploadfile/" + fileName
-	fileResponse.FullPath = "/static/uploadfile/" + fileName
+	fileResponse.FullPath = my_config.CurrentOtherConfig.FileServerHost + "/static/uploadfile/" + fileName
 	return fileResponse, false
 }
 

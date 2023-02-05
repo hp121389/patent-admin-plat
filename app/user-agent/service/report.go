@@ -23,17 +23,56 @@ type Report struct {
 
 const noveltyReportType = "novelty"
 
-// GetCountByUserID 获取Report对象
-func (e *Report) GetCountByUserID(uid int, count *int64) error {
-	//引用传递、函数名、形参、返回值
+// GetReportListByUidAndTicketStatus 获取Report对象
+func (e *Report) GetReportListByUidAndTicketStatus(uid int, status string) ([]model.Report, error) {
 	var err error
-	var data model.ReportRelation
-	err = e.Orm.Model(&data).Where("user_id = ?", uid).Count(count).Error
+	var rel model.ReportRelation
+	var relList []model.ReportRelation
+	err = e.Orm.Model(&rel).Where("user_id = ?", uid).
+		Find(&relList).Limit(-1).Offset(-1).
+		Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		e.Log.Errorf("db error:%s", err)
-		return err
+		return nil, err
 	}
-	return nil
+
+	ticketIds := make([]int, 0, len(relList))
+	for _, r := range relList {
+		ticketIds = append(ticketIds, r.TicketId)
+	}
+	var ticket model.Ticket
+	var filterTicketList []model.Ticket
+	err = e.Orm.Model(&ticket).
+		Where("status = ?", status).
+		Find(&filterTicketList, ticketIds).Limit(-1).Offset(-1).
+		Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		e.Log.Errorf("db error:%s", err)
+		return nil, err
+	}
+	filterTicketMap := make(map[int]struct{})
+	for _, f := range filterTicketList {
+		filterTicketMap[f.ID] = struct{}{}
+	}
+
+	reportIds := make([]int, 0)
+	for _, r := range relList {
+		if _, ok := filterTicketMap[r.TicketId]; ok {
+			reportIds = append(reportIds, r.ReportId)
+		}
+	}
+
+	var data model.Report
+	var reportList []model.Report
+	err = e.Orm.Model(&data).
+		Find(&reportList, reportIds).Limit(-1).Offset(-1).
+		Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		e.Log.Errorf("db error:%s", err)
+		return nil, err
+	}
+
+	return reportList, nil
 }
 
 // GetNovelty 获取查新报告

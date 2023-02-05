@@ -19,8 +19,8 @@ type Dashboard struct {
 	PackageCount int `json:"packageCount"`
 	// 专利推荐
 	PatentRecommendation []*PatentDetail `json:"patentRecommendation"`
-	// 报告数量
-	ReportCount int `json:"reportCount"`
+	// 报告统计
+	ReportStatus map[string]int `json:"reportStatus"`
 	// 专利预估价
 	PatentTotalPrice int `json:"patentTotalPrice"`
 	// 合作者
